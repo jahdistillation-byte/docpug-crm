@@ -32941,6 +32941,7 @@ function getStockGroupLabel(
 // Inline geometry keeps stock icons identical across platforms.
 function getStockIcon(name) {
   const paths = {
+    wallet: '<rect x="3" y="5" width="18" height="15" rx="3"/><path d="M3 8V6a2 2 0 0 1 2-2h13M16 11h5v5h-5a2 2 0 0 1 0-5Z"/><path d="M17 13.5h.01"/>',
     partners: '<path d="M4 21V5l8-2v18M12 9h8v12M2 21h20M7 8h2M7 12h2M7 16h2M15 12h2M15 16h2"/>',
     box: '<path d="m12 3 9 5v8l-9 5-9-5V8l9-5Z"/><path d="m3 8 9 5 9-5M12 13v8M7.5 5.5l9 5"/>',
     capsule: '<path d="m8 16 8-8M5 19a5.66 5.66 0 0 1 0-8l6-6a5.66 5.66 0 0 1 8 8l-6 6a5.66 5.66 0 0 1-8 0Z"/>',
@@ -43895,434 +43896,111 @@ function openFinancePurchaseReceiveModal(purchase, onSuccess) {
 }
 function openFinancePurchaseDetailsModal(purchase, options = {}) {
   document.querySelector(".financePurchaseDetailsOverlay")?.remove();
-
-  const statusMeta = getFinancePurchaseStatusMeta(purchase.status);
-  const paymentMeta = getFinancePurchasePaymentMeta(purchase.payment_status);
+  const stockContext = options.context === "stock" || typeof options.onReceived === "function";
   const supplier = purchase.supplier || {};
   const items = Array.isArray(purchase.items) ? purchase.items : [];
-  const hasUnlinkedRemainingItems = items.some((item) =>
-    !item.stock_id &&
-    Number(item.ordered_qty || 0) > Number(item.received_qty || 0)
-  );
-  const canReceive =
-    purchase.status !== "received" &&
-    purchase.status !== "cancelled" &&
-    items.some((item) =>
-      item.stock_id &&
-      Number(item.ordered_qty || 0) > Number(item.received_qty || 0)
-    );
+  const delivery = getFinancePurchaseStatusMeta(purchase.status);
+  const payment = getFinancePurchasePaymentMeta(purchase.payment_status);
+  const text = value => escapeHtml(stockWorkspaceText(value));
+  const money = value => escapeHtml(formatClinicMoney(value ?? 0, purchase.currency || "UAH"));
+  const number = value => Number(value || 0).toLocaleString(getCalendarLocale(), { maximumFractionDigits: 6 });
+  const remaining = purchase.remaining_amount ?? Math.max(0, Number(purchase.total_amount || 0) - Number(purchase.paid_amount || 0));
+  const canReceive = stockContext && !["received", "cancelled"].includes(purchase.status) &&
+    items.some(item => item.stock_id && Number(item.ordered_qty || 0) > Number(item.received_qty || 0));
+  const canPay = purchase.status !== "cancelled" && Number(remaining) > 0;
   const documentUrl = getSafeFinanceDocumentUrl(purchase.document_url);
-  const currency = purchase.currency || "UAH";
-
-  const text = (value) => escapeHtml(getFinanceInterfaceText(value));
-
-  const money = (value) => escapeHtml(
-    formatVisitFinanceMoney(value, currency)
-  );
-
-  const remaining = purchase.remaining_amount ?? Math.max(
-    0,
-    Number(purchase.total_amount || 0) -
-    Number(purchase.paid_amount || 0)
-  );
-
-  const totals = [
-    {
-      label: "Підсумок",
-      amount: purchase.subtotal,
-      className: "",
-      prefix: "",
-    },
-    {
-      label: "Знижка",
-      amount: purchase.discount_amount,
-      className: "",
-      prefix: "−",
-    },
-    {
-      label: "Разом",
-      amount: purchase.total_amount,
-      className: "is-total",
-      prefix: "",
-    },
-    {
-      label: "Сплачено",
-      amount: purchase.paid_amount,
-      className: "",
-      prefix: "",
-    },
-    {
-      label: "Залишок",
-      amount: remaining,
-      className: "is-remaining",
-      prefix: "",
-    },
-  ];
-
   const overlay = document.createElement("div");
   overlay.className = "financePurchaseDetailsOverlay";
-
   overlay.innerHTML = `
-    <div
-      class="financePurchaseDetailsModal"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="financePurchaseDetailsTitle"
-    >
-      <header class="financePurchaseDetailsHeader">
-        <div class="financePurchaseDetailsHeaderIcon">
-          ${getStockIcon("box")}
+    <section class="financePurchaseDetailsModal stockPurchaseDocument" role="dialog" aria-modal="true" aria-labelledby="financePurchaseDetailsTitle">
+      <header class="stockDocumentHeader">
+        <span class="stockDocumentIcon">${getStockIcon("box")}</span>
+        <div><span class="stockDocumentEyebrow">${text(stockContext ? "Закупівля" : "Фінанси · закупівля")}</span>
+          <h2 id="financePurchaseDetailsTitle">${escapeHtml(supplier.name || stockWorkspaceText("Закупівля"))}</h2>
+          <p>${escapeHtml(formatFinancePurchaseDate(purchase.order_date))}${purchase.invoice_number ? " · " + text("Накладна") + " " + escapeHtml(purchase.invoice_number) : ""}</p>
         </div>
-
-        <div>
-          <span>${text("ДОКУМЕНТ ЗАКУПІВЛІ")}</span>
-
-          <h2
-            id="financePurchaseDetailsTitle"
-            data-finance-content
-          >
-            ${
-              purchase.purchase_number
-                ? escapeHtml(purchase.purchase_number)
-                : text("Закупівля")
-            }
-          </h2>
-
-          <p data-finance-content>
-            ${
-              supplier.name
-                ? escapeHtml(supplier.name)
-                : text("Постачальник не вказаний")
-            }
-          </p>
-        </div>
-
-        <button
-          type="button"
-          class="financePurchaseDetailsClose"
-          aria-label="${text("Закрити")}"
-        >
-          ${getStockIcon("close")}
-        </button>
+        <button type="button" class="financePurchaseDetailsClose" aria-label="${text("Закрити")}">${getStockIcon("close")}</button>
       </header>
-
-      <div class="financePurchaseDetailsBody">
-        <section class="financePurchaseDetailsStatuses">
-          <div class="${escapeHtml(statusMeta.className)}">
-            <span>${text("Статус постачання")}</span>
-            <strong>${text(statusMeta.label)}</strong>
-          </div>
-
-          <div class="${escapeHtml(paymentMeta.className)}">
-            <span>${text("Статус оплати")}</span>
-            <strong>${text(paymentMeta.label)}</strong>
-          </div>
-
-          <div>
-            <span>${text("Дата замовлення")}</span>
-
-            <strong data-finance-content>
-              ${escapeHtml(
-                formatFinancePurchaseDate(purchase.order_date)
-              )}
-            </strong>
-          </div>
-
-          <div>
-            <span>${text("Очікується")}</span>
-
-            <strong data-finance-content>
-              ${escapeHtml(
-                formatFinancePurchaseDate(purchase.expected_date)
-              )}
-            </strong>
-          </div>
+      <div class="stockDocumentBody">
+        <div class="stockDocumentStatuses">
+          <div><span>${text("Статус постачання")}</span><strong class="stockDocumentBadge ${escapeHtml(delivery.className)}">${text(delivery.label)}</strong></div>
+          <div><span>${text("Статус оплати")}</span><strong class="stockDocumentBadge">${text(payment.label)}</strong></div>
+          ${purchase.expected_date ? `<div><span>${text("Очікується")}</span><strong>${escapeHtml(formatFinancePurchaseDate(purchase.expected_date))}</strong></div>` : ""}
+        </div>
+        <section class="stockDocumentAmounts">
+          <div><span>${text(purchase.status === "draft" ? "Сума замовлення" : "Разом")}</span><strong>${money(purchase.total_amount)}</strong></div>
+          <div><span>${text("Сплачено")}</span><strong>${money(purchase.paid_amount)}</strong></div>
+          <div><span>${text("Залишок за документом")}</span><strong>${money(remaining)}</strong></div>
         </section>
-
-        <section class="financePurchaseDetailsSupplier">
-          <div class="financePurchaseDetailsSectionHead">
-            <div>
-              <span>${text("ПОСТАЧАЛЬНИК")}</span>
-
-              <h3 data-finance-content>
-                ${
-                  supplier.name
-                    ? escapeHtml(supplier.name)
-                    : text("Без назви")
-                }
-              </h3>
-            </div>
-          </div>
-
-          <div class="financePurchaseSupplierGrid">
-            ${
-              [
-                {
-                  label: "Контакт",
-                  value: supplier.contact_person,
-                  fallback: "—",
-                },
-                {
-                  label: "Телефон",
-                  value: supplier.phone,
-                  fallback: "—",
-                },
-                {
-                  label: "Email",
-                  value: supplier.email,
-                  fallback: "—",
-                },
-                {
-                  label: "Накладна",
-                  value: purchase.invoice_number,
-                  fallback: "Не вказано",
-                },
-              ]
-                .map((field) => `
-                  <div>
-                    <span>${text(field.label)}</span>
-
-                    <strong data-finance-content>
-                      ${
-                        field.value
-                          ? escapeHtml(field.value)
-                          : text(field.fallback)
-                      }
-                    </strong>
-                  </div>
-                `)
-                .join("")
-            }
-          </div>
+        <p class="stockDocumentSync">${getStockIcon("layers")}${text("Єдиний документ складу та фінансів. Повторне введення не потрібне.")}</p>
+        <section class="stockDocumentItems">
+          <div class="stockDocumentSectionTitle"><h3>${text("Товари")}</h3><small>${items.length} ${getStockCountText(items.length)}</small></div>
+          <table><thead><tr>${["Назва", "Замовлено", "Отримано", "Ціна", "Сума"].map(label => `<th scope="col">${text(label)}</th>`).join("")}</tr></thead>
+          <tbody>${items.map(item => {
+            const unit = escapeHtml(getStockInterfaceText(item.unit_snap || "шт"));
+            return `<tr><td data-label="${text("Назва")}"><strong>${escapeHtml(item.name_snap || stockWorkspaceText("Без назви"))}</strong>${!item.stock_id ? `<small>${text("Не пов’язано зі складом")}</small>` : ""}</td>
+              <td data-label="${text("Замовлено")}">${number(item.ordered_qty)} ${unit}</td>
+              <td data-label="${text("Отримано")}">${number(item.received_qty)} ${unit}</td>
+              <td data-label="${text("Ціна")}">${money(item.purchase_price)}</td>
+              <td data-label="${text("Сума")}"><strong>${money(item.line_total ?? Number(item.ordered_qty || 0) * Number(item.purchase_price || 0))}</strong></td></tr>`;
+          }).join("") || `<tr><td colspan="5">${text("Позицій немає")}</td></tr>`}</tbody></table>
         </section>
-
-        <section class="financePurchaseDetailsItems">
-          <div class="financePurchaseDetailsSectionHead">
-            <div>
-              <span>${text("СКЛАД ЗАМОВЛЕННЯ")}</span>
-              <h3>${text("Позиції")}</h3>
-            </div>
-
-            <b data-finance-content>${items.length}</b>
-          </div>
-
-          <div class="financePurchaseDetailsItemsList">
-            ${
-              items.length
-                ? items.map((item, index) => {
-                    const quantity = Number(item.ordered_qty || 0);
-                    const received = Number(item.received_qty || 0);
-                    const price = Number(item.purchase_price || 0);
-
-                    const lineTotal = Number(
-                      item.line_total ?? quantity * price
-                    );
-
-                    const unit = escapeHtml(
-                      getStockInterfaceText(item.unit_snap || "шт")
-                    );
-
-                    return `
-                      <article class="financePurchaseDetailsItem">
-                        <span class="financePurchaseItemNumber">
-                          ${index + 1}
-                        </span>
-
-                        <div class="financePurchaseItemName">
-                          <strong data-finance-content>
-                            ${
-                              item.name_snap
-                                ? escapeHtml(item.name_snap)
-                                : text("Без назви")
-                            }
-                          </strong>
-
-                          <small>
-                            ${text(
-                              item.stock_id
-                                ? "Повʼязано зі складом"
-                                : "Нова позиція"
-                            )}
-                          </small>
-                        </div>
-
-                        <div>
-                          <span>${text("Замовлено")}</span>
-                          <strong data-finance-content>
-                            ${quantity} ${unit}
-                          </strong>
-                        </div>
-
-                        <div>
-                          <span>${text("Отримано")}</span>
-                          <strong data-finance-content>
-                            ${received} ${unit}
-                          </strong>
-                        </div>
-
-                        <div>
-                          <span>${text("Ціна")}</span>
-                          <strong data-finance-content>
-                            ${money(price)}
-                          </strong>
-                        </div>
-
-                        <div class="financePurchaseItemTotal">
-                          <span>${text("Сума")}</span>
-                          <strong data-finance-content>
-                            ${money(lineTotal)}
-                          </strong>
-                        </div>
-                      </article>
-                    `;
-                  }).join("")
-                : `
-                  <div class="financePurchasesEmpty">
-                    ${text("Позицій немає")}
-                  </div>
-                `
-            }
-          </div>
-        </section>
-
-        <section class="financePurchaseDetailsFooterGrid">
-          <div class="financePurchaseDetailsInformation">
-            <div>
-              <span>${text("Примітка")}</span>
-
-              <strong data-finance-content>
-                ${
-                  purchase.note
-                    ? escapeHtml(purchase.note)
-                    : text("Без примітки")
-                }
-              </strong>
-            </div>
-
-            ${
-              documentUrl
-                ? `
-                  <a
-                    href="${escapeHtml(documentUrl)}"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    ${text("↗ Відкрити накладну")}
-                  </a>
-                `
-                : `
-                  <span class="financePurchaseNoDocument">
-                    ${text("Накладну не додано")}
-                  </span>
-                `
-            }
-          </div>
-
-          <div class="financePurchaseDetailsTotals">
-            ${
-              totals.map((row) => `
-                <div class="${row.className}">
-                  <span>${text(row.label)}</span>
-
-                  <strong data-finance-content>
-                    ${row.prefix}${money(row.amount)}
-                  </strong>
-                </div>
-              `).join("")
-            }
-          </div>
-        </section>
+        ${Number(purchase.discount_amount) > 0 ? `<p class="stockDocumentDiscount">${text("Підсумок")}: ${money(purchase.subtotal)} · ${text("Знижка")}: ${money(purchase.discount_amount)}</p>` : ""}
+        ${purchase.note ? `<p class="stockDocumentNote">${escapeHtml(purchase.note)}</p>` : ""}
+        <details class="stockDocumentContacts"><summary>${getStockIcon("chevron")}${text("Контакти та реквізити")}</summary>
+          <dl>${[["Контакт",supplier.contact_person],["Телефон",supplier.phone],["Email",supplier.email],["ЄДРПОУ",supplier.edrpou],["Адреса",supplier.address],["Номер документа",purchase.purchase_number]].filter(([,value]) => value).map(([label,value]) => `<div><dt>${text(label)}</dt><dd>${escapeHtml(value)}</dd></div>`).join("")}</dl>
+          ${documentUrl ? `<a href="${escapeHtml(documentUrl)}" target="_blank" rel="noopener noreferrer">${text("Відкрити накладну")}</a>` : ""}
+        </details>
+        <details class="stockDocumentContacts stockDocumentPaymentHistory"><summary>${getStockIcon("chevron")}${escapeHtml(stockPaymentText("Останні оплати"))}</summary><div class="stockDocumentPaymentRows"></div></details>
+        <p class="stockDocumentAccountingNote">${text("Замовлення та приймання товару не є оплатою. Рух коштів відображається після реєстрації платежу.")}</p>
       </div>
-
-      <footer class="financePurchaseDetailsActions">
-        <span>
-          ${text(
-            canReceive
-              ? "У закупівлі залишилися неприйняті позиції."
-              : purchase.status === "received"
-                ? "Поставку прийнято повністю."
-                : hasUnlinkedRemainingItems
-                  ? "Є позиції без прив’язки до складу."
-                  : "Приймання недоступне для цієї закупівлі."
-          )}
-        </span>
-
-        ${
-          canReceive
-            ? `<button
-                type="button"
-                class="financePurchaseDetailsReceive"
-              >${getStockIcon("box")} ${text("Прийняти поставку")}</button>`
-            : ""
-        }
-
-        <button
-          type="button"
-          class="financePurchaseDetailsDone"
-        >
-          ${text("Закрити")}
-        </button>
+      <footer class="stockDocumentFooter">
+        <span>${text(stockContext ? (canReceive ? "У закупівлі залишилися неприйняті позиції." : purchase.status === "received" ? "Поставку прийнято повністю." : "Приймання недоступне для цієї закупівлі.") : "Поставка ведеться у складі. Фінансові дані відображаються автоматично.")}</span>
+        <button type="button" class="financePurchaseDetailsDone">${text("Закрити")}</button>
+        ${canPay ? `<button type="button" class="stockDocumentPay">${getStockIcon("wallet")}${escapeHtml(stockPaymentText(Number(purchase.paid_amount || 0) > 0 ? "Доплатити" : "Зафіксувати оплату"))}</button>` : ""}
+        ${canReceive ? `<button type="button" class="financePurchaseDetailsReceive">${getStockIcon("box")}${text("Прийняти товар")}</button>` : ""}
+        ${!stockContext ? `<button type="button" class="stockDocumentOpenStock">${getStockIcon("box")}${text("Відкрити на складі")}</button>` : ""}
       </footer>
-    </div>
-  `;
-
+    </section>`;
   document.body.appendChild(overlay);
-  installFinanceLocalization(overlay);
-
   document.body.classList.add("financePurchaseModalOpen");
-
   const close = () => {
     overlay.remove();
-
-    document.body.classList.remove(
-      "financePurchaseModalOpen"
-    );
-
-    document.removeEventListener(
-      "keydown",
-      onKeydown
-    );
+    if (!document.querySelector(".financePurchaseReceiveOverlay")) document.body.classList.remove("financePurchaseModalOpen");
+    restoreFocus();
   };
-
-  const onKeydown = (event) => {
-    if (event.key === "Escape") {
+  const restoreFocus = bindStockDialogKeyboard(overlay, close);
+  overlay.querySelector(".financePurchaseDetailsClose").addEventListener("click", close);
+  overlay.querySelector(".financePurchaseDetailsDone").addEventListener("click", close);
+  const history = overlay.querySelector(".stockDocumentPaymentHistory");
+  history.addEventListener("toggle", () => { void loadStockSupplierPaymentHistory(history, purchase.id); });
+  overlay.querySelector(".stockDocumentPay")?.addEventListener("click", () => {
+    void openStockSupplierPayment(purchase, async () => {
       close();
-    }
-  };
-
-  overlay.querySelector(".financePurchaseDetailsClose")
-    ?.addEventListener("click", close);
-
-  overlay.querySelector(".financePurchaseDetailsDone")
-    ?.addEventListener("click", close);
-
-  overlay.querySelector(".financePurchaseDetailsReceive")
-    ?.addEventListener("click", () => {
-      openFinancePurchaseReceiveModal(purchase, async (result) => {
-        close();
-        if (typeof options.onReceived === "function") {
-          await options.onReceived(result);
-          return;
-        }
-        financeDashboardState.purchaseOffset = 0;
-        await renderFinanceTab();
-        openDeleteModal(
-          result?.purchase?.status === "received"
-            ? "Поставку повністю прийнято. Залишки складу оновлено."
-            : "Частину поставки прийнято. Залишки складу оновлено.",
-          null,
-          "operation-success"
-        );
-      });
-    });
-
-  overlay.addEventListener("click", (event) => {
-    if (event.target === overlay) {
-      close();
-    }
+      const reopenOptions = { ...options };
+      if (stockContext) {
+        state.stockWorkspaceNotice = "Оплату зафіксовано. Фінансові дані оновлено.";
+        renderStockTab();
+        reopenOptions.onReceived = () => {
+          state.stockWorkspaceNotice = "Поставку прийнято. Залишки оновлено.";
+          renderStockTab();
+        };
+      } else await renderFinanceTab();
+      await openStockPurchaseDocument(purchase.id, reopenOptions);
+    }, options);
   });
-
-  document.addEventListener("keydown", onKeydown);
+  overlay.addEventListener("click", event => { if (event.target === overlay) close(); });
+  overlay.querySelector(".stockDocumentOpenStock")?.addEventListener("click", () => {
+    close();
+    openStockPurchaseFromFinance(purchase.id);
+  });
+  overlay.querySelector(".financePurchaseDetailsReceive")?.addEventListener("click", () => {
+    openFinancePurchaseReceiveModal(purchase, async result => {
+      close();
+      if (typeof options.onReceived === "function") await options.onReceived(result);
+      else renderStockTab();
+    });
+  });
 }
 
 async function renderFinanceExpensesTab(
@@ -44362,6 +44040,8 @@ async function renderFinanceExpensesTab(
       ),
 
       loadFinancePurchasesApi({
+        status: "",
+        paymentStatus: "",
         dateFrom:
           financeDashboardState.dateFrom,
 
@@ -44821,350 +44501,7 @@ async function renderFinanceExpensesTab(
   </article>
 </section>
         <section class="financeExpensesSecondaryGrid">
-                   <article class="financePanel financePurchasesPanel">
-  <div class="financePanelHead financePurchasesPanelHead">
-    <div>
-      <span>
-        ${getFinanceInterfaceText(
-          "ПОСТАЧАННЯ"
-        )}
-      </span>
-
-      <h2>
-        ${getFinanceInterfaceText(
-          "Закупівлі"
-        )}
-      </h2>
-    </div>
-
-    <div class="financePurchasesPanelActions">
-      <b>
-        ${purchases.length}
-      </b>
-
-      <button
-        type="button"
-        id="financePurchaseCreateButton"
-      >
-        ${getFinanceInterfaceText(
-          "+ Нова закупівля"
-        )}
-      </button>
-    </div>
-  </div>
-
-    <div class="financePurchasesSummary">
-    <div>
-      <span>
-        ${getFinanceInterfaceText("Документів")}
-      </span>
-
-      <strong data-finance-content>
-        ${purchases.length}
-      </strong>
-    </div>
-
-    <div>
-      <span>
-        ${getFinanceInterfaceText("Сума документів")}
-      </span>
-
-      <strong data-finance-content>
-        ${
-          purchases.length
-            ? Object.entries(
-                purchases.reduce((totals, purchase) => {
-                  const currency = purchase.currency || "UAH";
-
-                  totals[currency] =
-                    Number(totals[currency] || 0) +
-                    Number(purchase.total_amount || 0);
-
-                  return totals;
-                }, {})
-              )
-                .map(([currency, amount]) =>
-                  escapeHtml(
-                    formatVisitFinanceMoney(amount, currency)
-                  )
-                )
-                .join("<br>")
-            : escapeHtml(
-                formatVisitFinanceMoney(
-                  0,
-                  getClinicCurrency()
-                )
-              )
-        }
-      </strong>
-    </div>
-
-    <div>
-      <span>
-        ${getFinanceInterfaceText("Очікують оплати")}
-      </span>
-
-      <strong data-finance-content>
-        ${
-          purchases.filter(
-            (purchase) => purchase.payment_status !== "paid"
-          ).length
-        }
-      </strong>
-    </div>
-  </div>
-
-  <div class="financePurchasesList">
-    ${
-      purchases.length
-        ? purchases
-            .map(
-              (purchase) => {
-                const statusMeta =
-                  getFinancePurchaseStatusMeta(
-                    purchase.status
-                  );
-
-                const paymentMeta =
-                  getFinancePurchasePaymentMeta(
-                    purchase.payment_status
-                  );
-
-                const orderedUnits =
-                  Number(
-                    purchase.ordered_units ||
-                    0
-                  );
-
-                const receivedUnits =
-                  Number(
-                    purchase.received_units ||
-                    0
-                  );
-
-                const receiveProgress =
-                  orderedUnits > 0
-                    ? Math.min(
-                        100,
-                        Math.max(
-                          0,
-                          (
-                            receivedUnits /
-                            orderedUnits
-                          ) * 100
-                        )
-                      )
-                    : 0;
-
-                const purchaseNumber =
-                  purchase.purchase_number ||
-                  getFinanceInterfaceText(
-                    "Закупівля"
-                  );
-
-                const supplierName =
-                  purchase.supplier?.name ||
-                  getFinanceInterfaceText(
-                    "Постачальник не вказаний"
-                  );
-
-                return `
-                  <button
-                    type="button"
-                    class="financePurchaseCard"
-                    data-finance-purchase-id="${escapeHtml(
-                      purchase.id
-                    )}"
-                  >
-                    <div class="financePurchaseCardIcon">
-                      ${statusMeta.icon}
-                    </div>
-
-                    <div class="financePurchaseCardMain">
-                      <div class="financePurchaseCardTitle">
-                        <div>
-                          <strong
-                            ${
-                              purchase.purchase_number
-                                ? "data-finance-content"
-                                : ""
-                            }
-                          >
-                            ${escapeHtml(
-                              purchaseNumber
-                            )}
-                          </strong>
-
-                          <span
-                            ${
-                              purchase.supplier?.name
-                                ? "data-finance-content"
-                                : ""
-                            }
-                          >
-                            ${escapeHtml(
-                              supplierName
-                            )}
-                          </span>
-                        </div>
-
-                        <div class="financePurchaseBadges">
-                          <span
-                            class="financePurchaseStatus ${
-                              statusMeta.className
-                            }"
-                          >
-                            ${escapeHtml(
-                              getFinanceInterfaceText(
-                                statusMeta.label
-                              )
-                            )}
-                          </span>
-
-                          <span
-                            class="financePurchasePaymentStatus ${
-                              paymentMeta.className
-                            }"
-                          >
-                            ${escapeHtml(
-                              getFinanceInterfaceText(
-                                paymentMeta.label
-                              )
-                            )}
-                          </span>
-                        </div>
-                      </div>
-
-                      <div class="financePurchaseCardMeta">
-                        <span>
-                          ${formatFinancePurchaseDate(
-                            purchase.order_date
-                          )}
-                        </span>
-
-                        <span>
-                          ${getFinancePurchaseItemsText(
-                            Number(
-                              purchase.items_count ||
-                              0
-                            )
-                          )}
-                        </span>
-
-                        <span>
-                          ${getFinanceReceivedItemsText(
-                            receivedUnits,
-                            orderedUnits
-                          )}
-                        </span>
-                      </div>
-
-                      <div class="financePurchaseProgress">
-                        <i
-                          style="
-                            width:
-                              ${receiveProgress}%;
-                          "
-                        ></i>
-                      </div>
-                    </div>
-
-                                       <div class="financePurchaseCardAmount">
-                      <strong data-finance-content>
-                        ${escapeHtml(
-                          formatVisitFinanceMoney(
-                            purchase.total_amount,
-                            purchase.currency || "UAH"
-                          )
-                        )}
-                      </strong>
-
-                      <span data-finance-content>
-                        ${escapeHtml(
-                          getFinanceRemainingAmountText(
-                            purchase.remaining_amount ??
-                            Math.max(
-                              0,
-                              Number(purchase.total_amount || 0) -
-                              Number(purchase.paid_amount || 0)
-                            ),
-                            purchase.currency || "UAH"
-                          )
-                        )}
-                      </span>
-                    </div>
-
-                    <span class="financePurchaseCardArrow">
-                      →
-                    </span>
-                  </button>
-                `;
-              }
-            )
-            .join("")
-        : `
-          <div class="financePurchasesEmpty">
-            <span>📦</span>
-
-            <strong>
-              ${getFinanceInterfaceText(
-                "Закупівель за цей період немає"
-              )}
-            </strong>
-
-            <p>
-              ${getFinanceInterfaceText(
-                "Створіть перше замовлення постачальнику."
-              )}
-            </p>
-          </div>
-        `
-    }
-  </div>
-
-  ${
-    purchasePagination.has_more ||
-    Number(
-      purchasePagination.offset ||
-      0
-    ) > 0
-      ? `
-        <div class="financePurchasesPagination">
-          <button
-            type="button"
-            id="financePurchasesPrevious"
-            ${
-              Number(
-                purchasePagination.offset ||
-                0
-              ) <= 0
-                ? "disabled"
-                : ""
-            }
-          >
-            ${getFinanceInterfaceText(
-              "← Назад"
-            )}
-          </button>
-
-          <button
-            type="button"
-            id="financePurchasesNext"
-            ${
-              purchasePagination.has_more
-                ? ""
-                : "disabled"
-            }
-          >
-            ${getFinanceInterfaceText(
-              "Далі →"
-            )}
-          </button>
-        </div>
-      `
-      : ""
-  }
-</article>
+          ${buildFinanceStockReferences(purchases, purchasePagination)}
          <article class="financePanel financeExpenseCounterpartiesPanel">
   <div class="financePanelHead">
     <div>
@@ -45370,17 +44707,6 @@ async function renderFinanceExpensesTab(
         }
       );
 
-        page
-      .querySelector(
-        "#financePurchaseCreateButton"
-      )
-      ?.addEventListener(
-        "click",
-        () => {
-          openFinancePurchaseModal();
-        }
-      );
-
     page
       .querySelectorAll(
         "[data-finance-purchase-id]"
@@ -45409,9 +44735,7 @@ async function renderFinanceExpensesTab(
                 return;
               }
 
-              openFinancePurchaseDetailsModal(
-                purchase
-              );
+              void openStockPurchaseDocument(purchase.id, { context: "finance" });
             }
           );
         }

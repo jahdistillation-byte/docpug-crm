@@ -184,6 +184,32 @@ class StockLaunchTests(unittest.TestCase):
         self.db.rows["stock_movements"] = []
         self.assertEqual(self.client.put("/api/stock/item", json={"unit": "шт"}).status_code, 200)
 
+    def test_purchase_reference_reads_same_document_without_financial_writes(self):
+        self.db.rows.update({
+            "stock_purchases": [{"id": "purchase", "org_id": "clinic", "supplier_id": "supplier", "total_amount": "9001.10", "paid_amount": "1.01", "status": "ordered"}],
+            "suppliers": [{"id": "supplier", "org_id": "clinic", "name": "Supplier"}],
+            "stock_purchase_items": [{"id": "line", "purchase_id": "purchase", "stock_id": "item", "ordered_qty": 10, "received_qty": 0}],
+        })
+        before = deepcopy(self.db.rows)
+        response = self.client.get("/api/finance/purchases/purchase")
+        self.assertEqual(response.status_code, 200)
+        data = response.get_json()["data"]
+        self.assertEqual(data["remaining_amount"], "9000.09")
+        self.assertEqual(data["supplier"]["name"], "Supplier")
+        self.assertEqual(len(data["items"]), 1)
+        self.assertEqual(self.db.rows, before)
+        self.db.rows["stock_purchases"][0]["paid_amount"] = "9001.10"
+        self.db.rows["stock_purchase_items"][0]["received_qty"] = 6
+        updated = self.client.get("/api/finance/purchases/purchase").get_json()["data"]
+        self.assertEqual(updated["remaining_amount"], "0.00")
+        self.assertEqual(updated["items"][0]["received_qty"], 6)
+
+    def test_purchase_reference_rejects_foreign_organization_and_doctor(self):
+        self.db.rows["stock_purchases"] = [{"id": "purchase", "org_id": "other"}]
+        self.assertEqual(self.client.get("/api/finance/purchases/purchase").status_code, 404)
+        self.user["role"] = "doctor"
+        self.assertEqual(self.client.get("/api/finance/purchases/purchase").status_code, 403)
+
 
 if __name__ == "__main__":
     unittest.main()

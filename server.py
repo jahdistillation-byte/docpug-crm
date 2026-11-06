@@ -2047,6 +2047,7 @@ PUBLIC_ASSET_FILES = {
     "style.css",
     "stock-catalog.css",
     "stock-workspace.js",
+    "stock-payments.js",
     "manifest.json",
     "login-clinic-bg.jpg",
     "login-clinic-bg.png",
@@ -6008,6 +6009,8 @@ def serialize_finance_transaction(
             row.get(
                 "transaction_type"
             ),
+        "accounting_kind": row.get("accounting_kind"),
+        "stock_purchase_id": str(row["stock_purchase_id"]) if row.get("stock_purchase_id") else None,
 
         "payment_method":
             row.get(
@@ -12088,6 +12091,132 @@ def api_finance_supplier_deactivate(
             "Не вдалося вимкнути постачальника.",
             500,
         )
+
+def supplier_payment_error(error):
+    error_code = str(getattr(error, "code", "") or "")
+    message = str(error).lower()
+    if error_code == "PGRST202" or "schema cache" in message or "does not exist" in message:
+        status, code, text = 503, "PAYMENT_SETUP_REQUIRED", "Оплату постачальникам ще не підключено в базі. Потрібне оновлення модуля."
+    elif error_code == "40001" or "payment state changed" in message:
+        status, code, text = 409, "PURCHASE_PAYMENT_STALE", "Сума закупівлі або оплата вже змінилася. Оновіть документ перед оплатою."
+    elif error_code == "23505" or "key payload conflict" in message:
+        status, code, text = 409, "PAYMENT_KEY_CONFLICT", "Цей запит уже використано для іншої оплати. Оновіть документ."
+    elif error_code == "42501":
+        status, code, text = 403, "PAYMENT_FORBIDDEN", "Недостатньо прав для оплати постачальнику."
+    elif error_code == "P0002":
+        status, code, text = 404, "PAYMENT_NOT_FOUND", "Закупівлю або активний рахунок не знайдено."
+    elif "exceeds remaining" in message:
+        status, code, text = 409, "PURCHASE_PAYMENT_STALE", "Сума перевищує залишок до оплати. Оновіть документ."
+    elif "currency mismatch" in message or "account mismatch" in message:
+        status, code, text = 400, "PAYMENT_CURRENCY_MISMATCH", "Валюта закупівлі та рахунку повинна збігатися. Оберіть касу, банк або сейф."
+    elif error_code == "55000":
+        status, code, text = 409, "PURCHASE_PAYMENT_STALE", "Для цієї закупівлі оплата недоступна. Оновіть документ."
+    elif error_code == "22023":
+        status, code, text = 400, "PAYMENT_INVALID", "Перевірте суму та реквізити оплати."
+    else:
+        status, code, text = 500, "PAYMENT_UNCONFIRMED", "Результат оплати не підтверджено. Повторіть той самий запит для перевірки."
+    return jsonify({"ok": False, "error": text, "code": code}), status
+
+
+@app.get("/api/finance/purchases/<purchase_id>/payment-state")
+def api_supplier_payment_state(purchase_id):
+    user, auth_error = owner_or_admin_required()
+    if auth_error:
+        return auth_error
+    org_id = get_current_org_id()
+    if not org_id:
+        return fail("Organization not selected", 400)
+    try:
+        clean_id = str(uuid.UUID(str(purchase_id)))
+    except (ValueError, TypeError, AttributeError):
+        return fail("Некоректний ID закупівлі.", 400)
+    try:
+        result = supabase.rpc("get_stock_purchase_payment_state", {
+            "p_org_id": org_id, "p_user_id": user["id"], "p_purchase_id": clean_id,
+        }).execute()
+        data = result.data
+        if isinstance(data, list) and len(data) == 1:
+            data = data[0]
+        if not isinstance(data, dict) or not isinstance(data.get("purchase"), dict):
+            raise RuntimeError("Invalid supplier payment state")
+        return ok(data)
+    except Exception as error:
+        return supplier_payment_error(error)
+
+
+@app.post("/api/finance/purchases/<purchase_id>/payments")
+def api_pay_supplier_purchase(purchase_id):
+    user, auth_error = owner_or_admin_required()
+    if auth_error:
+        return auth_error
+    org_id = get_current_org_id()
+    if not org_id:
+        return fail("Organization not selected", 400)
+    data = request.get_json(silent=True)
+    if not isinstance(data, dict):
+        return fail("Некоректні дані оплати.", 400)
+    try:
+        clean_id = str(uuid.UUID(str(purchase_id)))
+        account_id = str(uuid.UUID(str(data.get("financial_account_id") or "")))
+        key = str(uuid.UUID(str(data.get("idempotency_key") or "")))
+        amount = parse_finance_amount(data.get("amount"))
+        expected_paid = parse_finance_amount(data.get("expected_paid_amount"), allow_zero=True)
+        expected_total = parse_finance_amount(data.get("expected_total_amount"))
+        currency = str(data.get("currency") or "").strip().upper()
+        note = data.get("note", "")
+        if currency not in {"UAH", "EUR", "USD", "GBP", "PLN", "CHF"} or not isinstance(note, str) or len(note.strip()) > 500:
+            raise ValueError()
+    except (ValueError, TypeError, AttributeError):
+        return fail("Перевірте суму, валюту та рахунок оплати.", 400)
+    try:
+        result = supabase.rpc("pay_stock_purchase", {
+            "p_org_id": org_id, "p_user_id": user["id"], "p_purchase_id": clean_id,
+            "p_financial_account_id": account_id, "p_idempotency_key": key,
+            "p_amount": amount, "p_expected_paid_amount": expected_paid,
+            "p_expected_total_amount": expected_total, "p_currency": currency, "p_note": note.strip(),
+        }).execute()
+        result_data = result.data
+        if isinstance(result_data, list) and len(result_data) == 1:
+            result_data = result_data[0]
+        if not isinstance(result_data, dict) or not result_data.get("transaction_id"):
+            raise RuntimeError("Invalid supplier payment result")
+        return ok(result_data)
+    except Exception as error:
+        return supplier_payment_error(error)
+
+
+@app.get("/api/finance/purchases/<purchase_id>")
+def api_finance_purchase_detail(purchase_id):
+    user, auth_error = owner_or_admin_required()
+    if auth_error:
+        return auth_error
+    current_org = get_current_org_id()
+    if not current_org:
+        return fail("Organization not selected", 400)
+    try:
+        result = (supabase.table("stock_purchases")
+                  .select("id,supplier_id,purchase_number,invoice_number,status,payment_status,order_date,expected_date,received_at,subtotal,discount_amount,total_amount,paid_amount,currency,document_url,note,created_at,updated_at")
+                  .eq("org_id", current_org).eq("id", purchase_id).limit(1).execute())
+        if not result.data:
+            return fail("Закупівлю не знайдено.", 404)
+        purchase = dict(result.data[0])
+        supplier = (supabase.table("suppliers")
+                    .select("id,name,edrpou,contact_person,phone,email,address,active")
+                    .eq("org_id", current_org).eq("id", purchase.get("supplier_id"))
+                    .limit(1).execute()) if purchase.get("supplier_id") else None
+        items = (supabase.table("stock_purchase_items")
+                 .select("id,purchase_id,stock_id,name_snap,unit_snap,ordered_qty,received_qty,purchase_price,line_total,note")
+                 .eq("purchase_id", purchase_id).order("created_at").execute())
+        purchase["supplier"] = supplier.data[0] if supplier and supplier.data else None
+        purchase["items"] = list(items.data or [])
+        # This is the original document, not a new expense or ledger entry.
+        remaining = max(Decimal("0"), finance_decimal_from_database(purchase.get("total_amount")) - finance_decimal_from_database(purchase.get("paid_amount")))
+        purchase["remaining_amount"] = format(remaining, ".2f")
+        return ok(purchase)
+    except Exception as error:
+        print("Purchase detail failed:", repr(error), flush=True)
+        return fail("Не вдалося завантажити закупівлю.", 500)
+
 
 @app.get(
     "/api/finance/purchases"

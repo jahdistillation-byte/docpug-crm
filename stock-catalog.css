@@ -1,4 +1,128 @@
 /* Stock catalog, stage 1. Scoped to inventory; uses the existing theme tokens. */
+.stockPaymentOverlay { position: fixed; inset: 0; z-index: 10040; display: flex; align-items: center; justify-content: center; padding: 20px; background: var(--module-overlay, rgba(20,35,46,.5)); backdrop-filter: blur(8px); }
+html body .stockPaymentForm { display: flex; flex-direction: column; width: min(580px,100%); max-height: calc(100dvh - 40px); overflow: hidden; border: 1px solid var(--module-border); border-radius: 20px; background: var(--module-surface-2); color: var(--module-text); box-shadow: 0 24px 80px var(--module-shadow); font-variant-numeric: tabular-nums; }
+html body .stockPaymentForm > p { margin: 24px; }
+html body .stockPaymentForm > button { margin: 0 24px 24px; }
+html body .stockPaymentForm header { display: flex; gap: 12px; align-items: center; padding: 22px; border-bottom: 1px solid var(--module-border); flex-shrink: 0; }
+html body .stockPaymentForm header > div { flex: 1; min-width: 0; }
+html body .stockPaymentForm h2 { margin: 5px 0 0; color: var(--module-text); font-size: 23px; letter-spacing: -.025em; overflow-wrap: anywhere; }
+html body .stockPaymentForm header button { display: grid; place-items: center; width: 32px; height: 32px; padding: 0; flex: 0 0 32px; }
+html body .stockPaymentBody { flex: 1; min-height: 0; overflow-y: auto; padding: 20px 22px; }
+html body .stockPaymentBody > p:first-child { margin: 0 0 16px; color: var(--module-text-muted); font-size: 12px; line-height: 1.5; }
+html body .stockPaymentDue { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 14px; margin-bottom: 18px; border: 1px solid var(--module-border); border-radius: 12px; background: var(--module-accent-soft); }
+html body .stockPaymentDue span { color: var(--module-text-muted); font-size: 12px; }
+html body .stockPaymentDue strong { color: var(--module-accent-2); font-size: 23px; font-weight: 650; }
+html body .stockPaymentBody label { display: grid; gap: 7px; margin-top: 14px; color: var(--module-text-muted); font-size: 12px; }
+html body .stockPaymentForm :is(input:not([type="checkbox"]),select,textarea) { box-sizing: border-box; width: 100%; min-width: 0; min-height: 44px; padding: 10px 12px; border: 1px solid var(--module-border); border-radius: 10px; background: var(--module-input); color: var(--module-text); font: inherit; font-size: 14px; }
+html body .stockPaymentForm textarea { resize: vertical; }
+html body .stockPaymentForm :is(input,select,textarea):focus-visible { outline: 2px solid var(--module-accent); outline-offset: 2px; }
+html body .stockPaymentProjection { display: grid; gap: 6px; margin-top: 12px; color: var(--module-text-muted); font-size: 12px; }
+html body .stockPaymentProjection b { color: var(--module-text); font-weight: 550; }
+html body .stockPaymentBody .stockPaymentConfirm { display: flex; align-items: flex-start; gap: 10px; padding: 14px; border: 1px solid var(--module-border); border-radius: 11px; background: var(--module-surface-soft); line-height: 1.5; }
+html body .stockPaymentConfirm input { flex: 0 0 16px; width: 16px; height: 16px; margin: 2px 0 0; accent-color: var(--module-accent); }
+html body .stockPaymentForm button { min-height: 42px; padding: 10px 14px; border: 1px solid var(--module-border); border-radius: 10px; background: var(--module-surface-soft); color: var(--module-text-soft); font-size: 12px; font-weight: 600; cursor: pointer; }
+html body .stockPaymentForm button[type="submit"] { background: var(--module-accent); border-color: var(--module-accent); color: #fff; }
+html body .stockPaymentForm button:disabled { opacity: .45; cursor: default; }
+html body .stockPaymentForm footer { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 10px; padding: 16px 22px; border-top: 1px solid var(--module-border); flex-shrink: 0; }
+html body .stockPaymentForm :is(button,p)[hidden] { display: none; }
+html body .stockPaymentWarning { padding: 10px 12px; border: 1px solid var(--module-border-strong); border-radius: 9px; color: var(--module-text-soft); background: var(--module-accent-soft); font-size: 12px; line-height: 1.5; }
+html body .stockPaymentError { padding: 10px 12px; border: 1px solid var(--module-border); border-radius: 9px; color: var(--module-text); font-size: 12px; line-height: 1.5; }
+html body .stockDocumentFooter .stockDocumentPay { color: var(--module-accent-2); border-color: var(--module-border-strong); background: var(--module-accent-soft); }
+html body .stockDocumentPaymentRows article { padding: 12px 0; border-top: 1px solid var(--module-border); }
+html body .stockDocumentPaymentRows strong { color: var(--module-text); font-size: 14px; }
+html body .stockDocumentPaymentRows :is(small,p) { display: block; margin: 5px 0 0; color: var(--module-text-muted); font-size: 12px; overflow-wrap: anywhere; }
+@media(max-width:520px) {
+  .stockPaymentOverlay { padding: 12px; }
+  html body .stockPaymentForm { max-height: calc(100dvh - 24px); border-radius: 16px; }
+  html body .stockPaymentForm :is(header,footer,.stockPaymentBody) { padding: 16px; }
+  html body .stockPaymentForm footer button { flex: 1; }
+}
+.financePurchaseDetailsOverlay:has(.stockPurchaseDocument) { padding: 20px; }
+html body .stockPurchaseDocument {
+  display: flex; flex-direction: column; width: min(960px, 100%); max-height: calc(100dvh - 40px);
+  border: 1px solid var(--module-border) !important; border-radius: 22px; overflow: hidden;
+  background: var(--module-surface-2) !important; box-shadow: 0 28px 90px var(--module-shadow) !important;
+  color: var(--module-text); font-variant-numeric: tabular-nums;
+}
+html body .stockDocumentHeader { display: flex; align-items: center; gap: 14px; flex-shrink: 0; padding: 24px; border-bottom: 1px solid var(--module-border); }
+html body .stockDocumentIcon { display: grid; place-items: center; width: 46px; height: 46px; flex: 0 0 46px; border: 1px solid var(--module-border-strong); border-radius: 13px; background: var(--module-accent-soft); color: var(--module-accent-2); }
+html body .stockDocumentIcon .stockIcon { width: 22px; height: 22px; }
+html body .stockDocumentHeader > div { min-width: 0; flex: 1; }
+html body .stockDocumentEyebrow { color: var(--module-accent-2); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; font-weight: 650; }
+html body .stockDocumentHeader h2 { margin: 6px 0; color: var(--module-text); font-size: 26px; letter-spacing: -.03em; line-height: 1.2; overflow-wrap: anywhere; }
+html body .stockDocumentHeader p { margin: 0; color: var(--module-text-muted); font-size: 12px; }
+html body .stockDocumentHeader button { display: grid; place-items: center; flex: 0 0 34px; width: 34px; height: 34px; border: 1px solid var(--module-border); border-radius: 10px; background: transparent; color: var(--module-text-muted); cursor: pointer; }
+html body .stockDocumentBody { flex: 1; min-height: 0; overflow-y: auto; padding: 22px 24px; }
+html body .stockDocumentStatuses { display: flex; flex-wrap: wrap; gap: 20px; padding-bottom: 20px; }
+html body .stockDocumentStatuses > div { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+html body .stockDocumentStatuses span { color: var(--module-text-muted); font-size: 12px; }
+html body .stockDocumentStatuses strong { color: var(--module-text); font-size: 12px; font-weight: 600; }
+html body .stockDocumentBadge { display: inline-block; padding: 6px 9px; border: 1px solid var(--module-border) !important; border-radius: 7px; background: var(--module-surface-soft) !important; color: var(--module-text-soft) !important; }
+html body .stockDocumentBadge.is-received { color: var(--module-accent-2) !important; background: var(--module-accent-soft) !important; }
+html body .stockDocumentAmounts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; padding: 20px; border: 1px solid var(--module-border); border-radius: 14px; background: var(--module-surface-soft); }
+html body .stockDocumentAmounts > div + div { border-left: 1px solid var(--module-border); padding-left: 20px; }
+html body .stockDocumentAmounts span { display: block; color: var(--module-text-muted); font-size: 12px; }
+html body .stockDocumentAmounts strong { display: block; margin-top: 8px; color: var(--module-text); font-size: clamp(18px, 2vw, 26px); font-weight: 650; letter-spacing: -.025em; overflow-wrap: anywhere; }
+html body .stockDocumentAmounts > div:first-child strong { color: var(--module-accent-2); }
+html body .stockDocumentSync { display: flex; gap: 7px; align-items: flex-start; margin: 12px 0 24px; color: var(--module-text-muted); font-size: 11px; line-height: 1.5; }
+html body .stockDocumentSync .stockIcon { width: 14px; height: 14px; margin-top: 1px; color: var(--module-accent-2); }
+html body .stockDocumentSectionTitle { display: flex; justify-content: space-between; align-items: center; margin: 0 0 12px; }
+html body .stockDocumentSectionTitle h3 { margin: 0; color: var(--module-text); font-size: 15px; font-weight: 650; }
+html body .stockDocumentSectionTitle small { color: var(--module-text-muted); font-size: 12px; }
+html body .stockDocumentItems table { display: table; width: 100%; border-spacing: 0; border-collapse: collapse; table-layout: fixed; border: 0; background: transparent; }
+html body .stockDocumentItems th { padding: 10px 8px; border-bottom: 1px solid var(--module-border); background: var(--module-surface-soft); color: var(--module-text-muted); font-size: 11px; font-weight: 550; text-align: right; }
+html body .stockDocumentItems th:first-child { width: 36%; text-align: left; border-radius: 8px 0 0 8px; }
+html body .stockDocumentItems td { display: table-cell; padding: 15px 8px; border: 0; border-bottom: 1px solid var(--module-border); background: transparent; color: var(--module-text); font-size: 13px; text-align: right; vertical-align: middle; overflow-wrap: anywhere; }
+html body .stockDocumentItems td:first-child { text-align: left; }
+html body .stockDocumentItems td strong { color: var(--module-text); font-weight: 600; }
+html body .stockDocumentItems td small { display: block; margin-top: 5px; color: var(--module-text-muted); font-size: 11px; }
+html body .stockDocumentNote { margin: 16px 0; padding: 12px 14px; border-left: 2px solid var(--module-border-strong); background: var(--module-surface-soft); color: var(--module-text-soft); font-size: 13px; line-height: 1.5; white-space: pre-wrap; overflow-wrap: anywhere; }
+html body :is(.stockDocumentDiscount, .stockDocumentAccountingNote) { color: var(--module-text-muted); font-size: 11px; line-height: 1.55; }
+html body .stockDocumentContacts { margin-top: 18px; border-bottom: 1px solid var(--module-border); }
+html body .stockDocumentContacts summary { display: flex; gap: 8px; align-items: center; padding: 10px 0 14px; list-style: none; color: var(--module-text-soft); font-size: 12px; cursor: pointer; }
+html body .stockDocumentContacts summary::-webkit-details-marker { display: none; }
+html body .stockDocumentContacts:not([open]) summary .stockIcon { transform: rotate(-90deg); }
+html body .stockDocumentContacts .stockIcon { width: 14px; height: 14px; }
+html body .stockDocumentContacts dl { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin: 0 0 16px; }
+html body .stockDocumentContacts dt { color: var(--module-text-muted); font-size: 11px; }
+html body .stockDocumentContacts dd { margin: 5px 0 0; color: var(--module-text); font-size: 12px; overflow-wrap: anywhere; }
+html body .stockDocumentContacts a { display: inline-block; margin-bottom: 16px; color: var(--module-accent-2); font-size: 12px; }
+html body .stockDocumentFooter { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; flex-shrink: 0; padding: 18px 24px; border-top: 1px solid var(--module-border); background: var(--module-surface-2); }
+html body .stockDocumentFooter > span { flex: 1; min-width: 180px; color: var(--module-text-muted); font-size: 11px; line-height: 1.5; }
+html body .stockDocumentFooter button { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 42px; padding: 10px 16px; border: 1px solid var(--module-border); border-radius: 10px; background: var(--module-surface-soft); color: var(--module-text-soft); font-size: 12px; font-weight: 600; cursor: pointer; }
+html body .stockDocumentFooter :is(.financePurchaseDetailsReceive, .stockDocumentOpenStock) { background: var(--module-accent); color: #fff; border-color: var(--module-accent); }
+html body .stockDocumentLoading { padding: 28px; border: 1px solid var(--module-border); border-radius: 18px; background: var(--module-surface-2); color: var(--module-text); }
+html body .stockDocumentLoading button { min-height: 40px; padding: 10px 14px; border: 1px solid var(--module-border); border-radius: 10px; background: var(--module-accent-soft); color: var(--module-accent-2); cursor: pointer; }
+html body .stockFinanceReferences .stockFinanceReferenceNote { display: block; color: var(--module-text-muted); font-size: 12px; line-height: 1.5; }
+html body .stockFinanceReferenceTotals { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 16px 0 8px; }
+html body .stockFinanceReferenceTotals span { display: block; color: var(--module-text-muted); font-size: 11px; }
+html body .stockFinanceReferenceTotals strong { display: block; margin-top: 7px; color: var(--module-text); font-size: 18px; }
+html body .stockFinanceReferenceList { margin-top: 18px; }
+html body .stockFinanceReferenceList button { display: grid; grid-template-columns: minmax(0, 1fr) auto 18px; align-items: center; gap: 12px; width: 100%; padding: 14px 0; border: 0; border-top: 1px solid var(--module-border); background: transparent; text-align: left; cursor: pointer; }
+html body .stockFinanceReferenceList button > span:nth-child(2) { text-align: right; }
+html body .stockFinanceReferenceList strong { color: var(--module-text); font-size: 13px; font-weight: 600; }
+html body .stockFinanceReferenceList small { display: block; margin-top: 5px; color: var(--module-text-muted); font-size: 11px; }
+html body .stockFinanceReferenceList .stockIcon { color: var(--module-text-muted); width: 14px; height: 14px; transform: rotate(-90deg); }
+@media (max-width: 600px) {
+  .financePurchaseDetailsOverlay:has(.stockPurchaseDocument) { padding: 12px; }
+  html body .stockPurchaseDocument { max-height: calc(100dvh - 24px); border-radius: 17px; }
+  html body :is(.stockDocumentHeader, .stockDocumentBody, .stockDocumentFooter) { padding: 16px; }
+  html body .stockDocumentHeader h2 { font-size: 21px; }
+  html body .stockDocumentAmounts { gap: 10px; padding: 14px; }
+  html body .stockDocumentAmounts > div + div { padding-left: 10px; }
+  html body .stockDocumentAmounts span { font-size: 10px; }
+  html body .stockDocumentAmounts strong { font-size: 17px; }
+  html body .stockDocumentItems table, html body .stockDocumentItems tbody { display: block; }
+  html body .stockDocumentItems thead { display: none; }
+  html body .stockDocumentItems tr { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-bottom: 10px; padding: 14px; border: 1px solid var(--module-border); border-radius: 12px; background: var(--module-surface-soft); }
+  html body .stockDocumentItems td { display: block; padding: 0; border: 0; text-align: left; }
+  html body .stockDocumentItems td:first-child { grid-column: 1 / -1; }
+  html body .stockDocumentItems td:not(:first-child)::before { content: attr(data-label); display: block; margin-bottom: 5px; color: var(--module-text-muted); font-size: 10px; }
+  html body .stockDocumentContacts dl { grid-template-columns: minmax(0, 1fr); }
+  html body .stockDocumentFooter > span { flex-basis: 100%; }
+  html body .stockDocumentFooter button { flex: 1; }
+  html body .stockFinanceReferenceTotals { grid-template-columns: minmax(0, 1fr); }
+}
 html body .stockPurchaseForm,
 html body .stockReceiveForm {
   display: flex;

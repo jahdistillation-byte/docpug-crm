@@ -1,6 +1,25 @@
 /* Inventory navigation over the existing, organization-scoped purchasing APIs. */
 function stockWorkspaceText(value) {
   const labels = {
+    "Фінанси · закупівля": ["Finance · purchase", "Finanzen · Einkauf", "Finanse · zakup"],
+    "Сума замовлення": ["Order amount", "Bestellsumme", "Kwota zamówienia"],
+    "Сума замовлень": ["Order amounts", "Bestellsummen", "Kwoty zamówień"],
+    "Залишок за документом": ["Document balance", "Offener Dokumentbetrag", "Saldo dokumentu"],
+    "Залишок за документами": ["Document balances", "Offene Dokumentbeträge", "Salda dokumentów"],
+    "Сплачено за документами": ["Paid per documents", "Bezahlt laut Dokumenten", "Zapłacono według dokumentów"],
+    "Товари": ["Items", "Artikel", "Towary"],
+    "Контакти та реквізити": ["Contacts and details", "Kontakte und Angaben", "Kontakty i dane"],
+    "Номер документа": ["Document number", "Dokumentnummer", "Numer dokumentu"],
+    "Відкрити накладну": ["Open invoice", "Rechnung öffnen", "Otwórz fakturę"],
+    "Не пов’язано зі складом": ["Not linked to inventory", "Nicht mit Bestand verknüpft", "Niepowiązane z magazynem"],
+    "Єдиний документ складу та фінансів. Повторне введення не потрібне.": ["One document shared by inventory and finance. No re-entry needed.", "Ein gemeinsames Dokument für Lager und Finanzen. Keine doppelte Eingabe.", "Jeden dokument magazynu i finansów. Bez ponownego wprowadzania."],
+    "Замовлення та приймання товару не є оплатою. Рух коштів відображається після реєстрації платежу.": ["Orders and receipts are not payments. Cash movement is recorded after payment registration.", "Bestellung und Wareneingang sind keine Zahlung. Geldbewegungen werden nach Zahlungsregistrierung erfasst.", "Zamówienie i przyjęcie towaru nie są płatnością. Przepływ środków pojawia się po rejestracji płatności."],
+    "Поставка ведеться у складі. Фінансові дані відображаються автоматично.": ["Deliveries are managed in inventory. Financial data appears automatically.", "Lieferungen werden im Lager verwaltet. Finanzdaten erscheinen automatisch.", "Dostawy obsługuje magazyn. Dane finansowe pojawiają się automatycznie."],
+    "Відкрити на складі": ["Open in inventory", "Im Lager öffnen", "Otwórz w magazynie"],
+    "АВТОМАТИЧНО ЗІ СКЛАДУ": ["AUTOMATICALLY FROM INVENTORY", "AUTOMATISCH AUS DEM LAGER", "AUTOMATYCZNIE Z MAGAZYNU"],
+    "Один документ зі складом. Суми оновлюються автоматично, повторне введення не потрібне.": ["Shared with inventory. Amounts update automatically, with no re-entry.", "Gemeinsam mit dem Lager. Beträge aktualisieren sich automatisch, ohne erneute Eingabe.", "Wspólny dokument z magazynem. Kwoty aktualizują się automatycznie, bez ponownego wpisywania."],
+    "За документами на цій сторінці, без скасованих. Замовлення не є списанням коштів.": ["For documents on this page, excluding cancellations. Orders do not withdraw funds.", "Dokumente dieser Seite, ohne Stornierungen. Bestellungen buchen kein Geld ab.", "Dokumenty na tej stronie, bez anulowanych. Zamówienie nie powoduje wypływu środków."],
+    "Не вдалося завантажити закупівлю. Закрийте вікно та повторіть спробу.": ["Could not load the purchase. Close and try again.", "Einkauf konnte nicht geladen werden. Schließen und erneut versuchen.", "Nie udało się wczytać zakupu. Zamknij i spróbuj ponownie."],
     "Новий товар": ["New item", "Neuer Artikel", "Nowy towar"],
     "Залишок буде додано під час приймання закупівлі.": ["Stock will be added when the purchase is received.", "Der Bestand wird beim Wareneingang hinzugefügt.", "Stan zostanie dodany przy przyjęciu zakupu."],
     "Замовлення → приймання → залишки на складі": ["Order → receive → stock", "Bestellung → Wareneingang → Bestand", "Zamówienie → przyjęcie → stan"],
@@ -62,6 +81,69 @@ function bindStockDialogKeyboard(overlay, close) {
   return () => { if (previousFocus?.isConnected) previousFocus.focus({ preventScroll: true }); };
 }
 
+async function openStockPurchaseDocument(purchaseId, options = {}) {
+  document.querySelector(".financePurchaseDetailsOverlay")?.remove();
+  const loading = document.createElement("div");
+  loading.className = "financePurchaseDetailsOverlay";
+  loading.innerHTML = `<section class="stockDocumentLoading" role="dialog" aria-modal="true" aria-label="${escapeHtml(stockWorkspaceText("Закупівля"))}"><p role="status">${escapeHtml(stockWorkspaceText("Завантаження…"))}</p><button type="button">${escapeHtml(stockWorkspaceText("Закрити"))}</button></section>`;
+  document.body.appendChild(loading);
+  document.body.classList.add("financePurchaseModalOpen");
+  const close = () => { loading.remove(); document.body.classList.remove("financePurchaseModalOpen"); restoreFocus(); };
+  const restoreFocus = bindStockDialogKeyboard(loading, close);
+  loading.querySelector("button").addEventListener("click", close);
+  loading.querySelector("button").focus({ preventScroll: true });
+  try {
+    const purchase = await stockApiRequest(`/api/finance/purchases/${encodeURIComponent(purchaseId)}`, { method: "GET" });
+    if (!loading.isConnected) return;
+    openFinancePurchaseDetailsModal(purchase, options);
+  } catch (error) {
+    if (loading.isConnected) loading.querySelector("p").textContent = stockWorkspaceText("Не вдалося завантажити закупівлю. Закрийте вікно та повторіть спробу.");
+  }
+}
+
+function openStockPurchaseFromFinance(purchaseId = null) {
+  state.stockSection = "purchases";
+  state.stockPurchaseStatus = state.stockPurchasePayment = state.stockPurchaseSupplier = state.stockPurchaseSupplierName = "";
+  state.stockPurchaseOffset = 0;
+  if (state.route !== "stock") setHash("stock");
+  else renderStockTab();
+  if (purchaseId) void openStockPurchaseDocument(purchaseId, { context: "stock", onReceived: () => {
+    state.stockWorkspaceNotice = "Поставку прийнято. Залишки оновлено.";
+    if (state.route === "stock") renderStockTab();
+  } });
+}
+
+function buildFinanceStockReferences(purchases, pagination) {
+  const text = value => escapeHtml(stockWorkspaceText(value));
+  const totals = field => {
+    const currencies = {};
+    purchases.filter(p => p.status !== "cancelled").forEach(p => {
+      const currency = p.currency || "UAH";
+      const value = field === "remaining" ? Math.max(0, Number(p.total_amount || 0) - Number(p.paid_amount || 0)) : Number(p[field] || 0);
+      currencies[currency] = (currencies[currency] || 0) + value;
+    });
+    return Object.entries(currencies).map(([currency, value]) => escapeHtml(formatClinicMoney(value, currency))).join("<br>") || "—";
+  };
+  return `<article class="financePanel financePurchasesPanel stockFinanceReferences">
+    <div class="financePanelHead"><div><span>${text("АВТОМАТИЧНО ЗІ СКЛАДУ")}</span><h2>${text("Закупівлі")}</h2></div></div>
+    <p class="stockFinanceReferenceNote">${text("Один документ зі складом. Суми оновлюються автоматично, повторне введення не потрібне.")}</p>
+    <div class="stockFinanceReferenceTotals">
+      <div><span>${text("Сума замовлень")}</span><strong>${totals("total_amount")}</strong></div>
+      <div><span>${text("Сплачено за документами")}</span><strong>${totals("paid_amount")}</strong></div>
+      <div><span>${text("Залишок за документами")}</span><strong>${totals("remaining")}</strong></div>
+    </div>
+    <small class="stockFinanceReferenceNote">${text("За документами на цій сторінці, без скасованих. Замовлення не є списанням коштів.")}</small>
+    <div class="stockFinanceReferenceList">${purchases.map(p => `<button type="button" data-finance-purchase-id="${escapeHtml(p.id)}">
+      <span><strong>${escapeHtml(p.supplier?.name || stockWorkspaceText("Постачальник не вказаний"))}</strong><small>${escapeHtml(formatFinancePurchaseDate(p.order_date))} · ${text(getFinancePurchaseStatusMeta(p.status).label)}</small></span>
+      <span><strong>${escapeHtml(formatClinicMoney(p.total_amount, p.currency || "UAH"))}</strong><small>${text(getFinancePurchasePaymentMeta(p.payment_status).label)}</small></span>${getStockIcon("chevron")}
+    </button>`).join("") || `<p>${text("Закупівель за цими умовами немає.")}</p>`}</div>
+    <div class="financePurchasesPagination">
+      <button type="button" id="financePurchasesPrevious" ${Number(pagination.offset || 0) <= 0 ? "disabled" : ""}>${text("Попередні")}</button>
+      <button type="button" id="financePurchasesNext" ${pagination.has_more ? "" : "disabled"}>${text("Наступні")}</button>
+    </div>
+  </article>`;
+}
+
 function mountStockNavigation(page) {
   if (!isOwnerOrAdmin()) return;
   const container = page.querySelector(".stockPremiumPage");
@@ -109,12 +191,16 @@ async function renderStockWorkspace(page, section) {
   };
   page.querySelector("#stockWorkspaceCreate").addEventListener("click", () => {
     if (suppliersView) openFinanceSupplierCreateModal(() => refresh("Постачальника додано."));
-    else openFinancePurchaseModal({ onCreated: () => {
+    else openFinancePurchaseModal({ onCreated: async purchase => {
       state.stockPurchaseStatus = "";
       state.stockPurchasePayment = "";
       state.stockPurchaseSupplier = "";
       state.stockPurchaseSupplierName = "";
       refresh("Закупівлю створено. Залишок зміниться після приймання.");
+      if (purchase?.id) await openStockPurchaseDocument(purchase.id, { context: "stock", onReceived: () => {
+        state.stockWorkspaceNotice = "Поставку прийнято. Залишки оновлено.";
+        renderStockTab();
+      } });
     } });
   });
 
@@ -207,7 +293,7 @@ async function renderStockWorkspace(page, section) {
     content.querySelectorAll("[data-stock-purchase]").forEach(button => {
       button.addEventListener("click", () => {
         const purchase = purchases.find(p => String(p.id) === button.dataset.stockPurchase);
-        if (purchase) openFinancePurchaseDetailsModal(purchase, { onReceived: () => refresh("Поставку прийнято. Залишки оновлено.") });
+        if (purchase) void openStockPurchaseDocument(purchase.id, { context: "stock", onReceived: () => refresh("Поставку прийнято. Залишки оновлено.") });
       });
     });
   } catch (error) {
