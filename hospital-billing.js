@@ -47,7 +47,7 @@ async function openHospitalBillingWorkspace(hospitalization) {
   const overlay=document.createElement('div');overlay.id='hospitalTasksModal';overlay.className='hospitalTasksOverlay hospitalWardOverlay';
   const e=escapeHtml,t=s=>e(hospitalBillingText(s)),icon=hospitalWardIcon;
   const storageKey='pug:hospital-pending:'+JSON.stringify([getOrgHeaders(),typeof state!=='undefined'?state.me?.id:null,hospitalization.id]);
-  let busy=false,closed=false,catalog,bill,tasks,staff,tab='tasks',selected=[],draft={};
+  let busy=false,closed=false,catalog,bill,tasks,staff,tab='tasks',selected=[],draft={},summaryPrices=true;
   const close=async()=>{if(busy)return;closed=true;overlay.remove();restoreFocus();await renderHospitalTab();document.querySelector(`[data-hospital-assignments="${CSS.escape(String(hospitalization.id))}"]`)?.focus({preventScroll:true});};
   const restoreFocus=bindStockDialogKeyboard(overlay,close);
   const shell=()=>{overlay.innerHTML=`<div class="hospitalTasksBackdrop" data-close-hospital-tasks></div><section class="hospitalTasksModal" role="dialog" aria-modal="true" aria-labelledby="hospitalWardDialogTitle"><header class="hospitalTasksHeader"><div><div class="hospitalTasksEyebrow">${t('КАРТА СТАЦІОНАРУ')}</div><h2 id="hospitalWardDialogTitle">${e(hospitalization.patient_name||hospitalBillingText('Пацієнт'))}</h2><p>${e(hospitalization.diagnosis||'—')} · ${e(hospitalization.room||'—')}</p></div><button type="button" class="hospitalTasksClose" data-close-hospital-tasks aria-label="${t('Закрити')}">${icon('close')}</button></header>${hospitalWardPatientDetails(hospitalization)}<div class="hospitalBillingBody"><p role="status">${t('Завантаження призначень…')}</p></div><footer class="hospitalWardDialogFooter"><button class="hospitalWardSecondary" type="button" data-billing-medical>${icon('clipboard')}${t('Медична карта')}</button>${hospitalization.is_active!==false?`<button class="hospitalWardDischarge" type="button" data-billing-discharge>${t('Виписати')}</button>`:''}</footer></section>`;};
@@ -119,14 +119,18 @@ async function openHospitalBillingWorkspace(hospitalization) {
       body().querySelector('[data-cancel-back]').focus({preventScroll:true});
     }));
     bindCreateForm();
+    const priceControl=body().querySelector('[data-hospital-show-prices]');
+    priceControl?.addEventListener('change',()=>{summaryPrices=priceControl.checked;});
     const pdfButton=body().querySelector('[data-hospital-bill-pdf]');
     pdfButton?.addEventListener('click',async()=>{
       if(pdfButton.disabled)return;
       const original=pdfButton.innerHTML;pdfButton.disabled=true;pdfButton.textContent=hospitalDocumentText('Формування…');
+      const includePrices=priceControl?priceControl.checked:summaryPrices;
+      if(priceControl)priceControl.disabled=true;
       body().querySelector('.hospitalDocumentError')?.remove();
-      try{await downloadHospitalBillPdf(hospitalization.id,hospitalization.patient_id);}
+      try{await downloadHospitalSummaryPdf(hospitalization.id,hospitalization.patient_id,{includePrices});}
       catch(error){const message=document.createElement('p');message.className='hospitalDocumentError';message.setAttribute('role','alert');message.textContent=error.message||getPatientDocumentsUi().createFailed;pdfButton.after(message);}
-      finally{pdfButton.disabled=false;pdfButton.innerHTML=original;}
+      finally{pdfButton.disabled=false;pdfButton.innerHTML=original;if(priceControl)priceControl.disabled=false;}
     });
     body().querySelector('[data-billing-tab][aria-selected=true]')?.focus({preventScroll:true});
   }
@@ -149,6 +153,6 @@ async function openHospitalBillingWorkspace(hospitalization) {
     const update=()=>{try{const actual=values();const total=actual.reduce((sum,x,i)=>sum+hospitalBillingAmount(task.items[i],x.quantity),0n);form.querySelector('[data-actual-total]').textContent=hospitalBillingMoney(total,currency());form.querySelector('[type=submit]').disabled=false;form.querySelector('[role=alert]').hidden=true;}catch{form.querySelector('[data-actual-total]').textContent='—';form.querySelector('[type=submit]').disabled=true;form.querySelector('[role=alert]').hidden=false;}};
     form.querySelectorAll('[data-actual-item]').forEach(x=>x.addEventListener('input',update));form.addEventListener('submit',async event=>{event.preventDefault();update();if(form.querySelector('[type=submit]').disabled)return;await submit(`/api/hospital-tasks/${encodeURIComponent(task.id)}/complete`,{completed_by:form.elements.staff.value,completion_note:form.elements.note.value.trim(),actual_items:values()});});update();form.querySelector('input,select')?.focus({preventScroll:true});
   }
-  function renderBill(){return `<section class="hospitalBillingSheet"><h3>${t('Нарахування за виконані призначення')}</h3>${bill.charges.length?bill.charges.map(c=>`<article class="hospitalBillingCharge"><div><strong>${e(c.name)}</strong><small>${e(c.quantity)} ${e(c.unit)} × ${e(hospitalBillingMoney(hospitalBillingPrice(c.price),c.currency))} · ${e(formatHospitalDateTime(c.created_at))}</small></div><b>${e(hospitalBillingMoney(hospitalBillingNumber(c.amount,2,true,1000000000000000000n).units,c.currency))}</b></article>`).join(''):`<div class="hospitalBillingBlank"><h3>${t('Нарахувань ще немає')}</h3><p>${t('Сума з’явиться після виконання призначень.')}</p></div>`}<div class="hospitalBillingBillTotal"><span>${t('Разом')}</span><strong>${e(hospitalBillingMoney(hospitalBillingNumber(bill.total,2,true,1000000000000000000n).units,currency()))}</strong></div><div class="hospitalBillPdfAction"><button type="button" class="hospitalWardPrimary" data-hospital-bill-pdf>${icon('clipboard')}${e(hospitalDocumentText('Сформувати PDF'))}</button></div></section>`;}
+  function renderBill(){return `<section class="hospitalBillingSheet"><h3>${t('Нарахування за виконані призначення')}</h3>${bill.charges.length?bill.charges.map(c=>`<article class="hospitalBillingCharge"><div><strong>${e(c.name)}</strong><small>${e(c.quantity)} ${e(c.unit)} × ${e(hospitalBillingMoney(hospitalBillingPrice(c.price),c.currency))} · ${e(formatHospitalDateTime(c.created_at))}</small></div><b>${e(hospitalBillingMoney(hospitalBillingNumber(c.amount,2,true,1000000000000000000n).units,c.currency))}</b></article>`).join(''):`<div class="hospitalBillingBlank"><h3>${t('Нарахувань ще немає')}</h3><p>${t('Сума з’явиться після виконання призначень.')}</p></div>`}<div class="hospitalBillingBillTotal"><span>${t('Разом')}</span><strong>${e(hospitalBillingMoney(hospitalBillingNumber(bill.total,2,true,1000000000000000000n).units,currency()))}</strong></div><div class="hospitalBillPdfAction"><div class="hospitalSummaryExport"><span>${e(hospitalDocumentText('Підсумок стаціонару'))}</span>${hospitalSummaryPriceControl(summaryPrices)}</div><button type="button" class="hospitalWardPrimary" data-hospital-bill-pdf>${icon('clipboard')}${e(hospitalDocumentText('Сформувати PDF'))}</button></div></section>`;}
   await load();
 }

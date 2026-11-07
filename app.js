@@ -66216,6 +66216,7 @@ function renderPatientDocumentCard({
   selectLabel,
   emptyText,
   disabled = false,
+  controls = "",
 }) {
   const ui =
     getPatientDocumentsUi();
@@ -66313,6 +66314,8 @@ function renderPatientDocumentCard({
                     .join("")}
                 </select>
               </label>
+
+              ${controls}
 
               <button
                 type="button"
@@ -66594,33 +66597,7 @@ async function renderPatientDocumentsTab(
             ui.noVisits,
         })}
 
-        ${renderPatientDocumentCard({
-          type:
-            "hospital",
-
-          icon:
-            hospitalWardIcon("bed"),
-
-          title:
-            ui.hospitalTitle,
-
-          description:
-            ui.hospitalDescription,
-
-          badge:
-            ui.hospitalBadge,
-
-          options:
-            hospitalOptions,
-
-          selectLabel:
-            ui.selectHospital,
-
-          emptyText:
-            ui.noHospital,
-        })}
-
-        ${renderHospitalBillDocumentCard(hospitalizations)}
+        ${renderHospitalSummaryDocumentCard(hospitalizations)}
 
         ${renderPatientDocumentCard({
           type:
@@ -66750,6 +66727,10 @@ async function renderPatientDocumentsTab(
             button.textContent =
               ui.generating;
 
+            const priceControl=button.closest('.patientDocumentCard')?.querySelector('[data-hospital-show-prices]');
+            const includePrices=priceControl?priceControl.checked:true;
+            if(priceControl)priceControl.disabled=true;
+
             try {
               let consentData =
                 null;
@@ -66780,6 +66761,7 @@ async function renderPatientDocumentsTab(
                 type,
                 sourceId,
                 pet,
+                includePrices,
 
                 visits:
                   patientVisits,
@@ -66797,7 +66779,7 @@ async function renderPatientDocumentsTab(
 
               button.parentElement.querySelector('.hospitalDocumentError')?.remove();
               const message=document.createElement('p');message.className='hospitalDocumentError';message.setAttribute('role','alert');
-              message.textContent=type==='hospital-bill'?(error.message||ui.createFailed):ui.createFailed;
+              message.textContent=type==='hospital-summary'?(error.message||ui.createFailed):ui.createFailed;
               button.after(message);
             } finally {
               button.disabled =
@@ -66805,6 +66787,7 @@ async function renderPatientDocumentsTab(
 
               button.innerHTML =
                 original;
+              if(priceControl)priceControl.disabled=false;
             }
           }
         );
@@ -70530,8 +70513,9 @@ async function createPatientDocumentPdf({
   visits,
   hospitalizations,
   consentData = null,
+  includePrices = true,
 }) {
-  if(type === "hospital-bill")return downloadHospitalBillPdf(sourceId,pet?.id);
+  if(type === "hospital-summary")return downloadHospitalSummaryPdf(sourceId,pet?.id,{includePrices});
   const errorUi =
     getPatientDocumentErrorUi();
 

@@ -28437,6 +28437,8 @@ def api_get_hospital_tasks(
 
         try:
             rows = hospital_attach_treatment_items(rows, current_org)
+            if request.args.get("actual_quantities") == "1":
+                rows = hospital_attach_actual_quantities(rows, current_org)
         except Exception as error:
             return hospital_billing_error(error)
         return ok(rows)
@@ -28508,6 +28510,25 @@ def hospital_billing_command(action, hospitalization_id=None, task_id=None):
         return ok(task)
     except Exception as error:
         return hospital_billing_error(error)
+
+
+def hospital_attach_actual_quantities(rows, org_id):
+    completed = {str(row["id"]) for row in rows if row.get("status") == "completed"}
+    if not completed:
+        return rows
+    actual = {}
+    for offset in range(0, 50000, 500):
+        page = supabase.table("hospital_treatment_charges").select("item_id,quantity").eq("org_id", org_id).in_(
+            "task_id", sorted(completed)
+        ).order("id").range(offset, offset + 499).execute().data or []
+        actual.update({str(line["item_id"]): str(line["quantity"]) for line in page})
+        if len(page) < 500:
+            break
+    else:
+        raise RuntimeError("Hospital actual quantity limit exceeded")
+    return [{**row, "items": [{**item, "actual_quantity": actual.get(str(item["id"]), "0")}
+                             for item in row.get("items", [])]} if str(row["id"]) in completed else row
+            for row in rows]
 
 
 def hospital_attach_treatment_items(rows, org_id):

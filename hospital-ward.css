@@ -1,7 +1,19 @@
 /* Hospital workspace. New selectors keep the legacy theme cascade out of cards. */
+html body .hospitalDocumentPriceToggle{display:flex;align-items:center;gap:9px;min-height:32px;margin:3px 0 13px;color:var(--module-text-soft,#486477);font-size:13px;line-height:1.5;cursor:pointer}
+html body .hospitalDocumentPriceToggle input[type="checkbox"]{appearance:auto;display:block;flex:0 0 17px;width:17px;height:17px;min-width:17px;min-height:17px;padding:0;margin:0;border-radius:4px;box-shadow:none;accent-color:var(--module-accent,#326b96)}
+html body #hospitalTasksModal.hospitalWardOverlay .hospitalSummaryExport>span{display:block;font-size:12px;font-weight:600;color:var(--ward-muted);margin-bottom:4px}
+html body #hospitalTasksModal.hospitalWardOverlay .hospitalSummaryExport .hospitalDocumentPriceToggle{margin:0;color:var(--ward-text)}
+.hospitalSummaryDocument .hospitalSummarySection h3,.hospitalSummaryDocument .hospitalSummaryTreatments>h3{margin:0 0 6px;font-size:13px;line-height:1.5;color:#405c72}
+.hospitalSummaryDocument .hospitalSummarySection p{margin:0;font-size:12px;line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere}
+.hospitalSummaryDocument .hospitalSummaryTreatments{margin-top:16px}
+.hospitalSummaryDocument .hospitalSummaryTreatments>p{color:#66788a;font-size:12px}
+.hospitalSummaryDocument .hospitalSummaryTreatment h4{margin:0 0 5px;color:#253041;font-size:12px;line-height:1.5;overflow-wrap:anywhere}
+.hospitalSummaryDocument .hospitalSummaryTreatment p{margin:4px 0;font-size:12px;line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere}
+.hospitalSummaryDocument .hospitalSummaryTreatment small{display:block;font-size:10px;line-height:1.5;color:#66788a;margin-top:5px}
+.hospitalSummaryDocument .hospitalSummaryUsedItems{margin:7px 0;padding-left:16px;color:#405c72;font-size:11px;line-height:1.6}
 .patientDocumentsPage .patientDocumentIcon>svg{width:27px;height:27px}
 .hospitalDocumentError{color:var(--module-text,#1c3040);font-size:13px;line-height:1.5;margin:12px 0 0;overflow-wrap:anywhere}
-html body #hospitalTasksModal.hospitalWardOverlay .hospitalBillPdfAction{display:flex;justify-content:flex-end;flex-wrap:wrap;gap:10px;padding-top:22px}
+html body #hospitalTasksModal.hospitalWardOverlay .hospitalBillPdfAction{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;padding-top:22px}
 .hospitalBillDocument .hospitalBillTable{table-layout:fixed;width:100%;border-collapse:collapse}
 .hospitalBillDocument .disModernAccentLine{background:linear-gradient(90deg,var(--disAccent,#326b96),#dceaf4)!important}
 .hospitalBillDocument .disModernLogoFallback{background:#edf5fa!important;border-color:#d6e6f2!important;color:var(--disAccent,#326b96)!important}

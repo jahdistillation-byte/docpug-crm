@@ -70,5 +70,36 @@ class HospitalBillingApiTests(unittest.TestCase):
             self.assertEqual(response.status_code,status)
             self.assertNotIn('private',response.get_json()['error'])
 
+    def test_summary_actual_quantities_are_scoped_and_not_planned_amounts(self):
+        class Query:
+            def __init__(self):
+                self.operations=[]
+            def table(self,name):
+                self.operations.append(('table',name));return self
+            def select(self,columns):
+                self.operations.append(('select',columns));return self
+            def eq(self,key,value):
+                self.operations.append(('eq',key,value));return self
+            def in_(self,key,value):
+                self.operations.append(('in',key,value));return self
+            def order(self,key):
+                return self
+            def range(self,start,end):
+                return self
+            def execute(self):
+                return SimpleNamespace(data=[{'item_id':'used','quantity':'0.2'}])
+        query=Query()
+        rows=[{'id':TASK,'status':'completed','items':[{'id':'used','quantity':'0.3'},{'id':'unused','quantity':'1'}]},
+              {'id':'planned','status':'planned','items':[{'id':'planned-item','quantity':'2'}]}]
+        with patch.object(server,'supabase',query):
+            result=server.hospital_attach_actual_quantities(rows,ORG)
+        self.assertEqual(result[0]['items'][0]['actual_quantity'],'0.2')
+        self.assertEqual(result[0]['items'][1]['actual_quantity'],'0')
+        self.assertNotIn('actual_quantity',result[1]['items'][0])
+        self.assertEqual(rows[0]['items'][0]['quantity'],'0.3')
+        self.assertIn(('eq','org_id',ORG),query.operations)
+        self.assertIn(('in','task_id',[TASK]),query.operations)
+        self.assertIn(('select','item_id,quantity'),query.operations)
+
 if __name__=='__main__':
     unittest.main()
