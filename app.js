@@ -102301,6 +102301,7 @@ function ownerCatalogIcon(
 
 
 function renderOwnersCards() {
+  if (window.renderPugOwnersWorkspace?.()) return true;
   const page =
     document.querySelector(
       '.page[data-page="owners"]'
@@ -102871,7 +102872,7 @@ function renderOwners() {
   tbody.innerHTML = "";
 
     try {
-    renderOwnersCards();
+    if (renderOwnersCards()) return;
   } catch (error) {
     console.error(
       "Rendering owner cards failed:",
