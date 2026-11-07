@@ -10422,8 +10422,7 @@ function updateAppointmentTemplateSelector() {
 
   if (!template) {
     if (iconElement) {
-      iconElement.textContent =
-        "🩺";
+      iconElement.innerHTML = getStockIcon("medical");
     }
 
     if (nameElement) {
@@ -10450,11 +10449,7 @@ function updateAppointmentTemplateSelector() {
   }
 
   if (iconElement) {
-    iconElement.textContent =
-      String(
-        template.icon ||
-        "📅"
-      );
+    iconElement.innerHTML = getStockIcon("clock");
   }
 
   if (nameElement) {
@@ -75143,7 +75138,7 @@ events.forEach(
               data-open-team-schedule
               type="button"
             >
-              <span>👥</span>
+              ${getStockIcon("clock")}
 
               ${translateInterfaceText(
                 "calendar.teamSchedule"
@@ -75197,7 +75192,7 @@ events.forEach(
                           </div>
                           <div class="weekEventTitle">${escapeHtml(ev.title || translateInterfaceText("calendar.detail.visit.2"))}</div>
                           <div class="weekEventVet">
-                            👨‍⚕️ ${escapeHtml((staff.find((s) => String(s.id) === String(ev.staff_id))?.name) || translateInterfaceText("calendar.detail.no.veterinarian.assigned"))}
+                            ${escapeHtml((staff.find((s) => String(s.id) === String(ev.staff_id))?.name) || translateInterfaceText("calendar.detail.no.veterinarian.assigned"))}
                           </div>
                           ${ev.note ? `<div class="weekEventMeta">${escapeHtml(ev.note)}</div>` : ""}
                         </div>
@@ -75211,6 +75206,8 @@ events.forEach(
         </div>
       </div>
     `;
+
+    window.mountPugCalendarWorkspace?.(page, {mode: "week", date: today, staff, events});
 
     $("[data-cal-mode='day']")?.addEventListener("click", async () => {
       calendarMode = "day";
@@ -75568,7 +75565,7 @@ const monthDays =
                     class="ghost calendarScheduleButton"
                     data-open-team-schedule
                   >
-                    <span aria-hidden="true">👥</span>
+                    ${getStockIcon("clock")}
                     ${translateInterfaceText("calendar.teamSchedule")}
                   </button>
                 `
@@ -75796,7 +75793,7 @@ const monthDays =
                                             )};
                                         "
                                       >
-                                        👨‍⚕️ ${escapeHtml(
+                                        ${escapeHtml(
                                           employee.name ||
                                           translateInterfaceText(
                                             "schedule.employee"
@@ -75891,6 +75888,8 @@ const monthDays =
         </div>
       </div>
     `;
+
+    window.mountPugCalendarWorkspace?.(page, {mode: "month", date: today, staff, events});
 
     $("[data-cal-mode='day']")?.addEventListener("click", async () => {
       calendarMode = "day";
@@ -76997,6 +76996,7 @@ const updateScheduleSeriesPreview = () => {
     endInput.disabled =
       config.shiftKind ===
       "full-day";
+    endInput.hidden = config.shiftKind === "full-day";
   }
 
   if (fullDayHint) {
@@ -77934,10 +77934,7 @@ if (repeatMode) {
     );
 
   const previewStaff =
-    activeStaff.slice(
-      0,
-      4
-    );
+    activeStaff;
 
   const moreCount =
     Math.max(
@@ -77969,7 +77966,7 @@ if (repeatMode) {
           </span>
 
           <h3>
-            📅 ${escapeHtml(
+            ${getStockIcon("clock")} ${escapeHtml(
               formattedDate
             )}
           </h3>
@@ -79217,7 +79214,7 @@ page.innerHTML = `
             data-open-team-schedule
             type="button"
           >
-            <span>👥</span>
+            ${getStockIcon("clock")}
 
             ${translateInterfaceText(
               "calendar.teamSchedule"
@@ -79356,6 +79353,7 @@ page.innerHTML = `
 `;
 
 mountMobileCalendarDay(page);
+window.mountPugCalendarWorkspace?.(page, {mode: "day", date: today, staff, events});
 initCalendarTopScroll();
   $$("[data-calendar-timeline]")
   .forEach(
