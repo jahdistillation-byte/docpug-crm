@@ -1,4 +1,20 @@
 /* Hospital workspace. New selectors keep the legacy theme cascade out of cards. */
+.patientDocumentsPage .patientDocumentIcon>svg{width:27px;height:27px}
+.hospitalDocumentError{color:var(--module-text,#1c3040);font-size:13px;line-height:1.5;margin:12px 0 0;overflow-wrap:anywhere}
+html body #hospitalTasksModal.hospitalWardOverlay .hospitalBillPdfAction{display:flex;justify-content:flex-end;flex-wrap:wrap;gap:10px;padding-top:22px}
+.hospitalBillDocument .hospitalBillTable{table-layout:fixed;width:100%;border-collapse:collapse}
+.hospitalBillDocument .disModernAccentLine{background:linear-gradient(90deg,var(--disAccent,#326b96),#dceaf4)!important}
+.hospitalBillDocument .disModernLogoFallback{background:#edf5fa!important;border-color:#d6e6f2!important;color:var(--disAccent,#326b96)!important}
+.hospitalBillDocument .hospitalBillTable :is(th,td){padding:11px 12px;overflow-wrap:anywhere;word-break:normal;vertical-align:top}
+.hospitalBillDocument .hospitalBillTable th{font-size:11px;letter-spacing:.04em}
+.hospitalBillDocument .hospitalBillTable td{font-size:12px;line-height:1.5}
+.hospitalBillDocument .hospitalBillTable :is(th,td):not(:first-child){text-align:right;font-variant-numeric:tabular-nums}
+.hospitalBillDocument .hospitalBillTable td strong{font-weight:650}
+.hospitalBillDocument .hospitalBillTable td small{display:block;color:#66788a;font-size:10px;line-height:1.5;margin-top:4px}
+.hospitalBillDocument .hospitalBillTotal{justify-content:space-between;align-items:center;margin-top:18px;padding:16px 18px;background:#edf5fa;border-radius:12px;color:#405c72;gap:14px}
+.hospitalBillDocument .hospitalBillTotal strong{font-size:23px;letter-spacing:-.5px;color:var(--disAccent,#326b96);font-variant-numeric:tabular-nums}
+.hospitalBillDocument .hospitalBillPeriod p{font-size:12px;color:#405c72;margin:5px 0 0}
+.hospitalBillDocument .hospitalBillDisclaimer p{font-size:11px;line-height:1.6;color:#66788a;margin:0}
 html body :is(.hospitalWard,.hospitalWardOverlay){--ward-text:var(--module-text,#1c3040);--ward-muted:var(--module-text-muted,#687e90);--ward-paper:var(--module-surface-2,#fff);--ward-soft:var(--module-surface-soft,#edf5fa);--ward-line:var(--module-border,#dce7ef);--ward-accent:var(--module-accent,#326b96);--ward-positive:#357b67;--ward-warning:#956827;--ward-danger:#aa4352;color:var(--ward-text)}
 html body[data-theme="white"] :is(.hospitalWard,.hospitalWardOverlay){--ward-text:#1c3040;--ward-muted:#637b8e;--ward-paper:#fbfdff;--ward-soft:#edf5fa;--ward-line:#dae6ef;--ward-accent:#326b96}
 html body .hospitalWard{padding:0 0 110px;min-width:0}

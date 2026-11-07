@@ -2051,6 +2051,7 @@ PUBLIC_ASSET_FILES = {
     "hospital-ward.css",
     "hospital-ward.js",
     "hospital-billing.js",
+    "hospital-documents.js",
     "manifest.json",
     "login-clinic-bg.jpg",
     "login-clinic-bg.png",

@@ -54538,6 +54538,7 @@ async function downloadA4Pdf(visitId, options = {}) {
   });
 
   const notify = (source) => {
+    if(options.throwOnError)throw new Error(getSettingsInterfaceText(source));
     showSettingsMessage(
       getSettingsInterfaceText(source)
     );
@@ -54559,6 +54560,12 @@ async function downloadA4Pdf(visitId, options = {}) {
     return;
   }
 
+  if(downloadA4Pdf.busy){
+    const message=hospitalDocumentText("Зачекайте завершення формування попереднього PDF.");
+    if(options.throwOnError)throw new Error(message);
+    showSettingsMessage(message);return;
+  }
+  downloadA4Pdf.busy=true;
   let renderHost = null;
 
   try {
@@ -54753,6 +54760,18 @@ async function downloadA4Pdf(visitId, options = {}) {
     const pageWidthMm = 210;
     const pageHeightMm = 297;
 
+    const savePdf = () => {
+      if(options.pageNumbers){
+        const count=pdf.getNumberOfPages();
+        for(let page=1;page<=count;page++){
+          pdf.setPage(page);pdf.setFontSize(8);pdf.setTextColor('#687e90');
+          if(options.pageLabel)pdf.text(String(options.pageLabel),8,pageHeightMm-3);
+          pdf.text(`${page} / ${count}`,pageWidthMm-8,pageHeightMm-3,{align:'right'});
+        }
+      }
+      pdf.save(options.filename || a4FilenameFromVisit(visitId));
+    };
+
     const marginLeftMm = 8;
     const marginTopMm = 8;
     const marginRightMm = 8;
@@ -54796,9 +54815,7 @@ async function downloadA4Pdf(visitId, options = {}) {
         "FAST"
       );
 
-      pdf.save(
-        options.filename || a4FilenameFromVisit(visitId)
-      );
+      savePdf();
 
       return;
     }
@@ -54887,12 +54904,11 @@ async function downloadA4Pdf(visitId, options = {}) {
       pageIndex += 1;
     }
 
-    pdf.save(
-      options.filename || a4FilenameFromVisit(visitId)
-    );
+    savePdf();
   } catch (error) {
     console.error("PDF export failed:", error);
 
+    if(options.throwOnError)throw error;
     showSettingsMessage(
       getSettingsSafeErrorText(
         error,
@@ -54901,6 +54917,7 @@ async function downloadA4Pdf(visitId, options = {}) {
     );
   } finally {
     renderHost?.remove();
+    downloadA4Pdf.busy=false;
   }
 }
 
@@ -66145,7 +66162,8 @@ function getPatientDocumentVisitLabel(
 }
 
 async function loadPatientHospitalizationsApi(
-  patientId
+  patientId,
+  {strict = false} = {}
 ) {
   try {
     const response = await fetch(
@@ -66168,9 +66186,10 @@ async function loadPatientHospitalizationsApi(
 
     if (
       !response.ok ||
-      !result?.ok
+      !result?.ok ||
+      !Array.isArray(result.data)
     ) {
-      return [];
+      throw new Error(hospitalDocumentText("Не вдалося завантажити госпіталізації."));
     }
 
     return Array.isArray(result.data)
@@ -66182,6 +66201,7 @@ async function loadPatientHospitalizationsApi(
       error
     );
 
+    if (strict) throw error;
     return [];
   }
 }
@@ -66338,6 +66358,10 @@ async function renderPatientDocumentsTab(
   const ui =
     getPatientDocumentsUi();
 
+  const documentsRequest=(root.documentsRequest||0)+1;
+  root.documentsRequest=documentsRequest;
+  const documentsOrg=JSON.stringify(getOrgHeaders());
+
   root.innerHTML = `
     <div
       class="patientDocumentsLoading"
@@ -66354,10 +66378,16 @@ async function renderPatientDocumentsTab(
         pet.id,
     });
 
-  const hospitalizations =
-    await loadPatientHospitalizationsApi(
-      pet.id
-    );
+  let hospitalizations;
+  try {
+    hospitalizations=await loadPatientHospitalizationsApi(pet.id,{strict:true});
+  } catch {
+    if(root.documentsRequest!==documentsRequest)return;
+    root.innerHTML=`<div class="patientDocumentsLoading" role="alert"><p>${escapeHtml(hospitalDocumentText("Не вдалося завантажити госпіталізації."))}</p><button class="patientDocumentCreate" type="button">${escapeHtml(hospitalWardText("Повторити"))}</button></div>`;
+    root.querySelector('button').addEventListener('click',()=>renderPatientDocumentsTab(root,pet));
+    return;
+  }
+  if(root.documentsRequest!==documentsRequest||JSON.stringify(getOrgHeaders())!==documentsOrg)return;
 
   const patientVisits =
     (
@@ -66473,7 +66503,7 @@ async function renderPatientDocumentsTab(
 
   const availableSources =
     patientVisits.length +
-    completedHospitalizations
+    hospitalizations
       .length;
 
   root.innerHTML = `
@@ -66525,11 +66555,11 @@ async function renderPatientDocumentsTab(
             )}
             ·
             ${
-              completedHospitalizations
+              hospitalizations
                 .length
             }
             ${escapeHtml(
-              ui.discharges
+              hospitalDocumentText("госпіталізацій")
             )}
           </small>
         </div>
@@ -66543,7 +66573,7 @@ async function renderPatientDocumentsTab(
             "visit",
 
           icon:
-            "🩺",
+            hospitalWardIcon("doctor"),
 
           title:
             ui.visitTitle,
@@ -66569,7 +66599,7 @@ async function renderPatientDocumentsTab(
             "hospital",
 
           icon:
-            "🏥",
+            hospitalWardIcon("bed"),
 
           title:
             ui.hospitalTitle,
@@ -66590,12 +66620,14 @@ async function renderPatientDocumentsTab(
             ui.noHospital,
         })}
 
+        ${renderHospitalBillDocumentCard(hospitalizations)}
+
         ${renderPatientDocumentCard({
           type:
             "prescriptions",
 
           icon:
-            "💊",
+            getStockIcon("capsule"),
 
           title:
             ui.prescriptionsTitle,
@@ -66621,7 +66653,7 @@ async function renderPatientDocumentsTab(
             "finance",
 
           icon:
-            "🧾",
+            hospitalWardIcon("wallet"),
 
           title:
             ui.financeTitle,
@@ -66647,7 +66679,7 @@ async function renderPatientDocumentsTab(
             "consent",
 
           icon:
-            "✍️",
+            getStockIcon("edit"),
 
           title:
             ui.consentTitle,
@@ -66763,9 +66795,10 @@ async function renderPatientDocumentsTab(
                 error
               );
 
-              alert(
-                ui.createFailed
-              );
+              button.parentElement.querySelector('.hospitalDocumentError')?.remove();
+              const message=document.createElement('p');message.className='hospitalDocumentError';message.setAttribute('role','alert');
+              message.textContent=type==='hospital-bill'?(error.message||ui.createFailed):ui.createFailed;
+              button.after(message);
             } finally {
               button.disabled =
                 false;
@@ -70498,6 +70531,7 @@ async function createPatientDocumentPdf({
   hospitalizations,
   consentData = null,
 }) {
+  if(type === "hospital-bill")return downloadHospitalBillPdf(sourceId,pet?.id);
   const errorUi =
     getPatientDocumentErrorUi();
 

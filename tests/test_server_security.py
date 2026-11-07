@@ -70,6 +70,7 @@ class StaticAssetSecurityTests(unittest.TestCase):
             "/hospital-ward.js",
             "/hospital-ward.css",
             "/hospital-billing.js",
+            "/hospital-documents.js",
             "/ach.js",
             "/manifest.json",
         )
