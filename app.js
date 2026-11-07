@@ -77553,6 +77553,7 @@ updateScheduleSeriesPreview();
   ?.addEventListener(
     "click",
     async () => {
+      if (!saveButton || saveButton.disabled) return;
       const repeatMode =
   overlay
     .querySelector(
@@ -77719,18 +77720,6 @@ if (repeatMode) {
 
   return;
 }
-      const saveButton =
-        overlay.querySelector(
-          "#monthScheduleEditorSave"
-        );
-
-      if (
-        !saveButton ||
-        saveButton.disabled
-      ) {
-        return;
-      }
-
       saveButton.disabled =
         true;
 
