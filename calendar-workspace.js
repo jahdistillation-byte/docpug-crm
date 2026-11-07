@@ -142,7 +142,7 @@
       const id=document.getElementById('visitPatientSelect')?.value;
       const patient=(window.__visitPatientList||[]).find(item=>String(item.id)===String(id));
       selected.hidden=!patient;
-      if(patient)selected.innerHTML=`${icon('medical')}<div><strong>${esc(patient.name)}</strong><small>${esc([patient.species,patient.breed].filter(Boolean).join(' · '))}</small><small>${esc([patient.owner_name,patient.owner_phone].filter(Boolean).join(' · '))}</small></div>`;
+      if(patient)selected.innerHTML=`${icon('paw')}<div><strong>${esc(patient.name)}</strong><small>${esc([patient.species,patient.breed].filter(Boolean).join(' · '))}</small><small>${esc([patient.owner_name,patient.owner_phone].filter(Boolean).join(' · '))}</small></div>`;
     };
     const status=document.createElement('div');status.className='pcBookingAvailability';status.setAttribute('role','status');status.setAttribute('aria-live','polite');
     modal.querySelector('.pugVisitFieldsGrid')?.after(status);

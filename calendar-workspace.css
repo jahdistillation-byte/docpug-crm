@@ -205,3 +205,13 @@ html body #visitModal.modal.pugVisitOverlay.pugBookingWorkspace .pcVaccinationCa
 html body #visitModal.modal.pugVisitOverlay.pugBookingWorkspace .pcVaccinationCard :is(input,select){width:100%!important;min-width:0!important;max-width:100%!important}
 @media(max-width:900px){html body #visitModal.modal.pugVisitOverlay.pugBookingWorkspace .pugQuickPatientGrid,html body #visitModal.modal.pugVisitOverlay.pugBookingWorkspace .pcVaccinationSection{grid-template-columns:minmax(0,1fr)!important}}
 @media(max-width:540px){html body #visitModal.modal.pugVisitOverlay.pugBookingWorkspace .pcVaccinationCard>div:not([hidden]){grid-template-columns:minmax(0,1fr)!important}}
+
+/* Consistent hand-drawn pet mark, with no system emoji or dark badge. */
+html body #visitModal.modal.pugVisitOverlay.pugBookingWorkspace .patientSearchItem::before{content:none!important;display:none!important}
+html body #visitModal.modal.pugVisitOverlay.pugBookingWorkspace .patientSearchItem{display:grid!important;grid-template-columns:40px minmax(0,1fr)!important;justify-content:start!important;gap:12px!important;text-align:left!important}
+html body #visitModal.modal.pugVisitOverlay.pugBookingWorkspace .pcPatientAvatar{display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:12px;background:#e2edf5;color:#527c9b;border:1px solid #d0e1ed;box-shadow:none}
+html body #visitModal.modal.pugVisitOverlay.pugBookingWorkspace .pcPatientAvatar .stockIcon{width:24px!important;height:24px!important}
+html body #visitModal.modal.pugVisitOverlay.pugBookingWorkspace .pcPatientSearchText{min-width:0}
+html body #visitModal.modal.pugVisitOverlay.pugBookingWorkspace .pcPatientSearchText strong{color:var(--pc-text)!important;font-size:15px!important;font-weight:650!important;line-height:1.4!important;overflow-wrap:anywhere}
+html body #visitModal.modal.pugVisitOverlay.pugBookingWorkspace .pcPatientSearchText span{font-size:12px!important;line-height:1.5!important;margin-top:3px!important;overflow-wrap:anywhere}
+html body #visitModal.modal.pugVisitOverlay.pugBookingWorkspace .patientSearchItem:hover{background:#e4eff7!important;border-color:#acc6d9!important;box-shadow:0 3px 10px rgba(43,83,113,.06)!important;transform:none!important}

@@ -32935,6 +32935,7 @@ function getStockGroupLabel(
 // Inline geometry keeps stock icons identical across platforms.
 function getStockIcon(name) {
   const paths = {
+    paw: '<ellipse cx="5.5" cy="9" rx="2" ry="2.6" transform="rotate(-25 5.5 9)"/><ellipse cx="10" cy="5.5" rx="1.9" ry="2.5"/><ellipse cx="15" cy="5.5" rx="1.9" ry="2.5"/><ellipse cx="19" cy="9" rx="2" ry="2.6" transform="rotate(25 19 9)"/><path d="M7 15c2-1.2 2.4-4 5.2-4s3.3 2.8 5.3 4c3 2 1.3 5.5-1.4 5.5-1.8 0-2.5-1-3.9-1s-2.1 1-3.9 1C5.7 20.5 4 17 7 15Z"/>',
     wallet: '<rect x="3" y="5" width="18" height="15" rx="3"/><path d="M3 8V6a2 2 0 0 1 2-2h13M16 11h5v5h-5a2 2 0 0 1 0-5Z"/><path d="M17 13.5h.01"/>',
     partners: '<path d="M4 21V5l8-2v18M12 9h8v12M2 21h20M7 8h2M7 12h2M7 16h2M15 12h2M15 16h2"/>',
     box: '<path d="m12 3 9 5v8l-9 5-9-5V8l9-5Z"/><path d="m3 8 9 5 9-5M12 13v8M7.5 5.5l9 5"/>',
@@ -124702,8 +124703,9 @@ $("#visitPatientSearch")?.addEventListener("input", () => {
   box.innerHTML = found.length
     ? found.map((p) => `
       <div class="patientSearchItem" data-select-visit-patient="${escapeHtml(String(p.id))}">
-        <strong>${escapeHtml(p.name || translateInterfaceText("calendar.detail.patient"))}</strong>
-        <span>${escapeHtml(p.owner_name || translateInterfaceText("calendar.detail.no.owner.specified"))} · ${escapeHtml(p.owner_phone || p.phone || translateInterfaceText("calendar.detail.no.phone.number.specified"))}</span>
+        <div class="pcPatientAvatar" aria-hidden="true">${getStockIcon("paw")}</div>
+        <div class="pcPatientSearchText"><strong>${escapeHtml(p.name || translateInterfaceText("calendar.detail.patient"))}</strong>
+        <span>${escapeHtml(p.owner_name || translateInterfaceText("calendar.detail.no.owner.specified"))} · ${escapeHtml(p.owner_phone || p.phone || translateInterfaceText("calendar.detail.no.phone.number.specified"))}</span></div>
       </div>
     `).join("")
     : `<div class="hint">${escapeHtml(translateInterfaceText("calendar.detail.nothing.found"))}</div>`;
