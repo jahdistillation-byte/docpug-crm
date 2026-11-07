@@ -192,3 +192,16 @@ html body #visitModal.modal.pugVisitOverlay.pugBookingWorkspace .pugVisitPatient
 
 html body #visitModal.modal.pugVisitOverlay.pugBookingWorkspace :is(.pugVisitPatientBlock,.pugVisitDetailsBlock){grid-row:1!important}
 html body #visitModal.modal.pugVisitOverlay.pugBookingWorkspace .pugVisitDetailsBlock>.pugVisitMedicalBlock{margin-top:24px!important}
+
+/* New patient and vaccination fields need the full dialog width, without nested narrow grids. */
+html body #visitModal.modal.pugVisitOverlay.pugBookingWorkspace .pugQuickPatientBox{grid-column:1 / -1!important;grid-row:2!important;margin-top:0!important}
+html body #visitModal.modal.pugVisitOverlay.pugBookingWorkspace .pugQuickPatientGrid{align-items:start!important;grid-template-columns:repeat(2,minmax(0,1fr))!important}
+html body #visitModal.modal.pugVisitOverlay.pugBookingWorkspace .pcVaccinationSection{grid-column:1 / -1!important;display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:16px!important;min-width:0}
+html body #visitModal.modal.pugVisitOverlay.pugBookingWorkspace .pcVaccinationCard{padding:18px;border:1px solid var(--pc-line);border-radius:12px;background:var(--pc-paper);min-width:0}
+html body #visitModal.modal.pugVisitOverlay.pugBookingWorkspace .pcVaccinationCard>label{display:flex;flex-direction:column;gap:8px}
+html body #visitModal.modal.pugVisitOverlay.pugBookingWorkspace .pcVaccinationCard>label>span{font-size:15px!important;font-weight:650!important;color:var(--pc-text)!important}
+html body #visitModal.modal.pugVisitOverlay.pugBookingWorkspace .pcVaccinationCard>div:not([hidden]){display:grid!important;grid-template-columns:minmax(175px,.85fr) minmax(0,1.15fr)!important;gap:14px!important;margin-top:16px}
+html body #visitModal.modal.pugVisitOverlay.pugBookingWorkspace .pcVaccinationCard>div[hidden]{display:none!important}
+html body #visitModal.modal.pugVisitOverlay.pugBookingWorkspace .pcVaccinationCard :is(input,select){width:100%!important;min-width:0!important;max-width:100%!important}
+@media(max-width:900px){html body #visitModal.modal.pugVisitOverlay.pugBookingWorkspace .pugQuickPatientGrid,html body #visitModal.modal.pugVisitOverlay.pugBookingWorkspace .pcVaccinationSection{grid-template-columns:minmax(0,1fr)!important}}
+@media(max-width:540px){html body #visitModal.modal.pugVisitOverlay.pugBookingWorkspace .pcVaccinationCard>div:not([hidden]){grid-template-columns:minmax(0,1fr)!important}}
