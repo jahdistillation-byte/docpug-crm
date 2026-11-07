@@ -8494,7 +8494,10 @@ function getCurrentVetWaitingEvents(
   );
 }
 
+let waitingPatientsPollBusy = false;
 async function checkCurrentVetWaitingPatients() {
+  if (waitingPatientsPollBusy || document.hidden) return;
+  waitingPatientsPollBusy = true;
   try {
     const events =
       await loadCalendarApi();
@@ -8540,13 +8543,15 @@ if (
   state.route ===
   "calendar"
 ) {
-  await renderCalendarTab();
+  await refreshCalendarQuietly(events);
 }
   } catch (error) {
     console.warn(
       "checkCurrentVetWaitingPatients failed:",
       error
     );
+  } finally {
+    waitingPatientsPollBusy = false;
   }
 }
 let waitingPatientsPollStarted =
@@ -8568,12 +8573,6 @@ function startWaitingPatientsPoll() {
 
   setInterval(
     async () => {
-      console.log(
-        "[WAITING POLL] tick",
-        new Date()
-          .toLocaleTimeString()
-      );
-
       await checkCurrentVetWaitingPatients();
     },
     30000
@@ -74951,7 +74950,44 @@ function openCalendarDatePopover({ anchor, value, onSelect }) {
   });
 }
 
-async function renderCalendarTab() {
+function calendarEventsFingerprint(events) {
+  return JSON.stringify([...events].sort((a,b)=>String(a.id).localeCompare(String(b.id))).map(event=>
+    Object.fromEntries(Object.keys(event).sort().map(key=>[key,event[key]]))));
+}
+
+function calendarRefreshBlocked() {
+  if(document.body.classList.contains('calendarEditModalOpen')) return true;
+  return [...document.querySelectorAll(
+    '#visitModal.open, .modal.open, .deleteModalOverlay[style*="flex"], #calendarDatePopover, #monthScheduleEditorOverlay, .monthShiftDrawer.open, [role="dialog"][aria-modal="true"]'
+  )].some(element=>element.getClientRects().length && getComputedStyle(element).visibility!=='hidden');
+}
+
+async function refreshCalendarQuietly(events) {
+  const page=document.querySelector('.page[data-page="calendar"]');
+  if (state.route!=='calendar' || document.hidden || calendarMode==='month' || !page?.querySelector('.calendarCard') || calendarRefreshBlocked()) return;
+  if (page.__calendarEventsFingerprint===calendarEventsFingerprint(events)) return;
+  const mode=calendarMode,date=window.__calendarDate;
+  const windowScroll={x:window.scrollX,y:window.scrollY};
+  const positions=[...page.querySelectorAll('[id]')].filter(element=>element.scrollTop||element.scrollLeft||element.matches('#calendarDayGrid,#calTopScroll')).map(element=>({id:element.id,top:element.scrollTop,left:element.scrollLeft}));
+  const outsideOpen=page.querySelector('.pcOutside')?.open;
+  const focusId=page.contains(document.activeElement)?document.activeElement.id:'';
+  await renderCalendarTab({background:true,events});
+  if (state.route!=='calendar' || calendarMode!==mode || window.__calendarDate!==date) return;
+  // Existing mobile/grid mounting also schedules layout work. Restore after it finishes.
+  await new Promise(resolve=>requestAnimationFrame(resolve));
+  positions.forEach(({id,top,left})=>{
+    const element=document.getElementById(id);if(!element)return;
+    element.scrollTo({top,left,behavior:'instant'});
+  });
+  if(outsideOpen&&page.querySelector('.pcOutside'))page.querySelector('.pcOutside').open=true;
+  if(focusId)document.getElementById(focusId)?.focus({preventScroll:true});
+  window.scrollTo({left:windowScroll.x,top:windowScroll.y,behavior:'instant'});
+}
+
+async function renderCalendarTab(options = {}) {
+  const background=options.background===true;
+  const renderRevision=window.__pugCalendarRenderRevision=(window.__pugCalendarRenderRevision||0)+1;
+  const requestedMode=calendarMode;
   const page = document.querySelector('.page[data-page="calendar"]');
   if (!page) return;
 
@@ -74965,7 +75001,7 @@ async function renderCalendarTab() {
       : new Date().toISOString().slice(0, 10)
   );
 
-  page.innerHTML = `
+  if (!background) page.innerHTML = `
     <div class="card">
       <div class="hint">${escapeHtml(translateInterfaceText("calendar.detail.loading.calendar"))}</div>
     </div>
@@ -74978,11 +75014,15 @@ async function renderCalendarTab() {
 ] =
   await Promise.all([
     loadStaffApi(),
-    loadCalendarApi(),
+    options.events || loadCalendarApi(),
     loadStaffScheduleApi(
       today
     ),
   ]);
+
+  if(renderRevision!==window.__pugCalendarRenderRevision) return;
+  if(background && (state.route!=='calendar' || document.hidden || calendarMode!==requestedMode || (window.__calendarDate||todayISO())!==today || calendarRefreshBlocked())) return;
+  page.__calendarEventsFingerprint=calendarEventsFingerprint(events);
 
   const waitingForCurrentVet =
   getCurrentVetWaitingEvents(
