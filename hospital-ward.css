@@ -1,0 +1,164 @@
+/* Hospital workspace. New selectors keep the legacy theme cascade out of cards. */
+html body :is(.hospitalWard,.hospitalWardOverlay){--ward-text:var(--module-text,#1c3040);--ward-muted:var(--module-text-muted,#687e90);--ward-paper:var(--module-surface-2,#fff);--ward-soft:var(--module-surface-soft,#edf5fa);--ward-line:var(--module-border,#dce7ef);--ward-accent:var(--module-accent,#326b96);--ward-positive:#357b67;--ward-warning:#956827;--ward-danger:#aa4352;color:var(--ward-text)}
+html body[data-theme="white"] :is(.hospitalWard,.hospitalWardOverlay){--ward-text:#1c3040;--ward-muted:#637b8e;--ward-paper:#fbfdff;--ward-soft:#edf5fa;--ward-line:#dae6ef;--ward-accent:#326b96}
+html body .hospitalWard{padding:0 0 110px;min-width:0}
+.hospitalWardIcon{display:inline-block;width:19px;height:19px;flex:0 0 19px;vertical-align:middle}
+html body .hospitalWardHeader{display:flex;justify-content:space-between;align-items:center;gap:24px;padding:8px 0 27px}
+html body .hospitalWardEyebrow{display:block;color:var(--ward-accent);font-size:11px;font-weight:750;letter-spacing:1.8px;margin-bottom:9px}
+html body .hospitalWardHeader h1{margin:0;color:var(--ward-text);font-size:36px;line-height:1.2;letter-spacing:-1.2px;font-weight:720}
+html body .hospitalWardHeader p{margin:10px 0 0;color:var(--ward-muted);font-size:14px;line-height:1.5}
+html body :is(.hospitalWardPrimary,.hospitalWardSecondary,.hospitalWardDischarge){display:inline-flex;justify-content:center;align-items:center;gap:8px;min-height:42px;padding:10px 15px;border:1px solid var(--ward-line);border-radius:11px;color:var(--ward-accent);background:var(--ward-paper);font:inherit;font-size:13px;font-weight:650;line-height:1.4;cursor:pointer;text-decoration:none;box-shadow:none}
+html body .hospitalWardPrimary{background:var(--ward-accent);color:#fff;border-color:var(--ward-accent)}
+html body .hospitalWardPrimary:hover{filter:brightness(1.06)}
+html body :is(.hospitalWardPrimary,.hospitalWardSecondary,.hospitalWardDischarge):disabled{opacity:.55;cursor:default}
+html body :is(.hospitalWard,.hospitalWardOverlay) :is(button,input,select,textarea,summary):focus-visible{outline:3px solid #8bb9dc;outline-offset:3px}
+html body .hospitalWardToolbar{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:20px}
+html body .hospitalWardFilters{display:flex;gap:5px;flex-wrap:wrap;min-width:0}
+html body .hospitalWardFilters button{display:flex;align-items:center;justify-content:center;gap:8px;padding:10px 12px;border:1px solid transparent;border-radius:11px;background:transparent;color:var(--ward-muted);font:inherit;font-size:13px;font-weight:650;line-height:1.4;cursor:pointer;box-shadow:none}
+html body .hospitalWardFilters button span{font-size:11px;font-variant-numeric:tabular-nums;opacity:.85}
+html body .hospitalWardFilters button[aria-pressed="true"]{background:var(--ward-soft);color:var(--ward-accent);border-color:var(--ward-line)}
+html body .hospitalWardSearch{display:flex;align-items:center;gap:9px;width:300px;max-width:100%;padding:11px 13px;border:1px solid var(--ward-line);border-radius:12px;color:var(--ward-muted);background:var(--ward-paper)}
+html body .hospitalWardSearch input{width:100%;min-width:0;border:0;border-radius:2px;background:transparent;color:var(--ward-text);padding:0;box-shadow:none;font:inherit;font-size:13px;line-height:1.5;min-height:20px}
+html body .hospitalWardSearch input::placeholder{color:var(--ward-muted);opacity:1}
+html body .hospitalWardGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;align-items:start;min-width:0}
+html body .hospitalWardCard{min-width:0;padding:24px;border:1px solid var(--ward-line);border-radius:22px;background:var(--ward-paper);color:var(--ward-text);box-shadow:0 8px 30px rgba(41,74,99,.035)}
+html body .hospitalWardPatient{display:flex;align-items:center;gap:12px;min-width:0}
+html body .hospitalWardAvatar{display:grid;place-items:center;width:46px;height:46px;flex:0 0 46px;border-radius:14px;background:var(--ward-soft);color:var(--ward-accent)}
+html body .hospitalWardAvatar .hospitalWardIcon{width:24px;height:24px}
+html body .hospitalWardPatient>div{flex:1;min-width:0}
+html body .hospitalWardPatient h2{margin:0;color:var(--ward-text);font-size:22px;font-weight:720;line-height:1.2;letter-spacing:-.5px;overflow-wrap:anywhere}
+html body .hospitalWardPatient p{margin:5px 0 0;color:var(--ward-muted);font-size:12px;line-height:1.45;overflow-wrap:anywhere}
+html body .hospitalWardBadge{display:inline-flex;align-items:center;gap:6px;flex-shrink:0;max-width:100%;padding:6px 9px;border-radius:20px;color:var(--ward-positive);background:rgba(53,123,103,.08);font-size:11px;line-height:1.4;font-weight:650}
+html body .hospitalWardBadge>span{width:5px;height:5px;flex:0 0 5px;border-radius:50%;background:currentColor}
+html body .hospitalWardBadge.is-observation{background:rgba(185,136,54,.10);color:var(--ward-warning)}
+html body .hospitalWardBadge.is-critical{background:rgba(170,67,82,.09);color:var(--ward-danger)}
+html body .hospitalWardDiagnosis{margin:22px 0 0;color:var(--ward-text);font-size:15px;font-weight:550;line-height:1.5;overflow-wrap:anywhere}
+html body .hospitalWardMeta{display:flex;gap:14px;flex-wrap:wrap;margin-top:9px;color:var(--ward-muted);font-size:12px;line-height:1.5}
+html body .hospitalWardMeta>span{display:flex;align-items:start;gap:6px;min-width:0;overflow-wrap:anywhere}
+html body .hospitalWardMeta .hospitalWardIcon{width:15px;height:17px;flex:0 0 15px}
+html body .hospitalWardNext{margin-top:22px;padding-top:17px;border-top:1px solid var(--ward-line)}
+html body .hospitalWardNextHead{display:flex;justify-content:space-between;gap:12px;color:var(--ward-muted);font-size:11px;line-height:1.5;margin-bottom:14px}
+html body .hospitalWardNextHead>span:first-child{text-transform:uppercase;letter-spacing:.8px}
+html body .hospitalWardNextHead>span:last-child{flex-shrink:0;font-variant-numeric:tabular-nums}
+html body .hospitalWardNextTask{display:flex;gap:18px;align-items:start;min-height:73px}
+html body .hospitalWardTime{flex:0 0 78px}
+html body .hospitalWardTime time{display:block;font-size:21px;line-height:1.2;letter-spacing:-.6px;font-weight:650;color:var(--ward-accent);font-variant-numeric:tabular-nums}
+html body .hospitalWardTime small{display:block;margin-top:6px;color:var(--ward-muted);font-size:11px;font-variant-numeric:tabular-nums}
+html body .hospitalWardNextTask>div:last-child{flex:1;min-width:0}
+html body .hospitalWardNextTask h3{margin:0;font-size:14px;line-height:1.45;font-weight:650;color:var(--ward-text);overflow-wrap:anywhere}
+html body .hospitalWardInstruction{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin:5px 0 0;color:var(--ward-muted);font-size:12px;line-height:1.5;overflow-wrap:anywhere}
+html body .hospitalWardTaskStatus{display:flex;align-items:center;gap:5px;margin-top:6px;color:var(--ward-muted);font-size:12px;line-height:1.5}
+html body .hospitalWardTaskStatus .stockIcon{width:14px;height:14px;flex:0 0 14px}
+html body .hospitalWardNext.is-overdue .hospitalWardTaskStatus{color:var(--ward-danger)}
+html body .hospitalWardUndated{display:block;margin-top:6px;color:var(--ward-warning);font-size:11px;line-height:1.5}
+html body .hospitalWardTaskEmpty{display:flex;align-items:center;gap:9px;min-height:73px;margin:0;color:var(--ward-muted);font-size:13px;line-height:1.5}
+html body .hospitalWardCardFooter{display:flex;justify-content:space-between;align-items:center;gap:14px;padding-top:17px;margin-top:18px;border-top:1px solid var(--ward-line)}
+html body .hospitalWardCardFooter>span{display:flex;flex-direction:column;gap:3px;color:var(--ward-muted);font-size:11px;line-height:1.5}
+html body .hospitalWardCardFooter time{font-variant-numeric:tabular-nums}
+html body .hospitalWardCardFooter button{font-size:12px;flex-shrink:0}
+html body .hospitalWardCardFooter .hospitalWardIcon{width:16px;height:16px;flex:0 0 16px}
+html body .hospitalWardResults{margin:18px 0 0;color:var(--ward-muted);font-size:12px}
+html body .hospitalWardEmpty{grid-column:1/-1;display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;padding:55px 20px;color:var(--ward-muted)}
+html body .hospitalWardEmpty h2{margin:0;color:var(--ward-text);font-size:21px;font-weight:650}
+html body .hospitalWardEmpty p{margin:0;font-size:14px}
+html body .hospitalWardEmpty>.hospitalWardIcon{width:32px;height:32px;flex-basis:32px;color:var(--ward-accent)}
+html body .hospitalWardLoading{margin:0;padding:50px 0;text-align:center;color:var(--ward-muted)}
+
+/* Existing treatment actions, in the same visual language. */
+html body #hospitalTasksModal.hospitalWardOverlay .hospitalBillingBody{min-width:0}
+html body #hospitalTasksModal.hospitalWardOverlay .hospitalBillingTabs{display:flex;gap:22px;margin:0 28px;padding-top:15px;border-bottom:1px solid var(--ward-line)}
+html body #hospitalTasksModal.hospitalWardOverlay .hospitalBillingTabs button{display:flex;align-items:center;gap:9px;padding:0 0 13px;border:0;border-bottom:2px solid transparent;background:transparent;color:var(--ward-muted);font:inherit;font-size:13px;font-weight:600;cursor:pointer}
+html body #hospitalTasksModal.hospitalWardOverlay .hospitalBillingTabs button[aria-selected=true]{color:var(--ward-accent);border-bottom-color:var(--ward-accent)}
+html body #hospitalTasksModal.hospitalWardOverlay .hospitalBillingTabs button span{font-size:11px;font-variant-numeric:tabular-nums}
+html body #hospitalTasksModal.hospitalWardOverlay .hospitalBillingBody .hospitalTasksLayout{grid-template-columns:minmax(0,1fr) 340px}
+html body #hospitalTasksModal.hospitalWardOverlay .hospitalBillingPicker{min-width:0;margin:20px 0 0;padding:14px 0;border:0;border-top:1px solid var(--ward-line);border-bottom:1px solid var(--ward-line)}
+html body #hospitalTasksModal.hospitalWardOverlay .hospitalBillingPicker legend{padding:0 7px 0 0;color:var(--ward-text);font-size:12px;font-weight:650}
+html body #hospitalTasksModal.hospitalWardOverlay .hospitalBillingKind{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 10px}
+html body #hospitalTasksModal.hospitalWardOverlay .hospitalBillingKind>button:not(.hospitalWardPrimary):not(.hospitalWardSecondary){padding:6px 10px;border:1px solid var(--ward-line);border-radius:8px;background:var(--ward-paper);color:var(--ward-muted);font:inherit;font-size:12px;cursor:pointer}
+html body #hospitalTasksModal.hospitalWardOverlay .hospitalBillingKind>button[aria-pressed=true]{background:var(--ward-accent)!important;color:#fff!important;border-color:var(--ward-accent)!important}
+html body #hospitalTasksModal.hospitalWardOverlay .hospitalBillingPicker :is(input,select){margin-bottom:9px}
+html body #hospitalTasksModal.hospitalWardOverlay .hospitalBillingPicker>button{width:100%;font-size:12px}
+html body #hospitalTasksModal.hospitalWardOverlay .hospitalBillingItems{margin-top:12px;min-width:0}
+html body #hospitalTasksModal.hospitalWardOverlay .hospitalBillingItem{display:flex;align-items:start;justify-content:space-between;gap:12px;padding:11px 0;border-top:1px solid var(--ward-line);font-size:12px;min-width:0}
+html body #hospitalTasksModal.hospitalWardOverlay .hospitalBillingItem>div{min-width:0;flex:1}
+html body #hospitalTasksModal.hospitalWardOverlay .hospitalBillingItem strong{font-size:12px;font-weight:600;color:var(--ward-text);overflow-wrap:anywhere}
+html body #hospitalTasksModal.hospitalWardOverlay .hospitalBillingItem small{display:block;margin-top:3px;color:var(--ward-muted);font-size:11px;overflow-wrap:anywhere}
+html body #hospitalTasksModal.hospitalWardOverlay .hospitalBillingItem b{flex-shrink:0;color:var(--ward-text);font-weight:600;font-variant-numeric:tabular-nums}
+html body #hospitalTasksModal.hospitalWardOverlay .hospitalBillingSelectedItem{display:flex;align-items:end;gap:8px;padding-top:15px}
+html body #hospitalTasksModal.hospitalWardOverlay .hospitalBillingSelectedItem>label{flex:1;min-width:0}
+html body #hospitalTasksModal.hospitalWardOverlay .hospitalBillingSelectedItem strong{display:block;margin-bottom:4px;color:var(--ward-text);font-size:13px;overflow-wrap:anywhere}
+html body #hospitalTasksModal.hospitalWardOverlay .hospitalBillingSelectedItem label>span{display:block;font-size:11px;color:var(--ward-muted);margin-bottom:5px}
+html body #hospitalTasksModal.hospitalWardOverlay .hospitalBillingSelectedItem button{height:42px}
+html body #hospitalTasksModal.hospitalWardOverlay .hospitalBillingSelectedItem svg{width:16px;height:16px}
+html body #hospitalTasksModal.hospitalWardOverlay .hospitalBillingEstimate{display:flex;align-items:start;justify-content:space-between;gap:12px;margin-top:19px;padding-top:14px;border-top:1px solid var(--ward-line);font-size:12px;color:var(--ward-muted)}
+html body #hospitalTasksModal.hospitalWardOverlay .hospitalBillingEstimate strong{color:var(--ward-accent);font-size:15px;font-weight:650;font-variant-numeric:tabular-nums}
+html body #hospitalTasksModal.hospitalWardOverlay .hospitalBillingHelp{margin:10px 0 0;color:var(--ward-muted);font-size:11px;line-height:1.6}
+html body #hospitalTasksModal.hospitalWardOverlay .hospitalBillingValidation{color:var(--ward-danger);font-size:12px;line-height:1.5}
+html body #hospitalTasksModal.hospitalWardOverlay .hospitalBillingCompletion{max-width:740px;margin:0 auto;padding:24px 28px}
+html body #hospitalTasksModal.hospitalWardOverlay .hospitalBillingCompletion>h3{margin:20px 0 8px;color:var(--ward-text);font-size:20px;overflow-wrap:anywhere}
+html body #hospitalTasksModal.hospitalWardOverlay .hospitalBillingCompletion>p{color:var(--ward-muted);font-size:13px;line-height:1.6;overflow-wrap:anywhere}
+html body #hospitalTasksModal.hospitalWardOverlay .hospitalBillingCompletion .hospitalBillingItem{align-items:center;padding:15px 0}
+html body #hospitalTasksModal.hospitalWardOverlay .hospitalBillingCompletion .hospitalBillingItem label{flex:0 0 150px;min-width:0}
+html body #hospitalTasksModal.hospitalWardOverlay .hospitalBillingCompletion .hospitalBillingItem label span{display:block;color:var(--ward-muted);font-size:11px;margin-bottom:5px}
+html body #hospitalTasksModal.hospitalWardOverlay .hospitalBillingCompletion .hospitalBillingItem input{width:100%;padding:10px 11px;border:1px solid var(--ward-line);border-radius:9px;background:var(--ward-paper);color:var(--ward-text);font:inherit;font-size:14px;box-shadow:none}
+html body #hospitalTasksModal.hospitalWardOverlay .hospitalBillingSheet{padding:26px 28px;min-height:220px}
+html body #hospitalTasksModal.hospitalWardOverlay .hospitalBillingSheet>h3{margin:0 0 20px;color:var(--ward-text);font-size:17px}
+html body #hospitalTasksModal.hospitalWardOverlay .hospitalBillingCharge{display:flex;justify-content:space-between;align-items:start;gap:16px;padding:15px 0;border-bottom:1px solid var(--ward-line)}
+html body #hospitalTasksModal.hospitalWardOverlay .hospitalBillingCharge>div{min-width:0}
+html body #hospitalTasksModal.hospitalWardOverlay .hospitalBillingCharge strong{font-size:14px;font-weight:600;overflow-wrap:anywhere}
+html body #hospitalTasksModal.hospitalWardOverlay .hospitalBillingCharge small{display:block;color:var(--ward-muted);font-size:12px;line-height:1.5;margin-top:5px}
+html body #hospitalTasksModal.hospitalWardOverlay .hospitalBillingCharge b{flex-shrink:0;font-size:14px;font-weight:600;font-variant-numeric:tabular-nums}
+html body #hospitalTasksModal.hospitalWardOverlay .hospitalBillingBillTotal{display:flex;justify-content:space-between;align-items:center;gap:12px;padding-top:24px;color:var(--ward-muted)}
+html body #hospitalTasksModal.hospitalWardOverlay .hospitalBillingBillTotal strong{font-size:25px;color:var(--ward-accent);font-variant-numeric:tabular-nums}
+html body #hospitalTasksModal.hospitalWardOverlay :is(.hospitalBillingNotice,.hospitalBillingBlank){padding:30px 28px;color:var(--ward-muted);font-size:13px;line-height:1.6}
+html body #hospitalTasksModal.hospitalWardOverlay .hospitalBillingNotice button{margin-top:15px}
+html body #hospitalTasksModal.hospitalWardOverlay .hospitalBillingBlank{padding:30px 0}
+html body #hospitalTasksModal.hospitalWardOverlay [hidden]{display:none!important}
+@media(max-width:640px){html body #hospitalTasksModal.hospitalWardOverlay .hospitalBillingTabs{margin:0 18px;gap:16px}html body #hospitalTasksModal.hospitalWardOverlay :is(.hospitalBillingSheet,.hospitalBillingCompletion){padding:20px 18px}html body #hospitalTasksModal.hospitalWardOverlay .hospitalBillingCompletion .hospitalBillingItem{flex-wrap:wrap}html body #hospitalTasksModal.hospitalWardOverlay .hospitalBillingCompletion .hospitalBillingItem label{flex-basis:100%}html body #hospitalTasksModal.hospitalWardOverlay .hospitalBillingCompletion input{font-size:16px!important}html body #hospitalTasksModal.hospitalWardOverlay .hospitalBillingCharge{flex-wrap:wrap}html body #hospitalTasksModal.hospitalWardOverlay .hospitalBillingCharge b{margin-left:auto}}
+html body #hospitalTasksModal.hospitalWardOverlay{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;padding:24px}
+html body #hospitalTasksModal.hospitalWardOverlay .hospitalTasksBackdrop{position:absolute;inset:0;background:var(--module-overlay,rgba(23,42,56,.45));backdrop-filter:blur(8px)}
+html body #hospitalTasksModal.hospitalWardOverlay .hospitalTasksModal{position:relative;width:min(1120px,100%);max-height:calc(100dvh - 48px);overflow-y:auto;overscroll-behavior:contain;border:1px solid var(--ward-line)!important;border-radius:24px!important;background:var(--ward-paper)!important;color:var(--ward-text)!important;padding:0!important;box-shadow:0 24px 90px rgba(23,42,56,.2)}
+html body #hospitalTasksModal.hospitalWardOverlay .hospitalTasksHeader{position:sticky;top:0;z-index:2;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:24px 28px!important;margin:0!important;background:var(--ward-paper);border-bottom:1px solid var(--ward-line)}
+html body #hospitalTasksModal.hospitalWardOverlay .hospitalTasksEyebrow{margin:0 0 6px;color:var(--ward-accent)!important;font-size:11px!important;font-weight:750;letter-spacing:1.6px}
+html body #hospitalTasksModal.hospitalWardOverlay .hospitalTasksHeader h2{margin:0!important;color:var(--ward-text)!important;font-size:27px!important;line-height:1.25;letter-spacing:-.6px;overflow-wrap:anywhere}
+html body #hospitalTasksModal.hospitalWardOverlay .hospitalTasksHeader p{margin:7px 0 0!important;color:var(--ward-muted)!important;font-size:13px!important;line-height:1.5;overflow-wrap:anywhere}
+html body #hospitalTasksModal.hospitalWardOverlay .hospitalTasksClose{position:static!important;display:grid;place-items:center;flex:0 0 36px;width:36px!important;height:36px!important;padding:0!important;border:1px solid var(--ward-line)!important;border-radius:10px!important;background:var(--ward-soft)!important;color:var(--ward-muted)!important}
+html body #hospitalTasksModal.hospitalWardOverlay .hospitalTasksLayout{display:grid;grid-template-columns:minmax(0,1fr) 300px;align-items:start;gap:28px;padding:24px 28px!important;margin:0!important}
+html body #hospitalTasksModal.hospitalWardOverlay .hospitalTasksTimeline{min-width:0}
+html body #hospitalTasksModal.hospitalWardOverlay :is(.hospitalTasksSectionHead,.hospitalTaskTop){display:flex;align-items:start;justify-content:space-between;gap:12px}
+html body #hospitalTasksModal.hospitalWardOverlay .hospitalTasksSectionHead{margin-bottom:18px}
+html body #hospitalTasksModal.hospitalWardOverlay :is(.hospitalTasksSectionHead h3,.hospitalTaskCreateCard h3){margin:0 0 6px!important;color:var(--ward-text)!important;font-size:17px!important;line-height:1.4}
+html body #hospitalTasksModal.hospitalWardOverlay .hospitalTasksSectionHead p{margin:0;color:var(--ward-muted)!important;font-size:12px}
+html body #hospitalTasksModal.hospitalWardOverlay .hospitalTasksCount{color:var(--ward-accent)!important;background:var(--ward-soft)!important;border:0;border-radius:9px;padding:5px 8px;font-size:11px;white-space:nowrap}
+html body #hospitalTasksModal.hospitalWardOverlay .hospitalTaskCreateCard{min-width:0;background:var(--ward-soft)!important;border:1px solid var(--ward-line)!important;border-radius:16px!important;padding:18px!important;box-shadow:none}
+html body #hospitalTasksModal.hospitalWardOverlay .hospitalTaskItem{display:flex;align-items:start;gap:12px;min-width:0;margin:0 0 12px;padding:16px!important;border:1px solid var(--ward-line)!important;border-radius:14px!important;background:var(--ward-paper)!important;opacity:1!important;box-shadow:none}
+html body #hospitalTasksModal.hospitalWardOverlay .hospitalTaskIcon{display:grid;place-items:center;width:34px;height:34px;flex:0 0 34px;border:0!important;border-radius:10px!important;background:var(--ward-soft)!important;color:var(--ward-accent)!important}
+html body #hospitalTasksModal.hospitalWardOverlay .hospitalTaskContent{flex:1;min-width:0}
+html body #hospitalTasksModal.hospitalWardOverlay .hospitalTaskType{display:block;color:var(--ward-accent)!important;font-size:10px!important;font-weight:650;letter-spacing:.7px;margin-bottom:4px}
+html body #hospitalTasksModal.hospitalWardOverlay .hospitalTaskTop h4{margin:0;color:var(--ward-text)!important;font-size:14px!important;line-height:1.5;overflow-wrap:anywhere}
+html body #hospitalTasksModal.hospitalWardOverlay .hospitalTaskTop time{color:var(--ward-muted)!important;font-size:11px;line-height:1.5;flex-shrink:0;font-variant-numeric:tabular-nums}
+html body #hospitalTasksModal.hospitalWardOverlay .hospitalTaskContent>p{margin:8px 0!important;color:var(--ward-muted)!important;font-size:13px!important;line-height:1.5!important;overflow-wrap:anywhere}
+html body #hospitalTasksModal.hospitalWardOverlay :is(.hospitalTaskCompletedInfo,.hospitalWardResultNote){margin-top:8px;color:var(--ward-positive)!important;font-size:12px;line-height:1.5;overflow-wrap:anywhere}
+html body #hospitalTasksModal.hospitalWardOverlay .hospitalTaskActions{display:flex!important;gap:7px;flex-wrap:wrap;margin-top:13px}
+html body #hospitalTasksModal.hospitalWardOverlay :is(.hospitalTaskInput,.hospitalTaskTextarea,.hospitalTaskStaffSelect){width:100%;min-width:0;margin:0;padding:10px 11px!important;border:1px solid var(--ward-line)!important;border-radius:9px!important;background:var(--ward-paper)!important;color:var(--ward-text)!important;box-shadow:none;font:inherit;font-size:13px!important;line-height:1.5;color-scheme:var(--module-color-scheme,light)}
+html body #hospitalTasksModal.hospitalWardOverlay .hospitalTaskStaffSelect{width:auto;max-width:100%;flex:1 1 140px;font-size:12px!important}
+html body #hospitalTasksModal.hospitalWardOverlay .hospitalTaskField{display:block;margin-top:14px}
+html body #hospitalTasksModal.hospitalWardOverlay .hospitalTaskField>span{display:block;margin-bottom:6px;color:var(--ward-muted)!important;font-size:12px!important;font-weight:600}
+html body #hospitalTasksModal.hospitalWardOverlay :is(.hospitalTaskCreateButton,.hospitalTaskCompleteButton,.hospitalTaskDeleteButton){min-height:36px;border:1px solid var(--ward-line)!important;border-radius:9px!important;padding:8px 10px!important;background:var(--ward-soft)!important;color:var(--ward-accent)!important;font:inherit;font-size:12px!important;line-height:1.4;box-shadow:none}
+html body #hospitalTasksModal.hospitalWardOverlay .hospitalTaskCreateButton{width:100%;margin-top:17px;background:var(--ward-accent)!important;border-color:var(--ward-accent)!important;color:#fff!important}
+html body #hospitalTasksModal.hospitalWardOverlay .hospitalTaskDeleteButton{background:transparent!important;color:var(--ward-muted)!important}
+html body #hospitalTasksModal.hospitalWardOverlay :is(.hospitalTasksEmpty,.hospitalTasksLoading){padding:30px 14px!important;color:var(--ward-muted)!important;text-align:center}
+html body #hospitalTasksModal.hospitalWardOverlay .hospitalTasksEmpty strong{display:block;margin:12px 0 5px;color:var(--ward-text)!important}
+html body #hospitalTasksModal.hospitalWardOverlay .hospitalWardDetails{margin:0 28px;border-bottom:1px solid var(--ward-line);color:var(--ward-muted)}
+html body #hospitalTasksModal.hospitalWardOverlay .hospitalWardDetails summary{display:flex;align-items:center;gap:6px;width:fit-content;list-style:none;padding:13px 0;cursor:pointer;font-size:12px;font-weight:600}
+html body #hospitalTasksModal.hospitalWardOverlay .hospitalWardDetails summary::-webkit-details-marker{display:none}
+html body #hospitalTasksModal.hospitalWardOverlay .hospitalWardDetails summary .hospitalWardIcon{width:14px;height:14px}
+html body #hospitalTasksModal.hospitalWardOverlay .hospitalWardDetails[open] summary .hospitalWardIcon{transform:rotate(180deg)}
+html body #hospitalTasksModal.hospitalWardOverlay .hospitalWardDetails dl{display:grid;grid-template-columns:1fr 1fr;gap:12px 24px;margin:0 0 17px}
+html body #hospitalTasksModal.hospitalWardOverlay .hospitalWardDetails :is(dt,dd){margin:0;font-size:12px;overflow-wrap:anywhere}
+html body #hospitalTasksModal.hospitalWardOverlay .hospitalWardDetails dd{color:var(--ward-text);margin-top:3px;font-weight:550}
+html body #hospitalTasksModal.hospitalWardOverlay .hospitalWardDialogFooter{position:sticky;bottom:0;display:flex;justify-content:space-between;gap:12px;padding:16px 28px;background:var(--ward-paper);border-top:1px solid var(--ward-line);z-index:2}
+html body #hospitalTasksModal.hospitalWardOverlay .hospitalWardDischarge{color:var(--ward-danger);background:transparent;border-color:transparent}
+@media(max-width:900px){html body .hospitalWardHeader h1{font-size:31px}html body .hospitalWardToolbar{align-items:stretch}html body .hospitalWardSearch{width:100%}html body .hospitalWardPatient{flex-wrap:wrap}html body .hospitalWardBadge{margin-left:58px}html body .hospitalWardCard{padding:20px}html body #hospitalTasksModal.hospitalWardOverlay .hospitalTasksLayout{grid-template-columns:minmax(0,1fr)!important}html body #hospitalTasksModal.hospitalWardOverlay .hospitalTaskTop{flex-wrap:wrap}}
+@media(max-width:640px){html body .hospitalWardHeader{align-items:start;flex-direction:column;gap:16px;padding:4px 0 20px}html body .hospitalWardHeader h1{font-size:29px}html body .hospitalWardHeader p{font-size:13px}html body .hospitalWardHeader>.hospitalWardPrimary{align-self:start}html body .hospitalWardGrid{grid-template-columns:minmax(0,1fr);gap:14px}html body .hospitalWardPatient{flex-wrap:nowrap;gap:10px}html body .hospitalWardBadge{margin-left:0;font-size:10px;padding:5px 7px}html body .hospitalWardPatient h2{font-size:21px}html body .hospitalWardAvatar{width:40px;height:40px;flex-basis:40px}html body .hospitalWardPatient p{font-size:11px}html body .hospitalWardFilters{width:100%;gap:2px}html body .hospitalWardFilters button{font-size:12px;padding:10px 8px;gap:5px}html body .hospitalWardCard{padding:18px;border-radius:19px}html body .hospitalWardCardFooter{gap:10px;flex-wrap:wrap}html body .hospitalWardCardFooter>button{margin-left:auto}html body .hospitalWardSearch input{font-size:16px}html body .hospitalWardNextTask{gap:12px}html body .hospitalWardTime{flex-basis:74px}html body #hospitalTasksModal.hospitalWardOverlay{padding:12px}html body #hospitalTasksModal.hospitalWardOverlay .hospitalTasksModal{max-height:calc(100dvh - 24px);border-radius:18px!important}html body #hospitalTasksModal.hospitalWardOverlay .hospitalTasksHeader{padding:18px!important}html body #hospitalTasksModal.hospitalWardOverlay .hospitalTasksHeader h2{font-size:24px!important}html body #hospitalTasksModal.hospitalWardOverlay .hospitalTasksLayout{gap:20px;padding:18px!important}html body #hospitalTasksModal.hospitalWardOverlay .hospitalWardDetails{margin:0 18px}html body #hospitalTasksModal.hospitalWardOverlay .hospitalWardDetails dl{grid-template-columns:1fr}html body #hospitalTasksModal.hospitalWardOverlay .hospitalWardDialogFooter{padding:13px 18px;flex-wrap:wrap}html body #hospitalTasksModal.hospitalWardOverlay .hospitalTaskItem{padding:12px!important;gap:9px}html body #hospitalTasksModal.hospitalWardOverlay .hospitalTaskActions{display:flex!important}html body #hospitalTasksModal.hospitalWardOverlay .hospitalTaskStaffSelect{flex-basis:100%;width:100%}html body #hospitalTasksModal.hospitalWardOverlay :is(.hospitalTaskInput,.hospitalTaskTextarea,.hospitalTaskStaffSelect){font-size:16px!important}}
+@media(max-width:360px){html body .hospitalWardPatient{flex-wrap:wrap}html body .hospitalWardBadge{margin-left:50px}html body .hospitalWardFilters button{font-size:11px}html body .hospitalWardCardFooter>.hospitalWardPrimary{width:100%}}

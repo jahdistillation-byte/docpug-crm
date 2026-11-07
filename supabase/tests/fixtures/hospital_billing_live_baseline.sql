@@ -1,0 +1,173 @@
+-- Local fixture from the 7 Nov supplied schema report. Never deploy.
+create role anon; create role authenticated; create role service_role bypassrls;
+create table public.visits(id uuid primary key);
+create table public.stock_purchases(id uuid primary key);
+create table public.stock_purchase_items(id uuid primary key);
+create table public.stock_purchase_receipts(id uuid primary key);
+create table public.orgs(
+ id uuid default gen_random_uuid() not null,
+ name text not null,
+ created_at timestamp with time zone default now() not null,
+ subtitle text,
+ logo_url text,
+ phone text,
+ address text,
+ website text,
+ document_accent_color text,
+ doctor_signature_url text,
+ clinic_stamp_url text,
+ document_footer text,
+ updated_at timestamp with time zone default now(),
+ theme text not null,
+ currency text default 'UAH'::text not null,
+ login_prefix text not null,
+ constraint orgs_currency_supported CHECK ((currency = ANY (ARRAY['UAH'::text, 'EUR'::text, 'USD'::text, 'GBP'::text, 'PLN'::text, 'CHF'::text]))),
+ constraint orgs_pkey PRIMARY KEY (id),
+ constraint orgs_theme_check CHECK ((theme = ANY (ARRAY['purple'::text, 'black'::text, 'white'::text, 'blue'::text, 'green'::text])))
+);
+create table public.clinic_users(
+ id uuid default gen_random_uuid() not null,
+ org_id uuid,
+ username text not null,
+ password_plain text,
+ created_at timestamp with time zone default timezone('utc'::text, now()) not null,
+ role text not null,
+ display_name text,
+ is_active boolean default true not null,
+ updated_at timestamp with time zone default now(),
+ staff_id uuid,
+ password_hash text,
+ must_change_password boolean not null,
+ last_login_at timestamp with time zone,
+ constraint clinic_users_org_id_fkey FOREIGN KEY (org_id) REFERENCES orgs(id) ON DELETE CASCADE,
+ constraint clinic_users_pkey PRIMARY KEY (id),
+ constraint clinic_users_role_check CHECK ((role = ANY (ARRAY['owner'::text, 'admin'::text, 'vet'::text, 'assistant'::text]))),
+ constraint clinic_users_username_key UNIQUE (username)
+);
+create table public.staff(
+ id uuid default gen_random_uuid() not null,
+ org_id uuid not null,
+ name text not null,
+ role text not null,
+ avatar text,
+ color text,
+ is_active boolean default true not null,
+ created_at timestamp with time zone default now() not null,
+ updated_at timestamp with time zone default now() not null,
+ phone text,
+ shift_rate numeric,
+ percent_rate numeric,
+ bonus_rate numeric,
+ note text,
+ specialization text,
+ visit_percent numeric,
+ specialization_ids jsonb,
+ skills jsonb,
+ emergency_contact_name text,
+ emergency_contact_phone text,
+ emergency_contact_relation text,
+ achievements_demo_mode boolean not null,
+ constraint staff_pkey PRIMARY KEY (id)
+);
+create table public.hospitalizations(
+ id uuid default gen_random_uuid() not null,
+ org_id uuid not null,
+ patient_id uuid not null,
+ doctor_id uuid,
+ status text default 'observation'::text not null,
+ room text,
+ diagnosis text,
+ notes text,
+ admitted_at timestamp with time zone not null,
+ planned_discharge_at timestamp with time zone,
+ discharged_at timestamp with time zone,
+ is_active boolean default true not null,
+ created_at timestamp with time zone default now() not null,
+ updated_at timestamp with time zone default now() not null,
+ recommendations text,
+ constraint hospitalizations_pkey PRIMARY KEY (id),
+ constraint hospitalizations_status_check CHECK ((status = ANY (ARRAY['stable'::text, 'observation'::text, 'critical'::text])))
+);
+create table public.hospital_tasks(
+ id uuid default gen_random_uuid() not null,
+ org_id uuid not null,
+ hospitalization_id uuid not null,
+ task_type text not null,
+ title text not null,
+ instructions text,
+ scheduled_at timestamp with time zone not null,
+ status text default 'planned'::text not null,
+ completed_at timestamp with time zone,
+ completed_by uuid,
+ completion_note text,
+ created_by uuid,
+ created_at timestamp with time zone default now() not null,
+ updated_at timestamp with time zone default now() not null,
+ constraint hospital_tasks_pkey PRIMARY KEY (id),
+ constraint hospital_tasks_status_check CHECK ((status = ANY (ARRAY['planned'::text, 'completed'::text, 'cancelled'::text, 'overdue'::text]))),
+ constraint hospital_tasks_task_type_check CHECK ((task_type = ANY (ARRAY['medication'::text, 'infusion'::text, 'feeding'::text, 'measurement'::text, 'procedure'::text, 'examination'::text, 'other'::text])))
+);
+create table public.services(
+ id uuid default gen_random_uuid() not null,
+ org_id uuid not null,
+ name text not null,
+ price numeric default 0 not null,
+ active boolean default true not null,
+ created_at timestamp with time zone default now() not null,
+ constraint services_org_id_fkey FOREIGN KEY (org_id) REFERENCES orgs(id) ON DELETE CASCADE,
+ constraint services_pkey PRIMARY KEY (id)
+);
+create table public.stock(
+ id uuid default gen_random_uuid() not null,
+ org_id uuid not null,
+ name text not null,
+ unit text not null,
+ price numeric default 0 not null,
+ qty numeric default 0 not null,
+ active boolean default true not null,
+ created_at timestamp with time zone default now() not null,
+ group_id text not null,
+ category text not null,
+ dosage_form text not null,
+ administration_route text not null,
+ target_species text not null,
+ purchase_price numeric not null,
+ minimum_qty numeric not null,
+ updated_at timestamp with time zone default now() not null,
+ expiry_date date,
+ batch_number text,
+ constraint stock_batch_number_length CHECK (((batch_number IS NULL) OR ((char_length(TRIM(BOTH FROM batch_number)) >= 1) AND (char_length(TRIM(BOTH FROM batch_number)) <= 120)))),
+ constraint stock_org_id_fkey FOREIGN KEY (org_id) REFERENCES orgs(id) ON DELETE CASCADE,
+ constraint stock_pkey PRIMARY KEY (id)
+);
+create table public.stock_movements(
+ id uuid default gen_random_uuid() not null,
+ org_id uuid not null,
+ stock_id uuid,
+ visit_id uuid,
+ created_by uuid,
+ movement_type text not null,
+ quantity numeric not null,
+ quantity_before numeric not null,
+ quantity_after numeric not null,
+ unit_cost numeric not null,
+ name_snap text,
+ comment text,
+ created_at timestamp with time zone default now() not null,
+ purchase_id uuid,
+ purchase_item_id uuid,
+ receipt_id uuid,
+ constraint stock_movements_created_by_fkey FOREIGN KEY (created_by) REFERENCES clinic_users(id) ON DELETE SET NULL,
+ constraint stock_movements_movement_type_check CHECK ((movement_type = ANY (ARRAY['income'::text, 'writeoff'::text, 'correction'::text, 'visit'::text]))),
+ constraint stock_movements_org_id_fkey FOREIGN KEY (org_id) REFERENCES orgs(id) ON DELETE CASCADE,
+ constraint stock_movements_pkey PRIMARY KEY (id),
+ constraint stock_movements_purchase_fk FOREIGN KEY (purchase_id) REFERENCES stock_purchases(id) ON DELETE SET NULL,
+ constraint stock_movements_purchase_item_fk FOREIGN KEY (purchase_item_id) REFERENCES stock_purchase_items(id) ON DELETE SET NULL,
+ constraint stock_movements_quantity_check CHECK ((quantity > (0)::numeric)),
+ constraint stock_movements_receipt_fk FOREIGN KEY (receipt_id) REFERENCES stock_purchase_receipts(id) ON DELETE SET NULL,
+ constraint stock_movements_stock_id_fkey FOREIGN KEY (stock_id) REFERENCES stock(id) ON DELETE SET NULL,
+ constraint stock_movements_visit_id_fkey FOREIGN KEY (visit_id) REFERENCES visits(id) ON DELETE SET NULL
+);
+grant usage on schema public to service_role;
+grant all on all tables in schema public to service_role;
+revoke all on all tables in schema public from public,anon,authenticated;

@@ -12,7 +12,7 @@ import html
 import mimetypes
 import time
 import math
-from decimal import Decimal, InvalidOperation
+from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 from urllib.parse import parse_qsl, urlencode
 from urllib.request import Request, urlopen
 from urllib.error import HTTPError, URLError
@@ -2048,6 +2048,9 @@ PUBLIC_ASSET_FILES = {
     "stock-catalog.css",
     "stock-workspace.js",
     "stock-payments.js",
+    "hospital-ward.css",
+    "hospital-ward.js",
+    "hospital-billing.js",
     "manifest.json",
     "login-clinic-bg.jpg",
     "login-clinic-bg.png",
@@ -4401,10 +4404,11 @@ def api_delete_stock_item(stock_id):
             "foreign key" in error_text
             or "23503" in error_text
             or "still referenced" in error_text
+            or "hospital billing records are immutable" in error_text
         ):
             return fail(
                 (
-                    "Цю позицію вже використано у візиті або закупівлі. "
+                    "Цю позицію вже використано у візиті, закупівлі або стаціонарі. "
                     "Вимкніть її перемикачем замість видалення."
                 ),
                 409,
@@ -28328,6 +28332,9 @@ def enrich_hospital_tasks(rows):
 def api_get_hospital_tasks(
     hospitalization_id
 ):
+    user, auth_error = auth_required()
+    if auth_error:
+        return auth_error
     try:
         current_org = (
             get_current_org_id()
@@ -28427,6 +28434,10 @@ def api_get_hospital_tasks(
                 repr(enrich_error),
             )
 
+        try:
+            rows = hospital_attach_treatment_items(rows, current_org)
+        except Exception as error:
+            return hospital_billing_error(error)
         return ok(rows)
 
     except Exception as error:
@@ -28443,164 +28454,176 @@ def api_get_hospital_tasks(
         )
 
 
-@app.post("/api/hospitalizations/<hospitalization_id>/tasks")
-def api_create_hospital_task(
-    hospitalization_id
-):
+def hospital_billing_error(error):
+    code = str(getattr(error, "code", "") or "")
+    message = str(error).lower()
+    if code in {"PGRST202", "PGRST204", "42P01", "42703"} or "schema cache" in message:
+        return jsonify(ok=False, error="Потрібне оновлення модуля стаціонару в базі.", code="HOSPITAL_SETUP_REQUIRED"), 503
+    if code == "42501":
+        return jsonify(ok=False, error="Недостатньо прав для цієї дії.", code="HOSPITAL_FORBIDDEN"), 403
+    if code == "P0002":
+        return jsonify(ok=False, error="Пацієнта, активну позицію або працівника не знайдено.", code="HOSPITAL_NOT_FOUND"), 404
+    if "insufficient stock" in message:
+        return jsonify(ok=False, error="Недостатній залишок матеріалу. Оновіть дані та перевірте фактичну кількість.", code="HOSPITAL_STOCK_SHORTAGE"), 409
+    if code in {"23505", "40001", "55000"}:
+        return jsonify(ok=False, error="Дані змінилися або призначення вже закрито. Оновіть карту стаціонару.", code="HOSPITAL_STATE_CHANGED"), 409
+    if code in {"22023", "22P02", "22007", "22008", "22003", "23514"}:
+        return jsonify(ok=False, error="Перевірте час, валюту, працівника та кількість позицій.", code="HOSPITAL_INVALID"), 400
+    return jsonify(ok=False, error="Результат не підтверджено. Повторіть той самий запит для перевірки.", code="HOSPITAL_UNCONFIRMED"), 500
+
+
+def hospital_billing_command(action, hospitalization_id=None, task_id=None):
+    user, auth_error = auth_required()
+    if auth_error:
+        return auth_error
+    org_id = get_current_org_id()
+    if not org_id:
+        return fail("Organization not selected", 400)
+    payload = request.get_json(silent=True)
+    if not isinstance(payload, dict):
+        return fail("Некоректні дані призначення.", 400)
     try:
-        current_org = get_current_org_id()
-
-        if not current_org:
-            return fail(
-                "Organization not selected",
-                400
-            )
-
-        if not hospitalization_id:
-            return fail(
-                "hospitalization_id required",
-                400
-            )
-
-        data = (
-            request.get_json(
-                silent=True
-            )
-            or {}
-        )
-
-        task_type = str(
-            data.get("task_type")
-            or "other"
-        ).strip()
-
-        title = str(
-            data.get("title")
-            or ""
-        ).strip()
-
-        scheduled_at = (
-            data.get("scheduled_at")
-            or ""
-        )
-
-        if task_type not in HOSPITAL_TASK_TYPES:
-            return fail(
-                "Invalid hospital task type",
-                400
-            )
-
-        if not title:
-            return fail(
-                "title required",
-                400
-            )
-
-        if not scheduled_at:
-            return fail(
-                "scheduled_at required",
-                400
-            )
-
-        hospitalization_res = (
-            supabase
-            .table("hospitalizations")
-            .select("id, is_active")
-            .eq("org_id", current_org)
-            .eq("id", hospitalization_id)
-            .limit(1)
-            .execute()
-        )
-
-        if not hospitalization_res.data:
-            return fail(
-                "Hospitalization not found",
-                404
-            )
-
-        if (
-            hospitalization_res.data[0]
-            .get("is_active")
-            is False
-        ):
-            return fail(
-                "Hospitalization is already closed",
-                409
-            )
-
-        current_user = get_current_user()
-
-        payload = {
-            "org_id": current_org,
-            "hospitalization_id":
-                hospitalization_id,
-            "task_type": task_type,
-            "title": title,
-            "instructions": (
-                str(
-                    data.get("instructions")
-                    or ""
-                ).strip()
-                or None
-            ),
-            "scheduled_at": scheduled_at,
-            "status": "planned",
-            "created_at": datetime.now(
-                timezone.utc
-            ).isoformat(),
-            "updated_at": datetime.now(
-                timezone.utc
-            ).isoformat(),
-        }
-
-        if current_user:
-            creator_name = (
-                current_user.get(
-                    "display_name"
-                )
-                or current_user.get(
-                    "username"
-                )
-            )
-
-            if creator_name:
-                payload["completion_note"] = (
-                    f"Створено: {creator_name}"
-                )
-
-        result = (
-            supabase
-            .table("hospital_tasks")
-            .insert(
-                clean_payload(payload)
-            )
-            .execute()
-        )
-
-        row = (
-            result.data[0]
-            if result.data
-            else payload
-        )
-
-        return ok(row)
-
+        key = str(uuid.UUID(str(payload.get("idempotency_key") or "")))
+        clean_hospital = str(uuid.UUID(str(hospitalization_id))) if hospitalization_id else None
+        clean_task = str(uuid.UUID(str(task_id))) if task_id else None
+    except (ValueError, TypeError, AttributeError):
+        return fail("Некоректний ідентифікатор запиту.", 400)
+    fields = {"create": ("task_type", "title", "instructions", "scheduled_at", "currency", "items"),
+              "complete": ("completed_by", "completion_note", "actual_items"), "cancel": ()}[action]
+    command_payload = {key: payload[key] for key in fields if key in payload}
+    try:
+        result = supabase.rpc("hospital_task_command", {
+            "p_org_id": org_id, "p_user_id": user["id"], "p_action": action,
+            "p_request_key": key, "p_hospitalization_id": clean_hospital,
+            "p_task_id": clean_task, "p_payload": command_payload,
+        }).execute().data
+        if isinstance(result, list) and len(result) == 1:
+            result = result[0]
+        if not isinstance(result, dict) or not isinstance(result.get("task"), dict) or not result["task"].get("id"):
+            raise RuntimeError("Unconfirmed hospital command")
+        task = result["task"]
+        # Completion names are display data; do not make a second fallible write/read
+        # part of confirmation after the atomic operation has committed.
+        return ok(task)
     except Exception as error:
-        print(
-            "❌ POST hospital task error:",
-            repr(error)
-        )
+        return hospital_billing_error(error)
 
-        return fail(
-            f"Cannot create hospital task: {error}",
-            500
-        )
+
+def hospital_attach_treatment_items(rows, org_id):
+    if not rows:
+        return rows
+    items = []
+    for offset in range(0, 50000, 500):
+        page = supabase.table("hospital_treatment_items").select("*").eq("org_id", org_id).in_(
+            "task_id", [row["id"] for row in rows]
+        ).order("id").range(offset, offset + 499).execute().data or []
+        items.extend(page)
+        if len(page) < 500:
+            break
+    else:
+        raise RuntimeError("Hospital treatment item limit exceeded")
+    grouped = {}
+    for item in items:
+        item = dict(item)
+        item["quantity"] = str(item["quantity"])
+        item["price_snap"] = str(item["price_snap"])
+        grouped.setdefault(str(item["task_id"]), []).append(item)
+    return [{**row, "items": grouped.get(str(row["id"]), [])} for row in rows]
+
+
+@app.get("/api/hospitalizations/<hospitalization_id>/billing")
+def api_hospital_billing_state(hospitalization_id):
+    user, auth_error = auth_required()
+    if auth_error:
+        return auth_error
+    org_id = get_current_org_id()
+    if not org_id:
+        return fail("Organization not selected", 400)
+    try:
+        clean_id = str(uuid.UUID(str(hospitalization_id)))
+    except (ValueError, TypeError, AttributeError):
+        return fail("Некоректна госпіталізація.", 400)
+    try:
+        data = supabase.rpc("get_hospital_billing_state", {
+            "p_org_id": org_id, "p_user_id": user["id"], "p_hospitalization_id": clean_id,
+        }).execute().data
+        if isinstance(data, list) and len(data) == 1:
+            data = data[0]
+        if not isinstance(data, dict) or "total" not in data:
+            raise RuntimeError("Invalid hospital bill")
+        return ok(data)
+    except Exception as error:
+        return hospital_billing_error(error)
+
+
+@app.get("/api/hospitalizations/<hospitalization_id>/catalog")
+def api_hospital_treatment_catalog(hospitalization_id):
+    user, auth_error = auth_required()
+    if auth_error:
+        return auth_error
+    org_id = get_current_org_id()
+    if not org_id:
+        return fail("Organization not selected", 400)
+    try:
+        clean_id = str(uuid.UUID(str(hospitalization_id)))
+    except (ValueError, TypeError, AttributeError):
+        return fail("Некоректна госпіталізація.", 400)
+    try:
+        hospital = supabase.table("hospitalizations").select("id").eq("org_id", org_id).eq("id", clean_id).limit(1).execute().data
+        if not hospital:
+            return fail("Hospitalization not found", 404)
+        org = supabase.table("orgs").select("currency").eq("id", org_id).limit(1).execute().data
+        if not org:
+            return fail("Organization not found", 404)
+        catalog = {}
+        for table, fields in (("services", "id,name,price,active"), ("stock", "id,name,price,unit,qty,active")):
+            entries = []
+            for offset in range(0, 10000, 500):
+                page = supabase.table(table).select(fields).eq("org_id", org_id).eq("active", True).order("name").order("id").range(offset, offset + 499).execute().data or []
+                entries.extend(page)
+                if len(page) < 500:
+                    break
+            else:
+                return fail("Каталог завеликий для цього вікна.", 409)
+            for entry in entries:
+                entry["price"] = str(Decimal(str(entry.get("price") or 0)).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP))
+                if table == "stock":
+                    entry["qty"] = str(entry.get("qty") or 0)
+            catalog[table] = entries
+        return ok({"currency": org[0]["currency"], **catalog})
+    except Exception as error:
+        return hospital_billing_error(error)
+
+
+@app.post("/api/hospitalizations/<hospitalization_id>/tasks")
+def api_create_hospital_task(hospitalization_id):
+    return hospital_billing_command("create", hospitalization_id=hospitalization_id)
+
+
+@app.post("/api/hospital-tasks/<task_id>/complete")
+def api_complete_hospital_task(task_id):
+    return hospital_billing_command("complete", task_id=task_id)
+
+
+@app.delete("/api/hospital-tasks/<task_id>")
+def api_delete_hospital_task(task_id):
+    # Cancellation retains the prescription and snapshot trail.
+    return hospital_billing_command("cancel", task_id=task_id)
 
 
 @app.put("/api/hospital-tasks/<task_id>")
 def api_update_hospital_task(task_id):
+    user, auth_error = auth_required()
+    if auth_error:
+        return auth_error
     try:
         current_org = get_current_org_id()
+
+        existing = supabase.table("hospital_tasks").select("id,billing_managed,status").eq("org_id", current_org).eq("id", task_id).limit(1).execute().data
+        if not existing:
+            return fail("Hospital task not found", 404)
+        if existing[0].get("billing_managed") or existing[0].get("status") in {"completed", "cancelled"}:
+            return fail("Призначення захищене від прямого редагування. Використайте виконання або скасування.", 409)
 
         if not task_id:
             return fail(
@@ -28717,147 +28740,6 @@ def api_update_hospital_task(task_id):
             500
         )
 
-
-@app.post("/api/hospital-tasks/<task_id>/complete")
-def api_complete_hospital_task(task_id):
-    try:
-        current_org = get_current_org_id()
-
-        if not task_id:
-            return fail(
-                "task_id required",
-                400
-            )
-
-        data = (
-            request.get_json(
-                silent=True
-            )
-            or {}
-        )
-
-        completed_by = str(
-            data.get("completed_by")
-            or ""
-        ).strip()
-
-        payload = {
-            "status": "completed",
-            "completed_at": (
-                data.get("completed_at")
-                or datetime.now(
-                    timezone.utc
-                ).isoformat()
-            ),
-            "completion_note": (
-                str(
-                    data.get(
-                        "completion_note"
-                    )
-                    or ""
-                ).strip()
-                or None
-            ),
-            "updated_at": datetime.now(
-                timezone.utc
-            ).isoformat(),
-        }
-
-        if completed_by:
-            staff_res = (
-                supabase
-                .table("staff")
-                .select("id")
-                .eq("org_id", current_org)
-                .eq("id", completed_by)
-                .limit(1)
-                .execute()
-            )
-
-            if not staff_res.data:
-                return fail(
-                    "Staff member not found",
-                    404
-                )
-
-            payload["completed_by"] = (
-                completed_by
-            )
-
-        result = (
-            supabase
-            .table("hospital_tasks")
-            .update(
-                clean_payload(payload)
-            )
-            .eq("org_id", current_org)
-            .eq("id", task_id)
-            .execute()
-        )
-
-        if not result.data:
-            return fail(
-                "Hospital task not found",
-                404
-            )
-
-        enriched = enrich_hospital_tasks(
-            [result.data[0]]
-        )
-
-        return ok(
-            enriched[0]
-            if enriched
-            else result.data[0]
-        )
-
-    except Exception as error:
-        print(
-            "❌ COMPLETE hospital task error:",
-            repr(error)
-        )
-
-        return fail(
-            f"Cannot complete hospital task: {error}",
-            500
-        )
-
-
-@app.delete("/api/hospital-tasks/<task_id>")
-def api_delete_hospital_task(task_id):
-    try:
-        current_org = get_current_org_id()
-
-        if not task_id:
-            return fail(
-                "task_id required",
-                400
-            )
-
-        result = (
-            supabase
-            .table("hospital_tasks")
-            .delete()
-            .eq("org_id", current_org)
-            .eq("id", task_id)
-            .execute()
-        )
-
-        return ok(True)
-
-    except Exception as error:
-        print(
-            "❌ DELETE hospital task error:",
-            repr(error)
-        )
-
-        return fail(
-            f"Cannot delete hospital task: {error}",
-            500
-        )
-    # =====================================================
-# API: VISIT TASKS
-# =====================================================
 
 VISIT_TASK_STATUSES = {
     "open",
