@@ -110,6 +110,12 @@
   function initBooking(){
     const modal=document.getElementById('visitModal');if(!modal)return;
     modal.classList.add('pugBookingWorkspace');
+    const patientBlock=modal.querySelector('.pugVisitPatientBlock');
+    const quickPatient=modal.querySelector('.pugQuickPatientBox');
+    if(patientBlock&&quickPatient)patientBlock.appendChild(quickPatient);
+    const detailsBlock=modal.querySelector('.pugVisitDetailsBlock');
+    const reasonBlock=modal.querySelector('.pugVisitMedicalBlock');
+    if(detailsBlock&&reasonBlock)detailsBlock.appendChild(reasonBlock);
     const dialog=modal.querySelector('[role="dialog"]');
     const title=modal.querySelector('.pugVisitTitle');
     if(title){title.id='pugBookingTitle';dialog?.setAttribute('aria-labelledby',title.id);}
@@ -164,6 +170,10 @@
     new MutationObserver(()=>{
       if(isOpen()){
         // Localize existing text without replacing form fields or their listeners.
+        modal.querySelector('.pugVisitIcon').innerHTML=icon('clock');
+        modal.querySelector('.pugSearchIcon').innerHTML=icon('search');
+        modal.querySelectorAll('.pugSectionTitle span').forEach((element,index)=>{element.innerHTML=icon(['medical','clock','edit'][index]||'medical');});
+        modal.querySelectorAll('.pugQuickPatientTitle,.pugQuickGroupTitle').forEach(element=>{element.textContent=element.textContent.replace(/^[^\p{L}\p{N}]+/u,'');});
         modal.querySelectorAll('.pugSectionTitle strong').forEach((element,index)=>{element.textContent=t([18,19,20][index]||19);});
         const save=document.getElementById('visitSave'),cancel=document.getElementById('visitCancel');
         if(save)save.textContent=translateInterfaceText('calendar.detail.save.appointment').replace('💾','').trim();
