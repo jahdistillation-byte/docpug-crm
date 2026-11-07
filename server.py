@@ -2053,6 +2053,7 @@ PUBLIC_ASSET_FILES = {
     "hospital-billing.js",
     "hospital-documents.js",
     "calendar-workspace.css",
+    "calendar-themes.css",
     "calendar-workspace.js",
     "manifest.json",
     "login-clinic-bg.jpg",

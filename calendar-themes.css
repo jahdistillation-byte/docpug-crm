@@ -1,0 +1,95 @@
+/* Calendar theme palette. No other module is restyled. */
+html body[data-theme="white"]{--ct-bg:#f1f6fa;--ct-paper:#fbfdff;--ct-soft:#edf4f9;--ct-hover:#e1edf6;--ct-text:#1c3040;--ct-muted:#627b8d;--ct-line:#dfe8ef;--ct-accent:#326b96;--ct-accent-hover:#285b82;--ct-on-accent:#ffffff;--ct-accent-soft:#edf4f9;--ct-positive:#357b67;--ct-warning:#856126;--ct-scheme:light;}
+html body[data-theme="purple"]{--ct-bg:#19171f;--ct-paper:#24212c;--ct-soft:#2e2938;--ct-hover:#393246;--ct-text:#f2eff7;--ct-muted:#b6adC3;--ct-line:#494252;--ct-accent:#bba1ef;--ct-accent-hover:#cab5f4;--ct-on-accent:#241b35;--ct-accent-soft:#30273f;--ct-positive:#9bc7b1;--ct-warning:#ddbf89;--ct-scheme:dark;}
+html body[data-theme="black"]{--ct-bg:#191a19;--ct-paper:#252622;--ct-soft:#30312b;--ct-hover:#3b3b32;--ct-text:#f1eee6;--ct-muted:#bcb8ac;--ct-line:#4a4a40;--ct-accent:#c7ad84;--ct-accent-hover:#d8c09b;--ct-on-accent:#24221b;--ct-accent-soft:#353025;--ct-positive:#9bc7b1;--ct-warning:#ddbf89;--ct-scheme:dark;}
+html body[data-theme="green"]{--ct-bg:#17201d;--ct-paper:#222e29;--ct-soft:#2b3932;--ct-hover:#34463c;--ct-text:#edf4ee;--ct-muted:#acbfb1;--ct-line:#42554a;--ct-accent:#9cbea8;--ct-accent-hover:#b2cfbc;--ct-on-accent:#182a20;--ct-accent-soft:#293b31;--ct-positive:#a4cdb3;--ct-warning:#ddbf89;--ct-scheme:dark;}
+html body[data-theme="blue"]{--ct-bg:#17212a;--ct-paper:#222f3b;--ct-soft:#2a3a48;--ct-hover:#344859;--ct-text:#eff4f8;--ct-muted:#afbfcc;--ct-line:#43586a;--ct-accent:#aac8df;--ct-accent-hover:#bfd9eb;--ct-on-accent:#182935;--ct-accent-soft:#2b4052;--ct-positive:#9bc7b1;--ct-warning:#ddbf89;--ct-scheme:dark;}
+html body[data-theme] :is(.pugCalendarWorkspace,#visitModal.pugBookingWorkspace,#monthScheduleEditorOverlay,#calendarEventModal,#calendarDatePopover,.appointmentTemplateDrawer,.appointmentTemplateEditorOverlay){--pc-text:var(--ct-text)!important;--pc-muted:var(--ct-muted)!important;--pc-paper:var(--ct-paper)!important;--pc-soft:var(--ct-soft)!important;--pc-line:var(--ct-line)!important;--pc-accent:var(--ct-accent)!important;--module-accent:var(--ct-accent);--module-accent-2:var(--ct-accent-hover);--module-accent-soft:var(--ct-accent-soft);--module-accent-glow:transparent;--module-surface-1:var(--ct-paper);--module-surface-2:var(--ct-paper);--module-surface-soft:var(--ct-soft);--module-surface-hover:var(--ct-hover);--module-input:var(--ct-paper);--module-text:var(--ct-text);--module-text-soft:var(--ct-text);--module-text-muted:var(--ct-muted);--module-border:var(--ct-line);--module-border-strong:var(--ct-line);--module-color-scheme:var(--ct-scheme);color-scheme:var(--ct-scheme)!important;}
+html body[data-theme]:not([data-theme="white"])[data-current-route="calendar"]{background:var(--ct-bg)!important;--accent-color:var(--ct-accent);--accent-glow:transparent;--primary-glow:none;--text-main:var(--ct-text);--text-muted:var(--ct-muted)}
+html body[data-theme] .page[data-page="calendar"] .calendarCard.pugCalendarWorkspace :is(.pcPrimary){background:var(--ct-accent)!important;color:var(--ct-on-accent)!important;border-color:var(--ct-accent)!important}
+html body[data-theme] .page[data-page="calendar"] .calendarCard.pugCalendarWorkspace :is(.pcToolbar button,.pcScheduleLink,.weekCreateVisitButton,.pcOutsideList button):not(:disabled):hover{background:var(--ct-hover)!important;color:var(--ct-text)!important;border-color:var(--ct-accent)!important;box-shadow:none!important}
+html body[data-theme] .page[data-page="calendar"] .calendarCard.pugCalendarWorkspace .pcToolbar .pcPrimary:not(:disabled):hover{background:var(--ct-accent-hover)!important;color:var(--ct-on-accent)!important}
+html body[data-theme] .page[data-page="calendar"] .calendarCard.pugCalendarWorkspace :is(.weekEventCard,.monthDay,[data-edit-calendar-event]):hover{border-color:var(--ct-accent)!important;box-shadow:inset 0 0 0 1px var(--ct-line)!important}
+html body[data-theme] .page[data-page="calendar"] .calendarCard.pugCalendarWorkspace .calendarTimelineHover{background:var(--ct-accent-soft)!important;color:var(--ct-text)!important;border-color:var(--ct-accent)!important;box-shadow:none!important}
+html body[data-theme] .page[data-page="calendar"] .calendarCard.pugCalendarWorkspace .calendarTimelineHourLine{background:var(--ct-line)!important;opacity:.65}
+html body[data-theme] .page[data-page="calendar"] .calendarCard.pugCalendarWorkspace .calendarTimelineHalfLine{background:repeating-linear-gradient(90deg,var(--ct-line) 0 3px,transparent 3px 7px)!important;opacity:.4}
+html body[data-theme] .page[data-page="calendar"] .calendarCard.pugCalendarWorkspace :is(.calendarMobileDoctorPicker select,.monthDrawerPlaceholder,.monthBulkBox){background:var(--ct-paper)!important;color:var(--ct-text)!important;border-color:var(--ct-line)!important;box-shadow:none!important}
+html body[data-theme] #visitModal#visitModal.modal.pugVisitOverlay.pugBookingWorkspace :is(.pugVisitInput,.pugQuickInput){color-scheme:var(--ct-scheme)!important;background:var(--ct-paper)!important;color:var(--ct-text)!important}
+html body[data-theme] #visitModal#visitModal.modal.pugVisitOverlay.pugBookingWorkspace :is(.pugVisitSave,.pugQuickCreate){background:var(--ct-accent)!important;color:var(--ct-on-accent)!important;border-color:var(--ct-accent)!important}
+html body[data-theme] #visitModal#visitModal.modal.pugVisitOverlay.pugBookingWorkspace :is(.pugVisitSave,.pugVisitCancel,.pugAddPatientBtn,.pugQuickCreate,.pugQuickCancel,.appointmentTemplateSelector,.appointmentTemplateAddQuick,#visitClose):not(:disabled):hover{background:var(--ct-hover)!important;color:var(--ct-text)!important;border-color:var(--ct-accent)!important;box-shadow:none!important}
+html body[data-theme] #visitModal#visitModal.modal.pugVisitOverlay.pugBookingWorkspace :is(.pugVisitSave,.pugQuickCreate):not(:disabled):hover{background:var(--ct-accent-hover)!important;color:var(--ct-on-accent)!important}
+html body[data-theme] #visitModal#visitModal.modal.pugVisitOverlay.pugBookingWorkspace :is(.pcPatientAvatar,.appointmentTemplateSelectorIcon,.appointmentTemplateSelectorArrow){background:var(--ct-accent-soft)!important;color:var(--ct-accent)!important;border-color:var(--ct-line)!important;box-shadow:none!important}
+html body[data-theme] #visitModal#visitModal.modal.pugVisitOverlay.pugBookingWorkspace .patientSearchItem:hover{background:var(--ct-hover)!important;border-color:var(--ct-accent)!important;box-shadow:none!important}
+html body[data-theme] #visitModal#visitModal.modal.pugVisitOverlay.pugBookingWorkspace .pcBookingAvailability.is-available{background:var(--ct-soft)!important;color:var(--ct-positive)!important}
+html body[data-theme] #visitModal#visitModal.modal.pugVisitOverlay.pugBookingWorkspace .pcBookingAvailability.is-warning{background:var(--ct-soft)!important;color:var(--ct-warning)!important}
+html body[data-theme] #visitModal#visitModal.modal.pugVisitOverlay.pugBookingWorkspace :is(.appointmentTemplateSelector,.appointmentTemplateAddQuick){background:var(--ct-soft)!important;color:var(--ct-text)!important;border-color:var(--ct-line)!important;box-shadow:none!important}
+html body[data-theme] #monthScheduleEditorOverlay .monthScheduleEditorModal{background:var(--ct-paper)!important;color:var(--ct-text)!important;border-color:var(--ct-line)!important;box-shadow:0 24px 70px rgba(0,0,0,.2)!important}
+html body[data-theme] #monthScheduleEditorOverlay :is(h2,h3,strong,b){color:var(--ct-text)!important}
+html body[data-theme] #monthScheduleEditorOverlay :is(p,small,label>span,.hint){color:var(--ct-muted)!important}
+html body[data-theme] #monthScheduleEditorOverlay :is(input,select){background:var(--ct-paper)!important;color:var(--ct-text)!important;border:1px solid var(--ct-line)!important;box-shadow:none!important;color-scheme:var(--ct-scheme)!important}
+html body[data-theme] #monthScheduleEditorOverlay button{background:var(--ct-soft)!important;color:var(--ct-text)!important;border-color:var(--ct-line)!important;box-shadow:none!important;text-shadow:none!important}
+html body[data-theme] #monthScheduleEditorOverlay button:not(:disabled):hover{background:var(--ct-hover)!important;border-color:var(--ct-accent)!important}
+html body[data-theme] #monthScheduleEditorOverlay button.active{background:var(--ct-accent-soft)!important;color:var(--ct-accent)!important;border-color:var(--ct-accent)!important}
+html body[data-theme] #monthScheduleEditorOverlay :is(button,input,select,textarea):focus-visible{outline:2px solid var(--ct-accent)!important;outline-offset:3px!important}
+html body[data-theme] #calendarEventModal .calEditModal{background:var(--ct-paper)!important;color:var(--ct-text)!important;border-color:var(--ct-line)!important;box-shadow:0 24px 70px rgba(0,0,0,.2)!important}
+html body[data-theme] #calendarEventModal :is(h2,h3,strong,b){color:var(--ct-text)!important}
+html body[data-theme] #calendarEventModal :is(p,small,label>span,.hint){color:var(--ct-muted)!important}
+html body[data-theme] #calendarEventModal :is(input,select,textarea){background:var(--ct-paper)!important;color:var(--ct-text)!important;border:1px solid var(--ct-line)!important;box-shadow:none!important;color-scheme:var(--ct-scheme)!important}
+html body[data-theme] #calendarEventModal button{background:var(--ct-soft)!important;color:var(--ct-text)!important;border-color:var(--ct-line)!important;box-shadow:none!important;text-shadow:none!important}
+html body[data-theme] #calendarEventModal button:not(:disabled):hover{background:var(--ct-hover)!important;border-color:var(--ct-accent)!important}
+html body[data-theme] #calendarEventModal button.active{background:var(--ct-accent-soft)!important;color:var(--ct-accent)!important;border-color:var(--ct-accent)!important}
+html body[data-theme] #calendarEventModal :is(button,input,select,textarea):focus-visible{outline:2px solid var(--ct-accent)!important;outline-offset:3px!important}
+html body[data-theme] #calendarDatePopover :is(h2,h3,strong,b){color:var(--ct-text)!important}
+html body[data-theme] #calendarDatePopover :is(p,small,label>span,.hint){color:var(--ct-muted)!important}
+html body[data-theme] #calendarDatePopover button{background:var(--ct-soft)!important;color:var(--ct-text)!important;border-color:var(--ct-line)!important;box-shadow:none!important;text-shadow:none!important}
+html body[data-theme] #calendarDatePopover button:not(:disabled):hover{background:var(--ct-hover)!important;border-color:var(--ct-accent)!important}
+html body[data-theme] #calendarDatePopover button.active{background:var(--ct-accent-soft)!important;color:var(--ct-accent)!important;border-color:var(--ct-accent)!important}
+html body[data-theme] #calendarDatePopover :is(button,input,select,textarea):focus-visible{outline:2px solid var(--ct-accent)!important;outline-offset:3px!important}
+html body[data-theme] #monthScheduleEditorOverlay :is(.monthScheduleEditorHead,.monthScheduleEditorFooter,.monthScheduleRepeatContent){background:var(--ct-paper)!important;border-color:var(--ct-line)!important}
+html body[data-theme] #monthScheduleEditorOverlay :is(.monthScheduleChoice,.monthScheduleCycleSentence,.monthScheduleResultCard,.monthScheduleNumberControl){background:var(--ct-soft)!important;border-color:var(--ct-line)!important;box-shadow:none!important;color:var(--ct-text)!important}
+html body[data-theme] #monthScheduleEditorOverlay :is(.monthScheduleRepeatField>span,.monthScheduleWeekdayDescription,.monthScheduleSentenceText,.monthScheduleResultCard p,.monthScheduleEditorHead>div>span){color:var(--ct-muted)!important}
+html body[data-theme] #monthScheduleEditorOverlay :is(svg,.monthScheduleResultCard svg){color:var(--ct-accent)!important}
+html body[data-theme] #monthScheduleEditorOverlay :is(#monthScheduleEditorSave,[data-repeat-weekday].active){background:var(--ct-accent)!important;color:var(--ct-on-accent)!important;border-color:var(--ct-accent)!important}
+html body[data-theme] #monthScheduleEditorOverlay :is(#monthScheduleEditorSave,[data-repeat-weekday].active):hover{background:var(--ct-accent-hover)!important;color:var(--ct-on-accent)!important}
+html body[data-theme] #calendarEventModal :is(.calEditHeader,.calEditFooter,.calEditPatient,.calEditHeaderIcon,.calEditPatientIcon){background:var(--ct-soft)!important;border-color:var(--ct-line)!important;color:var(--ct-text)!important;box-shadow:none!important}
+html body[data-theme] #calendarEventModal :is(.calEditSave,#calEditSaveBtn,#calEditStartVisitBtn){background:var(--ct-accent)!important;color:var(--ct-on-accent)!important;border-color:var(--ct-accent)!important}
+html body[data-theme] #calendarDatePopover{background:var(--ct-paper)!important;color:var(--ct-text)!important;border-color:var(--ct-line)!important;box-shadow:0 12px 40px rgba(0,0,0,.18)!important}
+html body[data-theme] #calendarDatePopover .calendarDatePopoverDay.isSelected{background:var(--ct-accent)!important;color:var(--ct-on-accent)!important}
+html body[data-theme] :is(.pugCalendarWorkspace,#visitModal.pugBookingWorkspace,#monthScheduleEditorOverlay,#calendarEventModal,#calendarDatePopover,.appointmentTemplateDrawer,.appointmentTemplateEditorOverlay) :is(button,input,select,textarea,[role="button"],summary):focus-visible{outline-color:var(--ct-accent)!important}
+/* Brand violet stays saturated on primary actions; light violet is reserved for text accents. */
+html body[data-theme]{--ct-button:var(--ct-accent);--ct-button-hover:var(--ct-accent-hover);--ct-on-button:var(--ct-on-accent)}
+html body[data-theme="purple"]{--ct-button:#7047bd;--ct-button-hover:#8059c8;--ct-on-button:#ffffff}
+html body[data-theme] .page[data-page="calendar"] .calendarCard.pugCalendarWorkspace .pcToolbar .pcPrimary,
+html body[data-theme] #visitModal#visitModal.modal.pugVisitOverlay.pugBookingWorkspace :is(.pugVisitSave,.pugQuickCreate),
+html body[data-theme] #monthScheduleEditorOverlay #monthScheduleEditorSave,
+html body[data-theme] #calendarEventModal :is(.calEditSave,#calEditSaveBtn,#calEditStartVisitBtn){background:var(--ct-button)!important;color:var(--ct-on-button)!important;border-color:var(--ct-button)!important}
+html body[data-theme] .page[data-page="calendar"] .calendarCard.pugCalendarWorkspace .pcToolbar .pcPrimary:hover,
+html body[data-theme] #visitModal#visitModal.modal.pugVisitOverlay.pugBookingWorkspace :is(.pugVisitSave,.pugQuickCreate):hover,
+html body[data-theme] #monthScheduleEditorOverlay #monthScheduleEditorSave:hover{background:var(--ct-button-hover)!important;color:var(--ct-on-button)!important}
+html body[data-theme] #monthScheduleEditorOverlay :is(.monthSchedulePatternOptions,.monthScheduleShiftTypeOptions) button>svg{background:var(--ct-accent-soft)!important;color:var(--ct-accent)!important}
+html body[data-theme] #monthScheduleEditorOverlay .monthScheduleChoiceRadio{border-color:var(--ct-muted)!important}
+html body[data-theme] #monthScheduleEditorOverlay button.active>.monthScheduleChoiceRadio{background:var(--ct-accent)!important;border-color:var(--ct-accent)!important}
+html body[data-theme] #monthScheduleEditorOverlay .monthScheduleResultCard :is(span,small){color:var(--ct-muted)!important}
+html body[data-theme] #visitModal#visitModal.modal.pugVisitOverlay.pugBookingWorkspace :is(.appointmentTemplateDrawerPanel,.appointmentTemplateEditorModal){background:var(--ct-paper)!important;border-color:var(--ct-line)!important;color:var(--ct-text)!important;box-shadow:none!important}
+html body[data-theme] #visitModal#visitModal.modal.pugVisitOverlay.pugBookingWorkspace :is(.appointmentTemplateItem,.appointmentTemplateDrawerHeader,.appointmentTemplateEditorHeader,.appointmentTemplateEditorPreview){background:var(--ct-soft)!important;color:var(--ct-text)!important;border-color:var(--ct-line)!important;box-shadow:none!important}
+
+html body[data-theme] #visitModal#visitModal.modal.pugVisitOverlay.pugBookingWorkspace.open{background:rgba(7,8,12,.65)!important;backdrop-filter:blur(8px)!important}
+html body[data-theme="white"] #visitModal#visitModal.modal.pugVisitOverlay.pugBookingWorkspace.open{background:rgba(56,77,94,.28)!important}
+html body[data-theme] #visitModal#visitModal.modal.pugVisitOverlay.pugBookingWorkspace .pugVisitSection{background:none!important}
+html body[data-theme] #visitModal#visitModal.modal.pugVisitOverlay.pugBookingWorkspace :is(input,textarea)::placeholder{color:var(--ct-muted)!important;opacity:1!important}
+html body[data-theme] #visitModal#visitModal.modal.pugVisitOverlay.pugBookingWorkspace input::-webkit-calendar-picker-indicator{filter:none!important;opacity:.8!important}
+html body[data-theme] #visitModal#visitModal.modal.pugVisitOverlay.pugBookingWorkspace :is(.appointmentTemplateSelectorLabel,.appointmentTemplateSelectorMain small){color:var(--ct-muted)!important}
+html body[data-theme] #monthScheduleEditorOverlay :is(.monthScheduleCalendarDetails summary,.monthScheduleResultIcon,.monthSchedulePreviewDay){background:var(--ct-accent-soft)!important;color:var(--ct-accent)!important;border-color:var(--ct-line)!important;box-shadow:none!important}
+html body[data-theme] #calendarEventModal :is(.calEditPatientIcon,.calEditHeaderIcon){color:var(--ct-accent)!important}
+/* The legacy booking selector lists include two IDs; the repeated root above keeps this adapter local. */
+html body[data-theme] #appointmentTemplateEditor .appointmentTemplateEditorModal{background:var(--ct-paper)!important;color:var(--ct-text)!important;border-color:var(--ct-line)!important;box-shadow:0 24px 70px rgba(0,0,0,.2)!important}
+html body[data-theme] #appointmentTemplateEditor :is(h2,h3,strong){color:var(--ct-text)!important}
+html body[data-theme] #appointmentTemplateEditor :is(label>span,small,p){color:var(--ct-muted)!important}
+html body[data-theme] #appointmentTemplateEditor :is(input,select,textarea){background:var(--ct-paper)!important;color:var(--ct-text)!important;border-color:var(--ct-line)!important;color-scheme:var(--ct-scheme)!important}
+html body[data-theme] #appointmentTemplateEditor :is(.appointmentTemplateEditorHeader,.appointmentTemplateEditorPreview,.appointmentTemplateEditorFooter){background:var(--ct-soft)!important;border-color:var(--ct-line)!important}
+html body[data-theme] #appointmentTemplateEditor button{background:var(--ct-soft)!important;color:var(--ct-text)!important;border-color:var(--ct-line)!important;box-shadow:none!important}
+html body[data-theme] #appointmentTemplateEditor button[type="submit"]{background:var(--ct-button)!important;color:var(--ct-on-button)!important}
+html body[data-theme] #calendarEventModal :is(.calEditTitle,.calEditPatient strong){color:var(--ct-text)!important}
+html body[data-theme] #calendarEventModal :is(.calEditSubtitle,.calEditPatient span){color:var(--ct-muted)!important}
+
+html body[data-theme] #calendarEventModal .stockIcon{width:22px;height:22px;display:block}

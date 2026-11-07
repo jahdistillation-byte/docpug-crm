@@ -82687,7 +82687,7 @@ function ensureCalendarModal() {
       <header class="calEditHeader">
         <div class="calEditHeaderMain">
           <div class="calEditHeaderIcon">
-            📅
+            ${getStockIcon("clock")}
           </div>
 
           <div>
@@ -82716,7 +82716,7 @@ function ensureCalendarModal() {
 
       <div class="calEditPatient">
         <div class="calEditPatientIcon">
-          🐾
+          ${getStockIcon("paw")}
         </div>
 
         <div>
@@ -118362,8 +118362,8 @@ async function initSettingsUI() {
   const themes = [
     [
       "purple",
-      "Фіолетова",
-      "#9346E8",
+      "PUG",
+      "#7047BD",
     ],
     [
       "black",
