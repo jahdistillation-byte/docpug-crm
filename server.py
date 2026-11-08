@@ -2056,6 +2056,8 @@ PUBLIC_ASSET_FILES = {
     "calendar-themes.css",
     "owners-workspace.css",
     "owners-workspace.js",
+    "owner-profile-workspace.css",
+    "owner-profile-workspace.js",
     "calendar-workspace.js",
     "manifest.json",
     "login-clinic-bg.jpg",

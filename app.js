@@ -58617,6 +58617,7 @@ if (!pets.length) {
   // Переключаем секции
   document.querySelectorAll(".page").forEach(p => p.style.display = "none");
   const ownerPage = document.querySelector('[data-page="owner"]');
+  window.mountPugOwnerProfile?.(ownerPage, owner);
   if (ownerPage) ownerPage.style.display = "block";
 }
 
@@ -106225,8 +106226,7 @@ function openAddPetModal(
 </div>
 
 
-        <div
-         <div
+<div
   class="addPetField addPetFieldFull addPetBreedField"
   id="addPetBreedField"
 >
@@ -106556,6 +106556,7 @@ function openAddPetModal(
 
   document.body.appendChild(overlay);
 applyInterfaceTranslations(overlay);
+window.decoratePugOwnerForm?.(overlay);
 document.body.classList.add("addPetModalOpened");
 
   const form = overlay.querySelector("#addPetModalForm");
@@ -107136,9 +107137,7 @@ const renderBreedDropdown =
                 <span
                   class="addPetBreedOptionIcon"
                 >
-                  ${escapeHtml(
-                    group.icon
-                  )}
+                  ${getStockIcon("paw")}
                 </span>
 
                 <span>
@@ -107227,9 +107226,7 @@ const renderBreedDropdown =
 
             <div class="addPetBreedEmpty">
               <span>
-                ${escapeHtml(
-                  activeGroup.icon
-                )}
+                ${getStockIcon("paw")}
                 ${escapeHtml(
                   getOtherSpeciesGroupLabel(
                     activeGroup
@@ -107271,14 +107268,7 @@ const renderBreedDropdown =
                     <span
                       class="addPetBreedOptionIcon"
                     >
-                      ${
-                        activeGroup
-                          ? escapeHtml(
-                              activeGroup
-                                .icon
-                            )
-                          : "🐾"
-                      }
+                      ${getStockIcon("paw")}
                     </span>
 
                     <span>
