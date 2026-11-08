@@ -91533,6 +91533,8 @@ function addVisitHomeTreatment() {
 function initVisitUI() {
   if (state.visitUiBound) return;
   state.visitUiBound = true;
+  let visitStageNavigationLocked = false;
+  let visitStageNavigationResetTimer = null;
 
   document.addEventListener("click", (e) => {
    if (e.target.closest("#btnBackVisitPatient")) {
@@ -91573,6 +91575,9 @@ const visitStageButton =
 
 if (visitStageButton) {
   e.preventDefault();
+  visitStageNavigationLocked = true;
+  clearTimeout(visitStageNavigationResetTimer);
+  visitStageNavigationResetTimer = setTimeout(() => { visitStageNavigationLocked = false; }, 1800);
 
   const targetSelector =
     visitStageButton.dataset
@@ -91598,6 +91603,14 @@ if (visitStageButton) {
   visitStageButton.classList.add(
     "active"
   );
+
+  if (targetElement.matches(".visitWorkspaceSidebar") &&
+      targetElement.closest(".pugVisitWorkspace") &&
+      getComputedStyle(targetElement).position === "sticky") {
+    targetElement.classList.add("vwFinishFocus");
+    setTimeout(() => targetElement.classList.remove("vwFinishFocus"), 1600);
+    return;
+  }
 
   targetElement.scrollIntoView({
     behavior: "smooth",
@@ -91636,6 +91649,7 @@ if (visitStageButton) {
       );
 
     if (!visitPage) return;
+    if (visitPage.classList.contains("pugVisitWorkspace") && visitStageNavigationLocked) return;
 
     const stageButtons =
       Array.from(
@@ -91667,6 +91681,10 @@ if (visitStageButton) {
           );
 
         if (!target) return;
+        // A pinned invoice is visible beside every section; it is not a scroll stage.
+        if (visitPage.classList.contains("pugVisitWorkspace") &&
+            target.matches(".visitWorkspaceSidebar") &&
+            getComputedStyle(target).position === "sticky") return;
 
         const targetTop =
           target
@@ -91717,6 +91735,16 @@ if (visitStageButton) {
     }
   );
 
+  const unlockVisitStageNavigation = () => {
+    visitStageNavigationLocked = false;
+    queueVisitStageSync();
+  };
+  window.addEventListener("wheel", unlockVisitStageNavigation, { passive: true });
+  window.addEventListener("touchmove", unlockVisitStageNavigation, { passive: true });
+  window.addEventListener("keydown", event => {
+    if (["PageDown", "PageUp", "Home", "End", "ArrowDown", "ArrowUp", " "].includes(event.key) &&
+        !event.target.closest("input,textarea,select,[contenteditable]")) unlockVisitStageNavigation();
+  });
   queueVisitStageSync();
 
   // ==========================================================================

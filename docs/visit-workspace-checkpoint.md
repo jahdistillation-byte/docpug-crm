@@ -16,3 +16,12 @@ Validation:
 - Screenshots reviewed for the clinical form, sidebar, mobile layout and expanded AI panes. No live clinic records, payments or prescriptions were changed by these checks.
 
 No database migration is required.
+
+
+## Follow-up fixes — active route and wider workspace
+
+- Reset the legacy summary-card translateX and inset styles, which were applied only to the active visit route on wide screens. Sidebar geometry is now verified with the real app-container/main-content wrapper and active page class at 1500, 1710, 1920 and 2560 pixels.
+- Exclude the sticky desktop invoice from automatic scroll-stage detection. Stage buttons target whole clinical cards. Explicit navigation retains its selection during smooth scrolling; wheel/touch/keyboard navigation restores automatic tracking. The finish button emphasizes the already visible pinned invoice without scrolling the document unexpectedly.
+- Increase the canvas to 1760 pixels and disable legacy 80% scaling only on the visit route, improving field width and text readability.
+- Distinguish the owner discharge plan with an accent surface, left border, document badge and more room for recommendations. Clinical values and their save handlers are unchanged.
+- Regression fixture now uses an active route, including completed-visit navigation and repeated clicks across Diagnosis, Treatment and Services rather than only testing the inactive DOM.
