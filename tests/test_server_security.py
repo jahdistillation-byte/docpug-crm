@@ -77,6 +77,8 @@ class StaticAssetSecurityTests(unittest.TestCase):
             "/owners-workspace.js",
             "/owner-profile-workspace.css",
             "/owner-profile-workspace.js",
+            "/patient-overview-workspace.css",
+            "/patient-overview-workspace.js",
             "/calendar-workspace.js",
             "/ach.js",
             "/manifest.json",

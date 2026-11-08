@@ -60626,11 +60626,7 @@ async function renderPatientTab(tab, pet) {
       )
     : Promise.resolve([]),
 
-  tab === "overview"
-    ? loadPatientWeightsApi(
-        pet.id
-      )
-    : Promise.resolve([]),
+  loadPatientWeightsApi(pet.id),
 
   tab === "overview"
     ? loadPatientVaccinationsApi(
@@ -60805,11 +60801,12 @@ const patientBreed =
       )
     : "";
 
+const currentPatientWeight = getPugPatientCurrentWeight(pet, weightHistory);
 const patientWeight =
-  pet.weight_kg
+  currentPatientWeight
     ? `${
         Number(
-          pet.weight_kg
+          currentPatientWeight
         ).toLocaleString(
           getCalendarLocale(),
           {
@@ -61485,6 +61482,8 @@ root.innerHTML = `
     class="patientPremiumTabContent"
   ></div>
 `;
+
+window.mountPugPatientHeader?.(root);
 
 const backButton =
   root.querySelector(
@@ -62270,6 +62269,8 @@ dynamicBox.innerHTML = `
   </aside>
 </section>
 `;
+window.mountPugPatientOverview?.(dynamicBox, pet, weightHistory);
+
 const patientAiButton =
   dynamicBox.querySelector(
     "[data-patient-ai-generate]"
@@ -62712,12 +62713,7 @@ const setPatientNotesButtonText =
     if (
       patientNotesSaveButton
     ) {
-      patientNotesSaveButton.textContent =
-        `${icon} ${
-          translateInterfaceText(
-            translationKey
-          )
-        }`;
+      patientNotesSaveButton.textContent = translateInterfaceText(translationKey);
     }
   };
 
@@ -63964,26 +63960,7 @@ function renderPatientWeightPanel(
     (key) =>
       translateInterfaceText(key);
 
-  const rows =
-    Array.isArray(history)
-      ? [...history]
-      : [];
-
-  const sorted =
-    rows.sort(
-      (a, b) =>
-        String(
-          b.created_at ||
-          b.measured_at ||
-          ""
-        ).localeCompare(
-          String(
-            a.created_at ||
-            a.measured_at ||
-            ""
-          )
-        )
-    );
+  const sorted = sortPugPatientWeights(history);
 
   const latest =
     sorted[0] || null;
@@ -64013,7 +63990,7 @@ function renderPatientWeightPanel(
   }
 
   const recent =
-    sorted.slice(0, 4);
+    sorted;
 
   const formatWeight =
     (value) =>
