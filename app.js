@@ -100421,6 +100421,7 @@ if (completeButton) {
     completeButton.style.cursor =
       "default";
 
+    window.mountPugVisitWorkspace?.(visit, pet);
     return;
   }
 
@@ -100872,6 +100873,7 @@ openDeleteModal(
 renderVisitTasksBlock(
   visitId
 );
+window.mountPugVisitWorkspace?.(visit, pet);
 }
 
 function parseVisitNote(note) {
