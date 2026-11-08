@@ -29,6 +29,7 @@
       const items=document.createElement('div');items.className='poDiagnosisMenuItems';buttons.forEach(button=>items.append(button));menu.append(summary,items);actions.append(menu);
       items.addEventListener('click',event=>{if(event.target.closest('button'))menu.open=false;});
     });
+    root.querySelectorAll('.patientDiagnosisSeverity.severity-critical').forEach(el=>{el.textContent=el.textContent.replace(/^[^\p{L}\p{N}]+/u,'').trim();el.insertAdjacentHTML('afterbegin',icon('<path d="m12 3 10 18H2L12 3Z"/><path d="M12 9v5M12 17h.01"/>'));});
     const empty=root.querySelector('.patientDiagnosesEmpty:not(.is-error)>span');if(empty)empty.innerHTML=icons.minus;
     if(ai){
       const disclosure=document.createElement('details');disclosure.className='poAiDisclosure';
