@@ -89745,6 +89745,7 @@ async function renderVisits(
       </div>
     `;
 
+    window.mountPugVisitHistory?.(box);
     return;
   }
 
@@ -90291,6 +90292,7 @@ async function renderVisits(
   box.appendChild(
     timelineContainer
   );
+  window.mountPugVisitHistory?.(box);
 
   box.onclick =
     async (event) => {
@@ -113004,7 +113006,7 @@ async function renderMedcardTab(
     );
 
   container.className =
-    "patientInfoBox";
+    "patientInfoBox pugMedcardWorkspace";
 
   const rowHead =
     document.createElement(
@@ -113195,35 +113197,9 @@ async function renderMedcardTab(
           dateLine;
       }
 
-      const vitals = [
-        item.temperature
-          ? `🌡 ${formatValue(
-              item.temperature
-            )} °C`
-          : "",
-        item.weight_kg
-          ? `⚖️ ${formatValue(
-              item.weight_kg
-            )} ${t(
-              "patients.card.kg"
-            )}`
-          : "",
-        item.pulse
-          ? `❤️ ${item.pulse}`
-          : "",
-      ].filter(Boolean);
-
-      const vitalsElement =
-        clone.querySelector(
-          ".med-card-vitals"
-        );
-
+      const vitalsElement = clone.querySelector(".med-card-vitals");
       if (vitalsElement) {
-        vitalsElement.textContent =
-          vitals.join(" · ") ||
-          t(
-            "patients.card.medcard.parametersNotSpecified"
-          );
+        vitalsElement.innerHTML = renderPugMedcardVitals(item, formatValue);
       }
 
       const grid =
@@ -113407,7 +113383,7 @@ async function renderMedcardTab(
         ).trim()
       ) {
         doctorElement.textContent =
-          `👩‍⚕️ ${item.doctor}`;
+          String(item.doctor);
       } else if (
         doctorElement
       ) {

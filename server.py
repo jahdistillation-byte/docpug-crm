@@ -2060,6 +2060,8 @@ PUBLIC_ASSET_FILES = {
     "owner-profile-workspace.js",
     "patient-overview-workspace.css",
     "patient-overview-workspace.js",
+    "patient-records-workspace.css",
+    "patient-records-workspace.js",
     "calendar-workspace.js",
     "manifest.json",
     "login-clinic-bg.jpg",
