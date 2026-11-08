@@ -54423,6 +54423,8 @@ function collectPatientDocumentBreakRanges(
     ".disModernInfoGrid",
     ".disModernSection",
     ".disModernTextLine",
+    ".disOwnerPrescription",
+    ".disOwnerPrescriptionFields > div",
     ".disModernFinanceHead",
     ".disModernFinanceSummary",
     ".disModernTable tr",
@@ -54780,8 +54782,9 @@ async function downloadA4Pdf(visitId, options = {}) {
     const pageWidthMm = 210;
     const pageHeightMm = 297;
 
+    const ownerDocument = sourceDocument.classList.contains("disOwnerDischarge");
     const savePdf = () => {
-      if(options.pageNumbers){
+      if(options.pageNumbers || ownerDocument){
         const count=pdf.getNumberOfPages();
         for(let page=1;page<=count;page++){
           pdf.setPage(page);pdf.setFontSize(8);pdf.setTextColor('#687e90');
@@ -54816,7 +54819,7 @@ async function downloadA4Pdf(visitId, options = {}) {
 
     const relativeOnePageScale = fitScale / widthScale;
 
-    if (relativeOnePageScale >= 0.78) {
+    if (relativeOnePageScale >= (ownerDocument ? 0.98 : 0.78)) {
       const renderedWidthMm = canvas.width * fitScale;
       const renderedHeightMm = canvas.height * fitScale;
 
@@ -101336,12 +101339,6 @@ const performedCare =
 const performedCareItems =
   performedCare
     .split(/\n+/)
-    .flatMap(
-      (paragraph) =>
-        paragraph.match(
-          /[^.!?]+(?:[.!?]+|$)/g
-        ) || [paragraph]
-    )
     .map(
       (item) =>
         String(item || "")
@@ -101352,31 +101349,47 @@ const performedCareItems =
 const prescriptionItems =
   rx
     .split(/\n+/)
-    .flatMap(
-      (paragraph) =>
-        paragraph.match(
-          /[^.!?]+(?:[.!?]+|$)/g
-        ) || [paragraph]
-    )
     .map(
       (item) =>
         String(item || "")
           .trim()
     )
     .filter(Boolean);    
-const structuredHomeTreatmentItems =
-  formatVisitHomeTreatments(
-    Array.isArray(
-      clinicalData.home_treatments
-    )
-      ? clinicalData.home_treatments
-      : []
-  );
-
-const homeTreatmentItems =
-  structuredHomeTreatmentItems.length
-    ? structuredHomeTreatmentItems
-    : prescriptionItems;
+// Keep the clinician's values intact; never infer units or parse free-text doses.
+const structuredHomeTreatments = (Array.isArray(clinicalData.home_treatments)
+  ? clinicalData.home_treatments : [])
+  .filter(item => item && typeof item === "object")
+  .map(normalizeVisitHomeTreatmentItem)
+  .filter(item => [item.name, item.dose, item.route, item.frequency, item.duration, item.note].some(value => value.trim()));
+const editedPrescription = String(dis.rx || "").trim();
+const useStructuredTreatments = structuredHomeTreatments.length && (!editedPrescription ||
+  editedPrescription === formatVisitHomeTreatments(structuredHomeTreatments).map(item => `• ${item}`).join("\n") ||
+  editedPrescription === formatVisitHomeTreatments(structuredHomeTreatments).join("\n"));
+const homeTreatmentsHtml = useStructuredTreatments
+  ? structuredHomeTreatments.map((item, index) => {
+      const fields = [["Доза / кількість", item.dose], ["Як застосовувати", item.route],
+        ["Як часто", item.frequency], ["Тривалість", item.duration]]
+        .filter(([, value]) => value.trim());
+      return `<div class="disOwnerPrescription">
+        <div class="disOwnerPrescriptionName">${index + 1}. ${escapeHtml(item.name.trim() || "Призначення")}</div>
+        ${fields.length ? `<dl class="disOwnerPrescriptionFields">${fields.map(([label, value]) =>
+          `<div><dt>${label}</dt><dd>${escapeHtml(value)}</dd></div>`).join("")}</dl>` : ""}
+        ${item.note.trim() ? `<div class="disOwnerPrescriptionNote"><b>Примітка:</b> ${escapeHtml(item.note)}</div>` : ""}
+      </div>`;
+    }).join("")
+  : prescriptionItems.map(item => `<div class="disOwnerPrescription"><div class="disModernText">${escapeHtml(item)}</div></div>`).join("");
+const documentDate = value => {
+  const text = String(value || "").trim();
+  const match = text.match(/^(\d{4})-(\d{2})-(\d{2})(?:$|T|\s)/);
+  return match ? `${match[3]}.${match[2]}.${match[1]}` : text || "—";
+};
+const speciesNames = {dog: "Собака", cat: "Кіт", bird: "Птах", rabbit: "Кролик", rodent: "Гризун", other: "Інший вид"};
+const petSpecies = speciesNames[String(pet?.species || "").trim().toLowerCase()] || pet?.species || "—";
+const rawAge = String(pet?.age ?? "").trim();
+const ageYears = /^\d+$/.test(rawAge) ? Number(rawAge) : null;
+const ageLabel = ageYears !== null
+  ? `${rawAge} ${ageYears % 10 === 1 && ageYears % 100 !== 11 ? "рік" : ageYears % 10 >= 2 && ageYears % 10 <= 4 && !(ageYears % 100 >= 12 && ageYears % 100 <= 14) ? "роки" : "років"}`
+  : rawAge;
 const redFlags =
   firstNonEmpty(
     clinicalData.red_flags
@@ -101636,7 +101649,7 @@ const doctorName =
   ].filter(Boolean).join(" • ");
 
   a4.innerHTML = `
-    <div class="disModernDoc" style="--disAccent:${escapeHtml(accent)};">
+    <div class="disModernDoc disOwnerDischarge" style="--disAccent:${escapeHtml(accent)};">
       <div class="disModernHead">
         <div class="disModernBrand">
           ${
@@ -101663,7 +101676,7 @@ const doctorName =
         <div class="disModernHeadRight">
           <div class="disModernDocType">Виписка з амбулаторного прийому</div>
           <div class="disModernDocMeta">№ ${escapeHtml(visitNumber || "—")}</div>
-          <div class="disModernDocMeta">Дата візиту: ${escapeHtml(String(v.date || "—"))}</div>
+          <div class="disModernDocMeta">Дата візиту: ${escapeHtml(documentDate(v.date))}</div>
         </div>
       </div>
 
@@ -101677,20 +101690,21 @@ const doctorName =
           <div class="disModernInfoRows">
             <div class="disModernInfoRow">
               <span>Вид</span>
-              <b>${escapeHtml(pet?.species || "—")}</b>
+              <b>${escapeHtml(petSpecies)}</b>
             </div>
             <div class="disModernInfoRow">
               <span>Порода</span>
               <b>${escapeHtml(pet?.breed || "—")}</b>
             </div>
             <div class="disModernInfoRow">
-              <span>Вік</span>
-              <b>${escapeHtml(pet?.age || pet?.birth_date || "—")}</b>
+              <span>${ageLabel ? "Вік" : pet?.birth_date ? "Дата народження" : "Вік"}</span>
+              <b>${escapeHtml(ageLabel || (pet?.birth_date ? documentDate(pet.birth_date) : "—"))}</b>
             </div>
             <div class="disModernInfoRow">
               <span>Вага</span>
               <b>${escapeHtml(String(v.weight_kg || pet?.weight_kg || pet?.weight || "—"))} ${v.weight_kg || pet?.weight_kg || pet?.weight ? "кг" : ""}</b>
             </div>
+            ${String(pet?.microchip_number || "").trim() ? `<div class="disModernInfoRow"><span>Номер чипа</span><b>${escapeHtml(pet.microchip_number)}</b></div>` : ""}
           </div>
         </div>
 
@@ -101787,37 +101801,11 @@ const doctorName =
   </div>
 </div>
 
-${
-  homeTreatmentItems.length
-    ? `
-      <div class="disModernSection">
-        <div class="disModernSectionTitle">
-          Лікування вдома
-        </div>
-
-        <ul
-          class="
-            disModernBulletList
-            disModernBulletList--prescriptions
-          "
-        >
-          ${homeTreatmentItems
-            .map(
-              (item) => `
-                <li>
-                  ${escapeHtml(
-                    item
-                  )}
-                </li>
-              `
-            )
-            .join("")}
-        </ul>
-      </div>
-    `
-    : ""
-}
-<div class="disModernSection">
+${homeTreatmentsHtml ? `<div class="disModernSection disOwnerHome">
+  <div class="disModernSectionTitle">Лікування вдома</div>
+  ${homeTreatmentsHtml}
+</div>` : ""}
+<div class="disModernSection disOwnerRecommendations">
   <div class="disModernSectionTitle">
     Рекомендації для власника
   </div>
@@ -101860,7 +101848,7 @@ ${
     : ""
 }
 
-<div class="disModernSection">
+<div class="disModernSection disOwnerFollow">
   <div class="disModernSectionTitle">
     Контроль / повторний огляд
   </div>
@@ -101885,9 +101873,7 @@ ${
             </div>
           </div>
 
-          <div class="disModernGrandTotalBadge">
-            ${dischargeMoney(grandTotal)}
-          </div>
+
         </div>
 
         <div class="disModernTableWrap">
@@ -101920,7 +101906,7 @@ ${
           </div>
 
           <div class="disModernFinanceMini disModernFinanceMiniTotal">
-            <span>Разом до сплати</span>
+            <span>Загальна вартість</span>
             <b>${dischargeMoney(grandTotal)}</b>
           </div>
         </div>
@@ -101954,6 +101940,10 @@ ${
       </div>
     </div>
   `;
+  // Trim template indentation while preserving the clinician's own line breaks.
+  a4.querySelectorAll(".disModernText, .disModernBulletList li").forEach(node => {
+    node.textContent = node.textContent.trim();
+  });
 }
 
 function parseRxCombined(text) {

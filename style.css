@@ -76213,3 +76213,31 @@ body[data-theme="white"] .page[data-page="finance"] :is(
 ) {
   color: #ffffff !important;
 }
+
+/* Owner-facing visit discharge: readable at print size, independent of CRM theme. */
+.disOwnerDischarge .disModernText,
+.disOwnerDischarge .disModernBulletList li { font-size: 13px !important; line-height: 1.55 !important; white-space: pre-line !important; color: #283548 !important; }
+.disOwnerDischarge .disModernSection { padding: 12px 13px !important; }
+.disOwnerDischarge .disModernSectionTitle { font-size: 10px !important; line-height: 1.35 !important; }
+.disOwnerDischarge .disModernInfoGrid .disModernInfoRow { font-size: 11px !important; line-height: 1.4 !important; }
+.disOwnerDischarge .disModernTable td { font-size: 11px !important; overflow-wrap: anywhere; }
+.disOwnerDischarge .disModernTable th:first-child { width: 38%; }
+.disOwnerDischarge .disModernTableWrap { margin-top: 10px; }
+.disOwnerDischarge .disModernFinanceMini { min-width: 0; flex: 1; }
+.disOwnerDischarge .disModernFinanceMini b { font-size: 17px; }
+.disOwnerDischarge .disOwnerHome { background: #f5f8fc !important; border-color: #dce5f0 !important; break-inside: auto !important; }
+.disOwnerDischarge .disOwnerRecommendations,
+.disOwnerDischarge .disOwnerFollow { background: #f6f9fb !important; border-left: 3px solid var(--disAccent, #326b96) !important; }
+.disOwnerDischarge .disOwnerPrescription { margin-top: 9px; padding: 10px 11px; background: #fff; border: 1px solid #e1e7ef; border-radius: 8px; break-inside: avoid; }
+.disOwnerDischarge .disOwnerPrescriptionName { font-size: 13px; font-weight: 700; color: #1f2937; overflow-wrap: anywhere; }
+.disOwnerDischarge .disOwnerPrescriptionFields { margin: 8px 0 0; display: grid; grid-template-columns: 1fr 1fr; gap: 8px 16px; }
+.disOwnerDischarge .disOwnerPrescriptionFields > div { min-width: 0; break-inside: avoid; }
+.disOwnerDischarge .disOwnerPrescriptionFields dt { font-size: 10px; color: #58677a; }
+.disOwnerDischarge .disOwnerPrescriptionFields dd { margin: 2px 0 0; font-size: 13px; line-height: 1.5; color: #243348; white-space: pre-line; overflow-wrap: anywhere; }
+.disOwnerDischarge .disOwnerPrescriptionNote { margin-top: 8px; font-size: 12px; line-height: 1.5; white-space: pre-line; overflow-wrap: anywhere; }
+.disOwnerDischarge .disOwnerPrescription .disModernText { margin-top: 0 !important; }
+.disOwnerDischarge .disModernSection--warning { border-color: #efcccc !important; background: #fff7f7 !important; }
+.disOwnerDischarge .disModernFooter { font-size: 10px; }
+
+.disOwnerDischarge .disModernBulletList { white-space: normal !important; margin-top: 7px !important; padding-left: 18px !important; }
+.disOwnerDischarge .disModernBulletList li { margin: 3px 0 !important; }
