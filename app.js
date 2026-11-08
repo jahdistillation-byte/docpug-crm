@@ -15965,6 +15965,13 @@ function captureVisitMedicalDraft(
 
     weight:
       weight?.value ?? "",
+    extraFields: Object.fromEntries([
+      "visitReasonForVisit", "visitTemperature", "visitHeartRate", "visitRespiratoryRate",
+      "visitMucousMembranes", "visitCrtSeconds", "visitObjectiveExam", "visitProblemList",
+      "visitDiagnosisStatus", "visitDifferentialDiagnoses", "visitDiagnosticPlan",
+      "visitPerformedCare", "visitOwnerExplanation", "visitRedFlags", "visitFollowUp",
+    ].map(id => [id, document.getElementById(id)?.value ?? ""])),
+    homeTreatments: typeof readVisitHomeTreatments === "function" ? readVisitHomeTreatments() : null,
   };
 }
 
@@ -16003,6 +16010,14 @@ function restoreVisitMedicalDraft(
       draft.weight,
     ],
   ];
+
+  Object.entries(draft.extraFields || {}).forEach(([id, value]) => {
+    const field = document.getElementById(id);
+    if (field) field.value = value ?? "";
+  });
+  if (Array.isArray(draft.homeTreatments) && typeof renderVisitHomeTreatments === "function") {
+    renderVisitHomeTreatments(draft.homeTreatments);
+  }
 
   fields.forEach(
     ([fieldId, value]) => {
@@ -90601,6 +90616,7 @@ function updateVisitServicePickerPreview() {
   }
 }
 async function openVisitServicePicker() {
+  if (window.openPugVisitCatalog) return window.openPugVisitCatalog("service");
   document
     .getElementById(
       "visitServicePickerModal"

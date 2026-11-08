@@ -1,0 +1,56 @@
+/* Shared PUG catalog: readable rows and consistent stock/service selection. */
+html body[data-theme] #pugVisitCatalogModal{position:fixed;inset:0;z-index:1000100;display:flex;align-items:center;justify-content:center;padding:20px;color:var(--ct-text);color-scheme:var(--ct-scheme);box-sizing:border-box}
+html body[data-theme] #pugVisitCatalogModal .vcBackdrop{position:absolute;inset:0;background:rgba(10,16,24,.5);backdrop-filter:blur(6px)}
+html body[data-theme] #pugVisitCatalogModal .vcDialog{position:relative;display:flex;flex-direction:column;width:min(980px,100%);max-height:calc(100dvh - 40px);background:var(--ct-paper);color:var(--ct-text);border:1px solid var(--ct-line);border-radius:20px;box-shadow:0 24px 80px #0003;overflow:hidden}
+html body[data-theme] #pugVisitCatalogModal *{box-sizing:border-box}
+html body[data-theme] #pugVisitCatalogModal [hidden]{display:none!important}
+html body[data-theme] #pugVisitCatalogModal svg{width:18px;height:18px;flex-shrink:0;vertical-align:middle}
+html body[data-theme] #pugVisitCatalogModal button{font:inherit;cursor:pointer;box-shadow:none!important;text-shadow:none!important;transform:none!important}
+html body[data-theme] #pugVisitCatalogModal :is(button,input):focus-visible{outline:2px solid var(--ct-accent)!important;outline-offset:2px}
+html body[data-theme] #pugVisitCatalogModal .vcHead{display:flex;align-items:start;justify-content:space-between;gap:20px;padding:25px 27px 20px;border-bottom:1px solid var(--ct-line);flex-shrink:0}
+html body[data-theme] #pugVisitCatalogModal .vcKicker{font-size:10px;letter-spacing:1.4px;font-weight:700;text-transform:uppercase;color:var(--ct-accent)}
+html body[data-theme] #pugVisitCatalogModal h2{font-size:26px;line-height:1.35;font-weight:650;letter-spacing:-.5px;color:var(--ct-text);margin:7px 0}
+html body[data-theme] #pugVisitCatalogModal .vcHead p{font-size:13px;line-height:1.65;color:var(--ct-muted);margin:0}
+html body[data-theme] #pugVisitCatalogModal .vcClose{display:flex;align-items:center;justify-content:center;flex:0 0 36px;width:36px;height:36px;padding:0;border:1px solid var(--ct-line);border-radius:10px;background:var(--ct-soft);color:var(--ct-muted)}
+html body[data-theme] #pugVisitCatalogModal .vcTools{padding:20px 27px 12px;flex-shrink:0;border-bottom:1px solid var(--ct-line)}
+html body[data-theme] #pugVisitCatalogModal .vcSearch{display:flex;align-items:center;gap:10px;padding:0 13px;min-height:48px;background:var(--ct-soft);border:1px solid var(--ct-line);border-radius:11px;color:var(--ct-muted)}
+html body[data-theme] #pugVisitCatalogModal .vcSearch:focus-within{border-color:var(--ct-accent);outline:2px solid var(--ct-accent-soft)}
+html body[data-theme] #pugVisitCatalogModal #vcSearchInput{width:100%;min-width:0;height:47px;padding:10px 0!important;background:none!important;color:var(--ct-text)!important;border:0!important;box-shadow:none!important;outline:none!important;font:inherit;font-size:15px!important;line-height:1.6}
+html body[data-theme] #pugVisitCatalogModal #vcSearchInput::placeholder{color:var(--ct-muted);opacity:1}
+html body[data-theme] #pugVisitCatalogModal .vcCategories{display:flex;gap:7px;overflow-x:auto;padding:12px 0 5px;scrollbar-width:thin;scrollbar-color:var(--ct-line) transparent}
+html body[data-theme] #pugVisitCatalogModal .vcCategories button{flex:0 0 auto;padding:8px 11px;border:1px solid var(--ct-line);border-radius:8px;background:var(--ct-paper);color:var(--ct-muted);font-size:12px;line-height:1.5;font-weight:600;white-space:nowrap}
+html body[data-theme] #pugVisitCatalogModal .vcCategories button.active{color:var(--ct-accent);background:var(--ct-accent-soft);border-color:var(--ct-accent)}
+html body[data-theme] #pugVisitCatalogModal .vcStatus{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-top:11px;color:var(--ct-muted);font-size:12px;line-height:1.5;flex-wrap:wrap}
+html body[data-theme] #pugVisitCatalogModal .vcAvailability{display:flex;align-items:center;gap:7px;cursor:pointer}
+html body[data-theme] #pugVisitCatalogModal .vcAvailability input{width:16px;height:16px;margin:0;accent-color:var(--ct-accent)}
+html body[data-theme] #pugVisitCatalogModal .vcResults{overflow-y:auto;overscroll-behavior:contain;min-height:120px;max-height:55dvh;padding:7px 14px 12px;scrollbar-color:var(--ct-line) transparent}
+html body[data-theme] #pugVisitCatalogModal .vcResult{display:grid;grid-template-columns:34px minmax(0,1fr) 115px 18px;align-items:center;gap:13px;width:100%;padding:13px;border:1px solid transparent;border-bottom-color:var(--ct-line);border-radius:9px;background:var(--ct-paper);color:var(--ct-text);text-align:left;min-height:72px}
+html body[data-theme] #pugVisitCatalogModal[data-kind=stock] .vcResult{grid-template-columns:34px minmax(0,1fr) 115px 135px 18px}
+html body[data-theme] #pugVisitCatalogModal .vcResult:not(:disabled):hover,html body[data-theme] #pugVisitCatalogModal .vcResult.is-highlighted{background:var(--ct-accent-soft);border-color:var(--ct-accent)}
+html body[data-theme] #pugVisitCatalogModal .vcRowIcon{display:flex;align-items:center;justify-content:center;width:34px;height:34px;border:1px solid var(--ct-line);border-radius:9px;background:var(--ct-soft);color:var(--ct-accent)}
+html body[data-theme] #pugVisitCatalogModal .vcRowName{min-width:0}
+html body[data-theme] #pugVisitCatalogModal .vcRowName strong{display:block;font-size:14px;font-weight:600;line-height:1.55;color:var(--ct-text);white-space:normal;overflow-wrap:anywhere}
+html body[data-theme] #pugVisitCatalogModal .vcRowName small{display:block;font-size:11px;line-height:1.5;color:var(--ct-muted);margin-top:3px}
+html body[data-theme] #pugVisitCatalogModal .vcRowName small:empty{display:none}
+html body[data-theme] #pugVisitCatalogModal :is(.vcRowPrice,.vcRowStock)>small{display:block;color:var(--ct-muted);font-size:10px;line-height:1.5;margin-bottom:4px}
+html body[data-theme] #pugVisitCatalogModal :is(.vcRowPrice,.vcRowStock)>strong{display:block;color:var(--ct-text);font-size:13px;font-weight:600;line-height:1.5;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+html body[data-theme] #pugVisitCatalogModal .vcRowPrice>strong>span{font-size:11px;font-weight:400;color:var(--ct-muted)}
+html body[data-theme] #pugVisitCatalogModal .vcRowArrow{color:var(--ct-muted)}
+html body[data-theme] #pugVisitCatalogModal .vcResult.is-unavailable{cursor:default;opacity:.6;background:var(--ct-soft)}
+html body[data-theme] #pugVisitCatalogModal .vcResult.is-unavailable .vcRowArrow{visibility:hidden}
+html body[data-theme] #pugVisitCatalogModal .vcEmpty{display:flex;flex-direction:column;align-items:center;gap:10px;padding:35px 20px;color:var(--ct-muted);text-align:center}
+html body[data-theme] #pugVisitCatalogModal .vcEmpty strong{font-size:16px;color:var(--ct-text)}
+html body[data-theme] #pugVisitCatalogModal .vcEmpty p{margin:0;font-size:13px;line-height:1.6}
+html body[data-theme] #pugVisitCatalogModal .vcEmpty button{padding:9px 12px;border:1px solid var(--ct-line);border-radius:8px;background:var(--ct-soft);color:var(--ct-accent);font-size:12px}
+html body[data-theme] #pugVisitCatalogModal .vcFooter{padding:13px 27px;border-top:1px solid var(--ct-line);color:var(--ct-muted);font-size:11px;line-height:1.5}
+html body[data-theme] .page[data-page=visit] #pugVisitWorkspaceRoot .vcCatalogTrigger{display:flex!important;align-items:center;gap:10px!important;min-height:49px!important;width:100%!important;padding:10px 12px!important;background:var(--ct-soft)!important;border:1px solid var(--ct-line)!important;border-radius:9px!important;color:var(--ct-text)!important;text-align:left!important;font:inherit;cursor:pointer}
+html body[data-theme] .page[data-page=visit] #pugVisitWorkspaceRoot .vcCatalogTrigger:hover{border-color:var(--ct-accent)!important;background:var(--ct-hover)!important}
+html body[data-theme] .page[data-page=visit] #pugVisitWorkspaceRoot .vcTriggerText{display:flex;flex-direction:column;gap:4px;min-width:0;flex:1}
+html body[data-theme] .page[data-page=visit] #pugVisitWorkspaceRoot .vcTriggerText strong{font-size:13px!important;line-height:1.5!important;font-weight:600!important;color:var(--ct-text)!important;white-space:normal!important;overflow-wrap:anywhere}
+html body[data-theme] .page[data-page=visit] #pugVisitWorkspaceRoot .vcTriggerText small{font-size:11px!important;line-height:1.5!important;color:var(--ct-muted)!important;white-space:normal!important}
+html body[data-theme] .page[data-page=visit] #pugVisitWorkspaceRoot :is(.vcTriggerIcon,.vcTriggerArrow){display:flex;align-items:center;justify-content:center;flex:0 0 23px;color:var(--ct-accent)}
+html body[data-theme] .page[data-page=visit] #pugVisitWorkspaceRoot .visitPickerModern:has(#visitStkSelect){grid-template-columns:minmax(0,1fr) 85px auto!important}
+html body[data-theme] .page[data-page=visit] #pugVisitWorkspaceRoot .visitPickerSearch:has(#visitStkSearch){display:none!important}
+html body[data-theme] .page[data-page=visit] #pugVisitWorkspaceRoot .visitPickerModern:has(#visitStkSelect) .visitPickerSelect{grid-column:1!important}
+html body[data-theme] .page[data-page=visit] #pugVisitWorkspaceRoot .visitPickerModern:has(#visitStkSelect) .visitPickerQty{grid-column:2!important}
+@media(max-width:620px){html body[data-theme] #pugVisitCatalogModal{padding:9px}html body[data-theme] #pugVisitCatalogModal .vcDialog{max-height:calc(100dvh - 18px);border-radius:15px}html body[data-theme] #pugVisitCatalogModal .vcHead{padding:20px 17px 15px}html body[data-theme] #pugVisitCatalogModal h2{font-size:22px}html body[data-theme] #pugVisitCatalogModal .vcTools{padding:15px 17px 10px}html body[data-theme] #pugVisitCatalogModal #vcSearchInput{font-size:16px!important}html body[data-theme] #pugVisitCatalogModal .vcResults{padding:6px 9px 10px;max-height:55dvh}html body[data-theme] #pugVisitCatalogModal .vcResult,html body[data-theme] #pugVisitCatalogModal[data-kind=stock] .vcResult{grid-template-columns:30px minmax(0,1fr) 18px;gap:8px 10px;padding:13px 9px}html body[data-theme] #pugVisitCatalogModal .vcRowIcon{grid-column:1;grid-row:1;width:30px;height:30px}html body[data-theme] #pugVisitCatalogModal .vcRowName{grid-column:2;grid-row:1}html body[data-theme] #pugVisitCatalogModal .vcRowArrow{grid-column:3;grid-row:1}html body[data-theme] #pugVisitCatalogModal .vcRowPrice{grid-column:2;grid-row:2;display:flex;align-items:baseline;gap:7px}html body[data-theme] #pugVisitCatalogModal .vcRowStock{grid-column:2;grid-row:3;display:flex;align-items:baseline;gap:7px}html body[data-theme] #pugVisitCatalogModal .vcFooter{display:none}html body[data-theme] .page[data-page=visit] #pugVisitWorkspaceRoot .visitPickerModern:has(#visitStkSelect){grid-template-columns:minmax(0,1fr) 65px!important}}

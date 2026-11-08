@@ -1,0 +1,78 @@
+/* Shared catalog selection; the existing visit add/mutation handlers remain authoritative. */
+(() => {
+ const copies={uk:{service:'Оберіть послугу',stock:'Оберіть препарат або матеріал',serviceKicker:'Каталог послуг',stockKicker:'Склад клініки',subtitle:'Знайдіть позицію, оберіть її та вкажіть кількість у візиті.',search:'Назва, категорія або код…',all:'Усі',absent:'Показати відсутні',empty:'Нічого не знайдено',emptyHint:'Змініть запит або скиньте фільтри.',reset:'Скинути фільтри',found:'Знайдено',price:'Ціна',balance:'Залишок',none:'Немає в наявності',chooseService:'Оберіть послугу',chooseStock:'Оберіть препарат або матеріал',serviceHint:'Пошук за назвою та категорією',stockHint:'Назва, ціна та доступний залишок',close:'Закрити',keys:'↑↓ — навігація · Enter — обрати · Esc — закрити',loadError:'Не вдалося завантажити каталог. Спробуйте ще раз.',select:'Обрати'},en:{service:'Choose a service',stock:'Choose a medicine or material',serviceKicker:'Service catalog',stockKicker:'Clinic stock',subtitle:'Find and select an item, then set its quantity in the visit.',search:'Name, category or code…',all:'All',absent:'Show out-of-stock items',empty:'No results',emptyHint:'Change the query or reset the filters.',reset:'Reset filters',found:'Found',price:'Price',balance:'Stock',none:'Out of stock',chooseService:'Choose a service',chooseStock:'Choose a medicine or material',serviceHint:'Search by name and category',stockHint:'Name, price and available quantity',close:'Close',keys:'↑↓ navigate · Enter select · Esc close',loadError:'Could not load the catalog. Please try again.',select:'Select'},de:{service:'Leistung auswählen',stock:'Medikament oder Material auswählen',serviceKicker:'Leistungskatalog',stockKicker:'Praxislager',subtitle:'Position auswählen und anschließend die Menge im Besuch angeben.',search:'Name, Kategorie oder Code…',all:'Alle',absent:'Nicht verfügbare Positionen anzeigen',empty:'Keine Ergebnisse',emptyHint:'Suchbegriff ändern oder Filter zurücksetzen.',reset:'Filter zurücksetzen',found:'Gefunden',price:'Preis',balance:'Bestand',none:'Nicht vorrätig',chooseService:'Leistung auswählen',chooseStock:'Medikament oder Material auswählen',serviceHint:'Nach Name und Kategorie suchen',stockHint:'Name, Preis und verfügbarer Bestand',close:'Schließen',keys:'↑↓ navigieren · Enter auswählen · Esc schließen',loadError:'Katalog konnte nicht geladen werden. Bitte erneut versuchen.',select:'Auswählen'},pl:{service:'Wybierz usługę',stock:'Wybierz lek lub materiał',serviceKicker:'Katalog usług',stockKicker:'Magazyn kliniki',subtitle:'Wybierz pozycję, a następnie ustaw jej ilość w wizycie.',search:'Nazwa, kategoria lub kod…',all:'Wszystkie',absent:'Pokaż niedostępne pozycje',empty:'Brak wyników',emptyHint:'Zmień zapytanie lub zresetuj filtry.',reset:'Resetuj filtry',found:'Znaleziono',price:'Cena',balance:'Stan',none:'Brak w magazynie',chooseService:'Wybierz usługę',chooseStock:'Wybierz lek lub materiał',serviceHint:'Szukaj według nazwy i kategorii',stockHint:'Nazwa, cena i dostępny stan',close:'Zamknij',keys:'↑↓ nawigacja · Enter wybierz · Esc zamknij',loadError:'Nie udało się załadować katalogu. Spróbuj ponownie.',select:'Wybierz'}};
+ const words=()=>copies[getInterfaceLanguage()]||copies.uk;
+ const selections=new Map();
+ let closeActiveCatalog=null;
+ let catalogRequest=0;
+ const normalize=value=>String(value??'').normalize('NFKD').replace(/\p{M}/gu,'').toLocaleLowerCase().replace(/[’'`ʼ]/g,'').replace(/[^\p{L}\p{N}]+/gu,' ').trim();
+ const latin="qwertyuiop[]asdfghjkl;'zxcvbnm,.",cyrillic="йцукенгшщзхїфівапролджєячсмитьбю";
+ function keyboard(value,from,to){return [...String(value).toLowerCase()].map(char=>{const i=from.indexOf(char);return i<0?char:to[i]}).join('');}
+ const category=(item,kind)=>String(kind==='service'?(item.cat||item.category_name||item.category||'Інше'):(item.category_name||item.category||item.group||'Інше')).trim();
+ const categoryLabel=(value,kind)=>kind==='service'&&typeof getLocalizedServiceCategory==='function'?getLocalizedServiceCategory(value):typeof getStockInterfaceText==='function'?getStockInterfaceText(value):value;
+ const fields=(item,kind)=>[item.name,category(item,kind),categoryLabel(category(item,kind),kind),item.code,item.sku,item.barcode,...[item.code,item.sku,item.barcode].map(value=>String(value||'').replace(/[^\p{L}\p{N}]/gu,'')),item.manufacturer,kind==='stock'?item.unit:''].filter(value=>['string','number'].includes(typeof value)).join(' ');
+ function rank(item,query,kind){
+   const name=normalize(item.name),haystack=normalize(fields(item,kind));
+   const variants=[query,keyboard(query,latin,cyrillic),keyboard(query,cyrillic,latin)].map(normalize).filter(Boolean);
+   if(!variants.length)return 0;
+   let best=Infinity;
+   for(const variant of variants){const tokens=variant.split(/\s+/);if(!tokens.every(token=>haystack.includes(token)))continue;best=Math.min(best,name===variant?0:name.startsWith(variant)?1:tokens.every(token=>name.includes(token))?2:3);}
+   return best;
+ }
+ window.pugVisitCatalogSearch=(items,query,kind='service')=>(Array.isArray(items)?items:[]).filter(item=>item.active!==false).map((item,index)=>({item,index,rank:rank(item,query,kind)})).filter(row=>Number.isFinite(row.rank)).sort((a,b)=>a.rank-b.rank||String(a.item.name||'').localeCompare(String(b.item.name||''),getCalendarLocale())||a.index-b.index).map(row=>row.item);
+ const visitKey=kind=>String(state.selectedVisitId||'')+':'+kind;
+ const getItems=kind=>kind==='service'?loadServices():loadStock();
+ const money=item=>formatClinicMoney(Number(item.price)||0);
+ const unit=item=>typeof getStockInterfaceText==='function'?getStockInterfaceText(String(item.unit||'шт')):String(item.unit||'шт');
+ const quantity=item=>(Number(item.qty)||0).toLocaleString(getCalendarLocale(),{maximumFractionDigits:3});
+ function preview(kind){
+   const t=words(),select=document.getElementById(kind==='service'?'visitSvcSelect':'visitStkSelect'),button=document.getElementById(kind==='service'?'visitServicePickerButton':'visitStockPickerButton');if(!select||!button)return;
+   const id=selections.get(visitKey(kind)),item=getItems(kind).find(row=>String(row.id)===id&&row.active!==false&&(kind!=='stock'||Number(row.qty)>0));
+   if(!select.querySelector('option[value=""]'))select.prepend(new Option('',''));
+   if(item&&!Array.from(select.options).some(option=>option.value===String(item.id)))select.add(new Option(item.name,String(item.id)));
+   select.value=item?String(item.id):'';if(!item)selections.delete(visitKey(kind));
+   const label=item?item.name:kind==='service'?t.chooseService:t.chooseStock;
+   const meta=item?(kind==='service'?`${categoryLabel(category(item,kind),kind)} · ${money(item)}`:`${money(item)}/${unit(item)} · ${t.balance}: ${quantity(item)} ${unit(item)}`):kind==='service'?t.serviceHint:t.stockHint;
+   button.innerHTML=`<span class="vcTriggerIcon" aria-hidden="true">${getStockIcon(kind==='service'?'medical':'capsule')}</span><span class="vcTriggerText"><strong id="${kind==='service'?'visitServicePickerName':'visitStockPickerName'}">${escapeHtml(label)}</strong><small id="${kind==='service'?'visitServicePickerMeta':'visitStockPickerMeta'}">${escapeHtml(meta)}</small></span><span class="vcTriggerArrow" aria-hidden="true">${getStockIcon('search')}</span>`;
+   button.classList.add('vcCatalogTrigger');button.setAttribute('aria-haspopup','dialog');
+   const add=document.getElementById(kind==='service'?'visitSvcAdd':'visitStkAdd');if(add)add.disabled=!item;
+ }
+ window.mountPugVisitCatalogControls=()=>{
+   const select=document.getElementById('visitStkSelect');if(select){select.hidden=true;select.setAttribute('aria-hidden','true');let trigger=document.getElementById('visitStockPickerButton');if(!trigger){trigger=document.createElement('button');trigger.type='button';trigger.id='visitStockPickerButton';select.before(trigger);}trigger.onclick=()=>window.openPugVisitCatalog('stock');}
+   preview('service');preview('stock');
+ };
+ window.openPugVisitCatalog=async(kind='service')=>{
+   const request=++catalogRequest;
+   closeActiveCatalog?.();
+   const t=words(),origin=document.getElementById(kind==='service'?'visitServicePickerButton':'visitStockPickerButton'),context=String(state.selectedVisitId||'');
+   let items=getItems(kind).filter(item=>item.active!==false);
+   try{if(!items.length){if(kind==='service')await loadServicesApi();else await loadStockApi();items=getItems(kind).filter(item=>item.active!==false);}}
+   catch(error){showCrmNotice({title:t.loadError});return;}
+   if(request!==catalogRequest||context!==String(state.selectedVisitId||''))return;
+   const modal=document.createElement('div');modal.id='pugVisitCatalogModal';modal.className='vcOverlay';modal.dataset.kind=kind;
+   modal.innerHTML=`<div class="vcBackdrop" data-vc-close></div><section class="vcDialog" role="dialog" aria-modal="true" aria-labelledby="vcTitle"><header class="vcHead"><div><span class="vcKicker">${escapeHtml(kind==='service'?t.serviceKicker:t.stockKicker)}</span><h2 id="vcTitle">${escapeHtml(t[kind])}</h2><p>${escapeHtml(t.subtitle)}</p></div><button type="button" class="vcClose" data-vc-close aria-label="${escapeHtml(t.close)}">${getStockIcon('close')}</button></header><div class="vcTools"><label class="vcSearch">${getStockIcon('search')}<input id="vcSearchInput" type="search" role="combobox" aria-label="${escapeHtml(t.search)}" aria-controls="vcResults" aria-autocomplete="list" aria-expanded="true" placeholder="${escapeHtml(t.search)}" autocomplete="off" spellcheck="false"></label><div class="vcCategories"></div><div class="vcStatus"><span class="vcCount" role="status" aria-live="polite"></span>${kind==='stock'?`<label class="vcAvailability"><input type="checkbox" id="vcShowAbsent">${escapeHtml(t.absent)}</label>`:''}</div></div><div id="vcResults" class="vcResults" role="listbox" aria-label="${escapeHtml(t[kind])}"></div><footer class="vcFooter">${escapeHtml(t.keys)}</footer></section>`;
+   document.body.append(modal);const previousOverflow=document.body.style.overflow;document.body.style.overflow='hidden';
+   const input=modal.querySelector('#vcSearchInput'),results=modal.querySelector('#vcResults'),categories=modal.querySelector('.vcCategories');let selectedCategory='',query='',showAbsent=false,rows=[],active=-1,closed=false;
+   const close=()=>{if(closed)return;closed=true;if(closeActiveCatalog===close)closeActiveCatalog=null;document.removeEventListener('keydown',onKey,true);modal.remove();document.body.style.overflow=previousOverflow;if(origin?.isConnected)origin.focus();};
+   closeActiveCatalog=close;
+   const choose=index=>{const item=rows[index];if(!item||kind==='stock'&&!(Number(item.qty)>0))return;if(context!==String(state.selectedVisitId||'')){close();return;}selections.set(visitKey(kind),String(item.id));preview(kind);close();const qty=document.getElementById(kind==='service'?'visitSvcQty':'visitStkQty');qty?.focus();qty?.select();};
+   const uniqueCategories=[...new Set(items.map(item=>category(item,kind)))].sort((a,b)=>a.localeCompare(b,getCalendarLocale()));
+   function renderCategories(){categories.hidden=uniqueCategories.length<=1&&(!uniqueCategories[0]||['інше','other'].includes(normalize(uniqueCategories[0])));categories.innerHTML=`<button type="button" class="${!selectedCategory?'active':''}" data-vc-category="">${escapeHtml(t.all)}</button>`+uniqueCategories.map(value=>`<button type="button" class="${selectedCategory===value?'active':''}" data-vc-category="${escapeHtml(value)}">${escapeHtml(categoryLabel(value,kind))}</button>`).join('');}
+   function highlight(index){active=index;results.querySelectorAll('.vcResult').forEach((button,i)=>{button.classList.toggle('is-highlighted',i===active);button.setAttribute('aria-selected',String(i===active));button.tabIndex=i===active?0:-1;});if(active>=0){input.setAttribute('aria-activedescendant','vcOption'+active);results.querySelector('#vcOption'+active)?.scrollIntoView({block:'nearest'});}else input.removeAttribute('aria-activedescendant');}
+   function render(){
+     active=-1;input.removeAttribute('aria-activedescendant');rows=window.pugVisitCatalogSearch(items,query,kind).filter(item=>(!selectedCategory||category(item,kind)===selectedCategory)&&(kind!=='stock'||showAbsent||Number(item.qty)>0));
+     modal.querySelector('.vcCount').textContent=`${t.found}: ${rows.length}`;
+     results.innerHTML=rows.length?rows.map((item,i)=>{const absent=kind==='stock'&&!(Number(item.qty)>0),cat=category(item,kind);return `<button type="button" id="vcOption${i}" class="vcResult ${absent?'is-unavailable':''}" role="option" aria-selected="false" tabindex="-1" data-vc-index="${i}" ${absent?'disabled':''}><span class="vcRowIcon" aria-hidden="true">${getStockIcon(kind==='service'?'medical':'capsule')}</span><span class="vcRowName"><strong>${escapeHtml(item.name||'—')}</strong><small>${escapeHtml(['інше','other'].includes(normalize(cat))?'':categoryLabel(cat,kind))}${item.code||item.sku?' · '+escapeHtml(String(item.code||item.sku)):''}</small></span><span class="vcRowPrice"><small>${escapeHtml(t.price)}</small><strong>${escapeHtml(money(item))}${kind==='stock'?`<span>/${escapeHtml(unit(item))}</span>`:''}</strong></span>${kind==='stock'?`<span class="vcRowStock"><small>${escapeHtml(t.balance)}</small><strong>${escapeHtml(absent?t.none:quantity(item)+' '+unit(item))}</strong></span>`:''}<span class="vcRowArrow" aria-hidden="true">${getStockIcon('plus')}</span></button>`;}).join(''):`<div class="vcEmpty">${getStockIcon('search')}<strong>${escapeHtml(t.empty)}</strong><p>${escapeHtml(t.emptyHint)}</p><button type="button" data-vc-reset>${escapeHtml(t.reset)}</button></div>`;
+   }
+   function onKey(event){
+     if(!modal.isConnected)return;if(event.key==='Escape'){event.preventDefault();event.stopPropagation();close();return;}
+     if(['ArrowDown','ArrowUp'].includes(event.key)&&event.target===input){event.preventDefault();const selectable=rows.map((item,i)=>kind==='stock'&&!(Number(item.qty)>0)?-1:i).filter(i=>i>=0);if(!selectable.length)return;let at=selectable.indexOf(active);at=at<0?(event.key==='ArrowDown'?0:selectable.length-1):(at+(event.key==='ArrowDown'?1:-1)+selectable.length)%selectable.length;highlight(selectable[at]);}
+     if(event.key==='Enter'&&event.target===input){event.preventDefault();if(active>=0)choose(active);else if(rows.length===1)choose(0);}
+     if(event.key==='Tab'){const focusable=[...modal.querySelectorAll('button:not(:disabled),input')].filter(el=>el.tabIndex>=0&&el.getClientRects().length),first=focusable[0],last=focusable.at(-1);if(event.shiftKey&&document.activeElement===first){event.preventDefault();last?.focus();}else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first?.focus();}}
+   }
+   input.addEventListener('input',()=>{query=input.value;render();});
+   modal.querySelector('#vcShowAbsent')?.addEventListener('change',event=>{showAbsent=event.target.checked;render();});
+   modal.addEventListener('click',event=>{if(event.target.closest('[data-vc-close]')){close();return;}const categoryButton=event.target.closest('[data-vc-category]');if(categoryButton){selectedCategory=categoryButton.dataset.vcCategory;renderCategories();render();return;}if(event.target.closest('[data-vc-reset]')){selectedCategory='';query='';input.value='';showAbsent=false;const toggle=modal.querySelector('#vcShowAbsent');if(toggle)toggle.checked=false;renderCategories();render();input.focus();return;}const row=event.target.closest('[data-vc-index]');if(row)choose(Number(row.dataset.vcIndex));});
+   document.addEventListener('keydown',onKey,true);renderCategories();render();input.focus();
+ };
+})();

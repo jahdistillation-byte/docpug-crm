@@ -9,6 +9,7 @@
  }
  window.mountPugVisitWorkspace=(visit,pet)=>{
    const page=document.querySelector('.page[data-page="visit"]'),workspace=page?.querySelector('.visitWorkspace'),main=workspace?.querySelector('.visitWorkspaceMain');if(!main)return;
+   window.mountPugVisitCatalogControls?.();
    const t=words();page.classList.add('pugVisitWorkspace');workspace.id='pugVisitWorkspaceRoot';
    const exam=main.querySelector('.visitSectionCard:has(#visitReasonForVisit)');
    if(exam&&!workspace.dataset.clinicalLayout){
