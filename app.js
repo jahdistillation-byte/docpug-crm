@@ -3790,6 +3790,8 @@ Object.assign(APP_TRANSLATIONS.pl, {
 });
 
 Object.assign(APP_TRANSLATIONS.uk, {
+  "patients.form.microchip": "Номер мікрочипа",
+  "patients.form.microchipHint": "Номер з паспорта або сканера",
   "patients.form.newKicker": "НОВИЙ ПАЦІЄНТ",
   "patients.form.editKicker": "РЕДАГУВАННЯ ПАЦІЄНТА",
   "patients.form.addTitle": "Додати тварину",
@@ -3811,6 +3813,8 @@ Object.assign(APP_TRANSLATIONS.uk, {
 });
 
 Object.assign(APP_TRANSLATIONS.en, {
+  "patients.form.microchip": "Microchip number",
+  "patients.form.microchipHint": "Number from the passport or scanner",
   "patients.form.newKicker": "NEW PATIENT",
   "patients.form.editKicker": "EDIT PATIENT",
   "patients.form.addTitle": "Add animal",
@@ -3832,6 +3836,8 @@ Object.assign(APP_TRANSLATIONS.en, {
 });
 
 Object.assign(APP_TRANSLATIONS.de, {
+  "patients.form.microchip": "Mikrochipnummer",
+  "patients.form.microchipHint": "Nummer aus dem Heimtierausweis oder Scanner",
   "patients.form.newKicker": "NEUER PATIENT",
   "patients.form.editKicker": "PATIENT BEARBEITEN",
   "patients.form.addTitle": "Tier hinzufügen",
@@ -3853,6 +3859,8 @@ Object.assign(APP_TRANSLATIONS.de, {
 });
 
 Object.assign(APP_TRANSLATIONS.pl, {
+  "patients.form.microchip": "Numer mikroczipu",
+  "patients.form.microchipHint": "Numer z paszportu lub czytnika",
   "patients.form.newKicker": "NOWY PACJENT",
   "patients.form.editKicker": "EDYCJA PACJENTA",
   "patients.form.addTitle": "Dodaj zwierzę",
@@ -11641,6 +11649,8 @@ async function createPatientApi(payload) {
     String(
       payload?.age || ""
     ).trim(),
+
+  microchip_number: String(payload?.microchip_number || "").trim(),
 
   weight_kg:
     String(
@@ -62088,6 +62098,8 @@ dynamicBox.innerHTML = `
             </span>
           </div>
 
+          <div><span style="opacity:.5;">${escapeHtml(translateInterfaceText("patients.form.microchip"))}:</span><span style="margin-left:6px;">${escapeHtml(pet.microchip_number || "—")}</span></div>
+
           ${renderPassportVaccination({
             labelKey:
               "calendar.detail.rabies",
@@ -106470,6 +106482,11 @@ function openAddPetModal(
   </div>
 </label>
 
+<label class="addPetField addPetFieldFull">
+  <span class="addPetLabel"><span data-i18n="patients.form.microchip"></span> <small data-i18n="patients.form.optional"></small></span>
+  <input id="addPetMicrochip" class="addPetInput" type="text" maxlength="64" autocomplete="off" spellcheck="false" data-i18n-placeholder="patients.form.microchipHint">
+</label>
+
 <label
   class="
     addPetField
@@ -106552,6 +106569,7 @@ let activeOtherGroupId =
   "";
   const ageInput = overlay.querySelector("#addPetAge");
   const weightInput = overlay.querySelector("#addPetWeight");
+  const microchipInput = overlay.querySelector("#addPetMicrochip");
   const sexInput =
   overlay.querySelector(
     "#addPetSex"
@@ -106914,6 +106932,8 @@ const getPetModalState =
         String(
           ageInput?.value || ""
         ).trim(),
+
+      microchip: String(microchipInput?.value || "").trim(),
 
       weight:
         String(
@@ -107439,6 +107459,8 @@ if (isEditMode) {
     String(
       petToEdit.age || ""
     );
+
+  microchipInput.value = String(petToEdit.microchip_number || "");
 
   weightInput.value =
     String(
@@ -108182,6 +108204,7 @@ if (weightRaw) {
 `;
 
         const payload = {
+  microchip_number: microchipInput.value.trim(),
   owner_id:
     ownerId,
 
@@ -108654,6 +108677,7 @@ function closeVisitModal() {
     "#visitNewPetBreed",
     "#visitNewPetAge",
     "#visitNewPetWeight",
+    "#visitNewPetMicrochip",
   ].forEach((selector) => {
     const element =
       $(selector);
@@ -109196,6 +109220,7 @@ const petName =
 
           const patient =
   await createPatientApi({
+    microchip_number: String($("#visitNewPetMicrochip")?.value || "").trim(),
     owner_id:
       owner.id,
 
@@ -109303,6 +109328,7 @@ const petName =
             "#visitNewPetBreed",
             "#visitNewPetAge",
             "#visitNewPetWeight",
+            "#visitNewPetMicrochip",
           ].forEach(
             (selector) => {
               const input =
@@ -110319,6 +110345,8 @@ function getVisitModalState() {
           ?.value || ""
       ).trim(),
 
+    petMicrochip: String($("#visitNewPetMicrochip")?.value || "").trim(),
+
     petWeight:
       String(
         $("#visitNewPetWeight")
@@ -110597,6 +110625,7 @@ telegram:
 
       const createdPet =
   await createPatientApi({
+    microchip_number: String($("#visitNewPetMicrochip")?.value || "").trim(),
     owner_id:
       owner.id,
 
@@ -111040,6 +111069,10 @@ async function updatePatientApi(petId, payload = {}) {
         delete bodyObj[key];
       }
     });
+
+    if (Object.prototype.hasOwnProperty.call(payload, "microchip_number")) {
+      bodyObj.microchip_number = String(payload.microchip_number || "").trim() || null;
+    }
 
     const response = await fetch(
       `/api/patients/${encodeURIComponent(petId)}`,
@@ -124460,6 +124493,7 @@ telegram:
 
         const patient =
   await createPatientApi({
+    microchip_number: String($("#visitNewPetMicrochip")?.value || "").trim(),
     owner_id:
       owner.id,
 

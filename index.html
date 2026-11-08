@@ -2232,6 +2232,10 @@
               <span data-i18n="calendar.detail.weight.kg">Вага, кг</span>
               <input class="pugVisitInput" id="visitNewPetWeight" placeholder="Напр. 7.5" data-i18n-placeholder="calendar.detail.for.example.7.5">
             </label>
+            <label class="pugVisitField" style="grid-column:1/-1;">
+              <span><span data-i18n="patients.form.microchip">Номер мікрочипа</span> <small data-i18n="patients.form.optional">необов’язково</small></span>
+              <input class="pugVisitInput" id="visitNewPetMicrochip" type="text" maxlength="64" autocomplete="off" spellcheck="false" data-i18n-placeholder="patients.form.microchipHint">
+            </label>
           </div>
         </div>
 
@@ -3154,7 +3158,7 @@
 <script defer src="patient-overview-workspace.js?v=20261108-2"></script>
 <script
   defer
-  src="app.js?v=20261108-patient-overview-v1"
+  src="app.js?v=20261108-patient-microchip-v1"
 ></script>
 <div id="deleteModal" class="deleteModalOverlay" style="display:none;">
   <div class="deleteModal">

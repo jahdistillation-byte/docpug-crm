@@ -17845,6 +17845,14 @@ def api_get_patients():
         )
 
 
+def normalize_patient_microchip(value):
+    if value is None:
+        return None
+    if not isinstance(value, str) or len(value.strip()) > 64:
+        raise ValueError("Номер мікрочипа має бути текстом до 64 символів.")
+    return value.strip() or None
+
+
 @app.post("/api/patients")
 def api_create_patient():
     user, auth_error = auth_required()
@@ -17858,6 +17866,11 @@ def api_create_patient():
         )
         or {}
     )
+
+    try:
+        microchip_number = normalize_patient_microchip(data.get("microchip_number"))
+    except ValueError as error:
+        return fail(str(error), 400)
 
     owner_id = str(
         data.get("owner_id") or ""
@@ -18080,6 +18093,9 @@ def api_create_patient():
         }
 
 
+        if microchip_number is not None:
+            payload["microchip_number"] = microchip_number
+
         result = (
             insert_with_optional_fallback(
                 "patients",
@@ -18236,7 +18252,14 @@ def api_update_patient(
         get_current_org_id()
     )
 
+    if "microchip_number" in data:
+        try:
+            data["microchip_number"] = normalize_patient_microchip(data["microchip_number"])
+        except ValueError as error:
+            return fail(str(error), 400)
+
     allowed_fields = [
+        "microchip_number",
         "name",
         "species",
         "breed",

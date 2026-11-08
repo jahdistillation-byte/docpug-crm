@@ -1,0 +1,7 @@
+# Optional patient microchip — 2026-11-08
+
+Adds microchip_number to patient create/edit, all calendar quick-registration creation paths and the patient passport. The identifier is optional text (maximum 64 characters), preserving leading zeroes and legacy identifier formats. No uniqueness or 15-digit-only restriction is imposed. Empty registration omits the property; explicit empty editing sends null to clear it; unrelated updates omit it and preserve the existing value. Unsaved-change checks and calendar field resets include the new input. Four interface languages are supported, using existing theme-aware form classes.
+
+Database prerequisite: apply supabase/migrations/20261108153000_patient_microchip.sql before releasing the application changes. This adds a nullable text column; no existing records are rewritten. A nonempty identifier is deliberately not included in the optional-schema fallback list: it must never be silently discarded.
+
+Validation: four Flask tests check optional creation, leading zeroes, length/type validation, clearing versus omission and organization/patient update filters. Two Node tests run the actual frontend API functions to check outgoing create/edit payloads and explicit null clearing. Existing owner-form and patient-overview browser fixtures pass with a microchip identifier, including rendering in the passport. No live clinic records were changed. The user confirmed successful execution of the column migration before deployment.
