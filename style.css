@@ -76241,3 +76241,134 @@ body[data-theme="white"] .page[data-page="finance"] :is(
 
 .disOwnerDischarge .disModernBulletList { white-space: normal !important; margin-top: 7px !important; padding-left: 18px !important; }
 .disOwnerDischarge .disModernBulletList li { margin: 3px 0 !important; }
+
+/* Patient labs: shared PUG surfaces with separate, readable result states. */
+@layer pugReadableInterface {
+html body[data-theme] .page[data-page="patient"] #patientCardRoot .premiumLabsPage {
+  --lab-muted: var(--ct-muted);
+  --lab-danger: #f2a4ae;
+  --lab-high: #edb57f;
+  --lab-low: #a9cafa;
+  --lab-normal: var(--ct-positive);
+  --lab-high-bg: #423225;
+  --lab-low-bg: #263c56;
+  --lab-normal-bg: #253d34;
+}
+html body[data-theme="white"] .page[data-page="patient"] #patientCardRoot .premiumLabsPage {
+  --lab-muted: #526779;
+  --lab-danger: #ad3345;
+  --lab-high: #844515;
+  --lab-low: #255990;
+  --lab-normal: #236448;
+  --lab-high-bg: #fff0e3;
+  --lab-low-bg: #e9f2ff;
+  --lab-normal-bg: #e9f5ee;
+}
+html body[data-theme] .page[data-page="patient"] #patientCardRoot .premiumLabsPage :is(
+  .premiumLabsHero, .premiumLabTypeButton, .premiumLabsHistory, .labHistoryCard, .premiumLabsEmpty
+) {
+  background: var(--ct-paper) !important;
+  color: var(--ct-text) !important;
+  border: 1px solid var(--ct-line) !important;
+  box-shadow: none !important;
+}
+html body[data-theme] .page[data-page="patient"] #patientCardRoot .premiumLabsPage :is(
+  .labHistoryStat, .labMetricCard, .premiumLabsSpecies, .labHistoryQualitative, .labHistoryComment, .labHistoryOwnerExplanation
+) {
+  background: var(--ct-soft) !important;
+  color: var(--ct-text) !important;
+  border: 1px solid var(--ct-line) !important;
+  box-shadow: none !important;
+}
+html body[data-theme] .page[data-page="patient"] #patientCardRoot .premiumLabsPage :is(
+  h2, h3, .premiumLabTypeText strong, .labHistoryTitle, .labHistoryQualitative strong,
+  .labHistoryStat strong, .labMetricLabel, .labMetricValue, .labHistoryCommentText, .labHistoryOwnerExplanationText
+) { color: var(--ct-text) !important; }
+html body[data-theme] .page[data-page="patient"] #patientCardRoot .premiumLabsPage :is(
+  p, .premiumLabsSpecies span, .premiumLabTypeText small, .labHistorySubtitle, .labHistoryStat > span,
+  .labMetricCode, .labMetricUnit, .labMetricRef, .labHistoryQualitative small
+) { color: var(--lab-muted) !important; opacity: 1 !important; }
+html body[data-theme] .page[data-page="patient"] #patientCardRoot .premiumLabsPage :is(
+  .premiumLabsKicker, .premiumLabsSpecies strong, .labHistoryKicker, .labHistoryMetaIcon,
+  .labHistoryCommentLabel, .labHistoryOwnerExplanationLabel
+) { color: var(--ct-accent) !important; }
+html body[data-theme] .page[data-page="patient"] #patientCardRoot .premiumLabsPage :is(
+  .premiumLabsHeroIcon, .premiumLabTypeIcon, .premiumLabTypeAction, .premiumLabsEmptyIcon,
+  .labHistoryIcon, .labHistoryQualitativeIcon, .labActionBtn
+) {
+  color: var(--ct-accent) !important;
+  background: var(--ct-accent-soft) !important;
+  border-color: var(--ct-line) !important;
+  box-shadow: none !important;
+}
+html body[data-theme] .page[data-page="patient"] #patientCardRoot .premiumLabsPage .labActionBtnDanger {
+  color: var(--lab-danger) !important;
+}
+html body[data-theme] .page[data-page="patient"] #patientCardRoot .premiumLabsPage .labHistoryCardAccent {
+  background: var(--ct-accent) !important;
+  box-shadow: none !important;
+}
+html body[data-theme] .page[data-page="patient"] #patientCardRoot .premiumLabsPage .premiumLabTypeButton {
+  transition: background-color .15s ease, border-color .15s ease;
+  transform: none !important;
+}
+html body[data-theme] .page[data-page="patient"] #patientCardRoot .premiumLabsPage :is(.premiumLabTypeButton, .labActionBtn):hover {
+  background: var(--ct-hover) !important;
+  border-color: var(--ct-accent) !important;
+}
+html body[data-theme] .page[data-page="patient"] #patientCardRoot .premiumLabsPage button:focus-visible {
+  outline: 2px solid var(--ct-accent) !important;
+  outline-offset: 2px;
+}
+html body[data-theme] .page[data-page="patient"] #patientCardRoot .premiumLabsPage .premiumLabTypeText small {
+  font-size: 13px !important;
+  line-height: 1.35 !important;
+  white-space: normal !important;
+  overflow-wrap: anywhere;
+}
+html body[data-theme] .page[data-page="patient"] #patientCardRoot .premiumLabsPage .labHistoryStats {
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  max-width: 700px;
+}
+html body[data-theme] .page[data-page="patient"] #patientCardRoot .premiumLabsPage .labHistoryStat {
+  min-width: 0 !important;
+  overflow-wrap: anywhere;
+}
+html body[data-theme] .page[data-page="patient"] #patientCardRoot .premiumLabsPage .labHistoryStat > span {
+  font-size: 12px !important;
+  text-transform: none;
+  letter-spacing: 0;
+}
+html body[data-theme] .page[data-page="patient"] #patientCardRoot .premiumLabsPage :is(.labHistoryStat strong, .labMetricValue) {
+  font-variant-numeric: tabular-nums;
+}
+html body[data-theme] .page[data-page="patient"] #patientCardRoot .premiumLabsPage :is(.labMetricStatus-high, .labHistoryStatHigh strong) {
+  color: var(--lab-high) !important;
+}
+html body[data-theme] .page[data-page="patient"] #patientCardRoot .premiumLabsPage :is(.labMetricStatus-low, .labHistoryStatLow strong) {
+  color: var(--lab-low) !important;
+}
+html body[data-theme] .page[data-page="patient"] #patientCardRoot .premiumLabsPage :is(.labMetricStatus-normal, .labHistoryStatOk strong) {
+  color: var(--lab-normal) !important;
+}
+html body[data-theme] .page[data-page="patient"] #patientCardRoot .premiumLabsPage .labMetricStatus-high { background: var(--lab-high-bg) !important; }
+html body[data-theme] .page[data-page="patient"] #patientCardRoot .premiumLabsPage .labMetricStatus-low { background: var(--lab-low-bg) !important; }
+html body[data-theme] .page[data-page="patient"] #patientCardRoot .premiumLabsPage .labMetricStatus-normal { background: var(--lab-normal-bg) !important; }
+html body[data-theme] .page[data-page="patient"] #patientCardRoot .premiumLabsPage .labMetricStatus-unknown {
+  background: var(--ct-paper) !important;
+  color: var(--lab-muted) !important;
+}
+html body[data-theme] .page[data-page="patient"] #patientCardRoot .premiumLabsPage .labMetricHeader { flex-wrap: wrap; gap: 6px 10px; }
+html body[data-theme] .page[data-page="patient"] #patientCardRoot .premiumLabsPage .labMetricStatus { white-space: normal; }
+html body[data-theme] .page[data-page="patient"] #patientCardRoot .premiumLabsPage .labMetricRef { line-height: 1.4; }
+html body[data-theme] .page[data-page="patient"] #patientCardRoot .premiumLabsPage .labMetricMain { flex-wrap: wrap; overflow-wrap: anywhere; }
+@media (max-width: 640px) {
+  html body[data-theme] .page[data-page="patient"] #patientCardRoot .premiumLabsPage .labHistoryStats {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+  html body[data-theme] .page[data-page="patient"] #patientCardRoot .premiumLabsPage .labMetricsGrid {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+}
+}
