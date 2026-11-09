@@ -22392,10 +22392,10 @@ Object.assign(
       pl: "Naliczono",
     },
 
-    "🧠 Навички": {
-      en: "🧠 Skills",
-      de: "🧠 Fähigkeiten",
-      pl: "🧠 Umiejętności",
+    "Навички": {
+      en: "Skills",
+      de: "Fähigkeiten",
+      pl: "Umiejętności",
     },
 
     "+ Додати": {
@@ -23684,8 +23684,14 @@ installTeamLocalization(
     doc.role === "admin" ? "Адміністратор" :
     "Ветеринарний лікар";
 
-  const dashboard = await loadStaffDashboardApi(doc.id);
-  const liveStats = await buildStaffLiveStats(doc.id);
+  const today = todayISO();
+  const [dashboard, liveStats, schedule] = await Promise.all([
+    loadStaffDashboardApi(doc.id),
+    buildStaffLiveStats(doc.id),
+    loadStaffScheduleApi(today),
+  ]);
+  const shift = schedule.find((row) => String(row.staff_id) === String(doc.id));
+  const onShift = Boolean(shift && shift.is_active !== false);
 
 Object.assign(dashboard, liveStats);
 
@@ -23753,7 +23759,9 @@ const revenue = Number(dashboard.revenue || 0);
       <div class="teamDashName">${escapeHtml(staffName)}</div>
 ${profileTitle ? `<div class="teamDashTitle">🏆 ${escapeHtml(profileTitle)}</div>` : ""}
 <div class="teamDashRole">${escapeHtml(roleLabel)}</div>
-      <div class="teamDashStatus">На зміні</div>
+      <div class="teamDashStatus ${onShift ? "" : "is-off"}">
+        ${escapeHtml(getTeamInterfaceText(onShift ? "На зміні" : "Вихідний"))}
+      </div>
 
       <div class="teamDashContact">
   <div
@@ -23874,7 +23882,7 @@ ${profileTitle ? `<div class="teamDashTitle">🏆 ${escapeHtml(profileTitle)}</d
 
   <div class="teamDashTop">
     <div>
-      <h1>${escapeHtml(staffName)} 👋</h1>
+      <h1>${escapeHtml(staffName)}</h1>
       <p>Ваші показники, досягнення та ефективність</p>
     </div>
 
@@ -23933,6 +23941,8 @@ ${profileTitle ? `<div class="teamDashTitle">🏆 ${escapeHtml(profileTitle)}</d
 
 const profileState = {
   doc,
+  today,
+  career,
   dashboard,
   staffName,
   staffColor,
@@ -23999,18 +24009,6 @@ function renderTeamProfileTab(
     renderTeamOverviewTab(
       root,
       state
-    );
-
-    window.__lastTeamDashboard =
-      state.dashboard;
-
-    requestAnimationFrame(
-      () => {
-        renderStaffProfileCharts(
-          state.dashboard,
-          6
-        );
-      }
     );
 
     return;
@@ -24166,370 +24164,90 @@ function getTeamNextLevelText(
 }
 
 
-function getTeamOverviewInsightHtml({
-  staffName,
-  revenueGrowth,
-  visitsGrowth,
-  rating,
-}) {
-  const safeName =
-    escapeHtml(
-      staffName || ""
-    );
+Object.assign(TEAM_INTERFACE_TEXT, {
+  "До завершення": { en: "To complete", de: "Noch offen", pl: "Do zakończenia" },
+  "Поточний місяць": { en: "This month", de: "Dieser Monat", pl: "Ten miesiąc" },
+  "Відкрити аналітику": { en: "Open analytics", de: "Analyse öffnen", pl: "Otwórz analitykę" },
+  "Відкрити досягнення": { en: "Open achievements", de: "Erfolge öffnen", pl: "Otwórz osiągnięcia" },
+  "Карʼєра": { en: "Career", de: "Karriere", pl: "Kariera" },
+});
 
-  const safeRevenueGrowth =
-    escapeHtml(
-      String(
-        Number(
-          revenueGrowth || 0
-        )
-      )
-    );
-
-  const safeVisitsGrowth =
-    escapeHtml(
-      String(
-        Number(
-          visitsGrowth || 0
-        )
-      )
-    );
-
-  const safeRating =
-    rating
-      ? escapeHtml(
-          Number(rating)
-            .toFixed(2)
-        )
-      : "—";
-
-  const language =
-    getInterfaceLanguage();
-
-  if (language === "en") {
-    return `
-      ${safeName} has stable performance:
-      revenue changed by
-      <strong>${safeRevenueGrowth}%</strong>,
-      visits changed by
-      <strong>${safeVisitsGrowth}%</strong>.
-      Current client rating:
-      <strong>${safeRating}</strong>.
-    `;
-  }
-
-  if (language === "de") {
-    return `
-      ${safeName} zeigt stabile Ergebnisse:
-      Der Umsatz hat sich um
-      <strong>${safeRevenueGrowth}%</strong>
-      verändert, die Anzahl der Termine um
-      <strong>${safeVisitsGrowth}%</strong>.
-      Aktuelle Kundenbewertung:
-      <strong>${safeRating}</strong>.
-    `;
-  }
-
-  if (language === "pl") {
-    return `
-      ${safeName} ma stabilne wyniki:
-      przychód zmienił się o
-      <strong>${safeRevenueGrowth}%</strong>,
-      a liczba wizyt o
-      <strong>${safeVisitsGrowth}%</strong>.
-      Aktualna ocena klientów:
-      <strong>${safeRating}</strong>.
-    `;
-  }
-
-  return `
-    ${safeName} має стабільні показники:
-    виручка змінилась на
-    <strong>${safeRevenueGrowth}%</strong>,
-    кількість візитів — на
-    <strong>${safeVisitsGrowth}%</strong>.
-    Поточний рейтинг клієнтів —
-    <strong>${safeRating}</strong>.
-  `;
-}
-
-
-function renderTeamOverviewTab(
-  root,
-  state
-) {
-  const {
-    dashboard,
-    staffName,
-    revenue,
-    visits,
-    checks,
-    avgCheck,
-    rating,
-    revenueGrowth,
-    visitsGrowth,
-    checksGrowth,
-    avgCheckGrowth,
-    doc,
-  } = state;
+function renderTeamOverviewTab(root, state) {
+  const { dashboard, career, doc, today } = state;
+  const label = (key) => escapeHtml(getTeamInterfaceText(key));
+  const appointmentStatuses = (dashboard.live_calendar_events || [])
+    .filter((event) => event.event_date === today)
+    .map((event) => getCalendarEventVisualStatus(event).key)
+    .filter((status) => status !== "cancelled" && status !== "no_show");
+  const completed = appointmentStatuses.filter((status) => status === "completed").length;
+  const metrics = [
+    ["Записів сьогодні", appointmentStatuses.length],
+    ["Виконано", completed],
+    ["До завершення", appointmentStatuses.length - completed],
+  ];
 
   root.innerHTML = `
-    <section class="teamDashKpis">
-      ${renderTeamKpiCard(
-        "💰",
-        "Виручка",
-        getTeamMoneyText(
-          revenue
-        ),
-        revenueGrowth
-      )}
-
-      ${renderTeamKpiCard(
-        "🐾",
-        "Візити",
-        visits,
-        visitsGrowth
-      )}
-
-      ${renderTeamKpiCard(
-        "💳",
-        "Середній чек",
-        getTeamMoneyText(
-          avgCheck
-        ),
-        avgCheckGrowth
-      )}
-
-      ${renderTeamKpiCard(
-        "⭐",
-        "Рейтинг клієнтів",
-        rating
-          ? rating.toFixed(2)
-          : "—",
-        0
-      )}
-
-      ${renderTeamKpiCard(
-        "🧾",
-        "Закрито чеків",
-        checks,
-        checksGrowth
-      )}
-    </section>
-
-    <section class="teamDashInsight">
-      <div class="teamInsightIcon">
-        ✨
-      </div>
-
-      <div>
-        <b>
-          Що варто знати сьогодні
-        </b>
-
-        <p>
-          ${getTeamOverviewInsightHtml({
-            staffName,
-            revenueGrowth,
-            visitsGrowth,
-            rating,
-          })}
-        </p>
-      </div>
-    </section>
-
-    <section class="teamDashGrid">
-      <div
-        class="
-          teamDashPanel
-          teamDashPanelLarge
-        "
-      >
-        <div class="teamDashPanelHead">
-          <h3>
-            Виручка
-          </h3>
-
-          <span>
-            грн
+    <div class="teamOverview">
+      <section class="teamDashPanel teamOverviewToday" aria-labelledby="teamTodayTitle">
+        <div class="teamOverviewHeading">
+          <span class="teamOverviewIcon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M7 3v4m10-4v4M3 10h18"/></svg>
           </span>
-        </div>
-
-        <div class="teamChartBox">
-          <canvas
-            id="staffRevenueChart"
-          ></canvas>
-        </div>
-      </div>
-
-      <div
-        class="
-          teamDashPanel
-          teamDashPanelLarge
-        "
-      >
-        <div class="teamDashPanelHead">
-          <h3>
-            Кількість візитів
-          </h3>
-
-          <span>
-            візити
-          </span>
-        </div>
-
-        <div class="teamChartBox">
-          <canvas
-            id="staffVisitsChart"
-          ></canvas>
-        </div>
-      </div>
-
-      <div class="teamDashPanel">
-        <div class="teamDashPanelHead">
-          <h3>
-            🎯 Сьогодні
-          </h3>
-        </div>
-
-        <div class="teamDashRows">
-          <p>
-            <span>Статус</span>
-            <b>На зміні</b>
-          </p>
-
-          <p>
-            <span>Записів сьогодні</span>
-            <b>0</b>
-          </p>
-
-          <p>
-            <span>Виконано</span>
-            <b>0</b>
-          </p>
-
-          <p>
-            <span>Попереду</span>
-            <b>0</b>
-          </p>
-        </div>
-      </div>
-
-      <div class="teamDashPanel">
-        <div class="teamDashPanelHead">
-          <h3>
-            🏆 Карʼєра
-          </h3>
-
-          <span>
-            ${getTeamLevelText(1)}
-          </span>
-        </div>
-
-        <div class="teamDashXp">
           <div>
-            <b>
-              ${getTeamLevelText(1)}
-            </b>
-
-            <span>
-              0 / 100 XP
-            </span>
+            <h2 id="teamTodayTitle">${label("Сьогодні")}</h2>
+            <time datetime="${escapeHtml(today)}">${escapeHtml(formatCalendarDate(today, { weekday: "long", day: "numeric", month: "long" }))}</time>
           </div>
-
-          <i>
-            <em
-              style="width:0%"
-            ></em>
-          </i>
-
-          <p>
-            ${getTeamNextLevelText(
-              100
-            )}
-          </p>
         </div>
-      </div>
+        <dl class="teamOverviewMetrics">
+          ${metrics.map(([key, count]) => `<div><dt>${label(key)}</dt><dd>${count}</dd></div>`).join("")}
+        </dl>
+      </section>
 
-      ${renderStaffSkillsPanel(
-        doc
-      )}
-
-      <div
-        class="
-          teamDashPanel
-          teamDashFull
-        "
-      >
-        <div class="teamDashPanelHead">
-          <h3>
-            💰 Фінансова інформація
-
-            <span class="panelMutedTitle">
-              (за цей місяць)
-            </span>
-          </h3>
+      <section class="teamDashPanel teamOverviewCareer" aria-labelledby="teamCareerTitle">
+        <div class="teamOverviewHeading">
+          <span class="teamOverviewIcon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="9" r="6"/><path d="m8.5 14-2 7 5.5-2.5 5.5 2.5-2-7"/></svg>
+          </span>
+          <div>
+            <h2 id="teamCareerTitle">${label("Карʼєра")}</h2>
+            <span>${escapeHtml(getTeamLevelText(career.level))}</span>
+          </div>
         </div>
-
-        <div class="teamDashRows">
-          <p>
-            <span>Ставка</span>
-
-            <b>
-              ${escapeHtml(
-                String(
-                  doc.shift_rate ||
-                  0
-                )
-              )}
-              ${getTeamInterfaceText(
-                "грн / зміна"
-              )}
-            </b>
-          </p>
-
-          <p>
-            <span>Відсоток</span>
-
-            <b>
-              ${escapeHtml(
-                String(
-                  doc.percent_rate ||
-                  0
-                )
-              )}%
-            </b>
-          </p>
-
-          <p>
-            <span>Бонуси</span>
-            <b>—</b>
-          </p>
-
-          <p>
-            <span>Нараховано</span>
-
-            <b>
-              ${getTeamMoneyText(
-                revenue
-              )}
-            </b>
-          </p>
+        <div class="teamOverviewProgress">
+          <progress aria-labelledby="teamCareerTitle" value="${career.progressPercent}" max="100"></progress>
+          <span>${career.xpInLevel} / ${career.neededForNext} XP</span>
         </div>
-      </div>
-    </section>
+        <button type="button" class="teamGhostBtn teamOverviewLink" data-team-overview-tab="achievements">
+          ${label("Відкрити досягнення")} <span aria-hidden="true">→</span>
+        </button>
+      </section>
+
+      <section class="teamDashPanel teamOverviewMonth" aria-labelledby="teamMonthTitle">
+        <div>
+          <h2 id="teamMonthTitle">${label("Поточний місяць")}</h2>
+          <span>${label("Візити")} <strong>${Number(dashboard.visits_this_month || 0)}</strong></span>
+        </div>
+        <button type="button" class="teamGhostBtn teamOverviewLink" data-team-overview-tab="analytics">
+          ${label("Відкрити аналітику")} <span aria-hidden="true">→</span>
+        </button>
+      </section>
+
+      ${renderStaffSkillsPanel(doc)}
+    </div>
   `;
 
-  if (
-    typeof bindStaffSkillsPanel ===
-    "function"
-  ) {
-    bindStaffSkillsPanel(
-      root,
-      state
-    );
-  }
+  root.querySelectorAll("[data-team-overview-tab]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const tab = document.querySelector(`#teamProfileNav [data-profile-tab="${button.dataset.teamOverviewTab}"]`);
+      tab?.click();
+      tab?.focus({ preventScroll: true });
+      root.scrollIntoView({ block: "nearest" });
+    });
+  });
+
+  bindStaffSkillsPanel(root, state);
 }
+
 function getStaffSkills(doc) {
   const raw = doc?.skills;
 
@@ -24556,7 +24274,7 @@ function renderStaffSkillsPanel(doc) {
   return `
     <div class="teamDashPanel staffSkillsPanel">
       <div class="teamDashPanelHead">
-        <h3>🧠 Навички</h3>
+        <h3>Навички</h3>
         <button class="teamGhostBtn mini" id="btnAddStaffSkill" type="button">
           + Додати
         </button>

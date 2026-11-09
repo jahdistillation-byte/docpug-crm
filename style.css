@@ -77443,14 +77443,14 @@ html body[data-theme] .page[data-page="patient"] #patientCardRoot .premiumLabsPa
   }
 
   html body[data-theme] .page[data-page="team"] .teamDashTop {
-    padding: clamp(14px, 2vw, 24px);
+    padding: clamp(14px, 2vw, 24px) !important;
     border: 1px solid var(--ct-line);
     border-radius: 18px;
   }
 
   @media (min-width: 1251px) {
     .page[data-page="team"] .teamDashSidebar {
-      overflow-y: auto;
+      overflow-y: auto !important;
       scrollbar-color: var(--ct-line) transparent;
     }
   }
@@ -77460,5 +77460,133 @@ html body[data-theme] .page[data-page="patient"] #patientCardRoot .premiumLabsPa
     .premiumVetActions :is(.premiumEditBtn, .premiumDeleteBtn) {
       font-size: 0 !important;
     }
+  }
+}
+
+/* Veterinarian overview prioritizes today's work and personal progress. */
+@layer pugReadableInterface {
+  html body[data-theme] .page[data-page="team"] .teamDashStatus.is-off {
+    color: var(--team-muted) !important;
+    box-shadow: none !important;
+  }
+
+  .page[data-page="team"] .teamOverview {
+    display: grid;
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+    gap: 14px;
+  }
+
+  html body[data-theme] .page[data-page="team"] .teamOverview > .teamDashPanel {
+    min-width: 0;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: clamp(14px, 2vw, 23px) !important;
+    border-radius: 18px !important;
+  }
+
+  html body[data-theme] .page[data-page="team"] .teamOverviewCareer {
+    background: var(--ct-accent-soft) !important;
+    border-color: color-mix(in srgb, var(--ct-accent) 38%, var(--ct-line)) !important;
+  }
+
+  .teamOverviewHeading {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .teamOverviewIcon {
+    display: grid;
+    place-items: center;
+    flex: 0 0 40px;
+    height: 40px;
+    border-radius: 11px;
+    background: var(--ct-paper);
+    border: 1px solid var(--ct-line);
+    color: var(--ct-accent);
+  }
+
+  .teamOverviewIcon svg { width: 21px; height: 21px; }
+
+  .teamOverview h2 {
+    margin: 0 0 3px;
+    font-size: clamp(17px, 1.5vw, 20px) !important;
+    line-height: 1.25;
+  }
+
+  .teamOverviewHeading :is(time, div > span),
+  .teamOverviewMonth div > span,
+  .teamOverviewProgress > span {
+    color: var(--team-muted);
+    font-size: 13px;
+  }
+
+  .teamOverviewMetrics {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 7px;
+    margin: 16px 0 0 !important;
+  }
+
+  .teamOverviewMetrics > div {
+    display: flex;
+    flex-direction: column-reverse;
+    justify-content: flex-end;
+    gap: 4px;
+    min-width: 0;
+    padding: 9px !important;
+    border: 1px solid var(--ct-line);
+    border-radius: 11px;
+    background: var(--ct-soft);
+  }
+
+  .teamOverviewMetrics dt {
+    color: var(--team-muted);
+    font-size: 12px;
+    overflow-wrap: anywhere;
+  }
+
+  .teamOverviewMetrics dd {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 750;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .teamOverviewProgress {
+    display: grid;
+    gap: 5px;
+    margin: 15px 0 10px !important;
+  }
+
+  .teamOverviewProgress progress {
+    width: 100%;
+    height: 8px;
+    appearance: none;
+    border: 0;
+    border-radius: 8px;
+    overflow: hidden;
+    background: var(--ct-line);
+    accent-color: var(--ct-accent);
+  }
+
+  .teamOverviewProgress progress::-webkit-progress-bar { background: var(--ct-line); }
+  .teamOverviewProgress progress::-webkit-progress-value { background: var(--ct-accent); }
+  .teamOverviewProgress progress::-moz-progress-bar { background: var(--ct-accent); }
+
+  .teamOverview :is(.teamOverviewMonth, .staffSkillsPanel) { grid-column: 1 / -1; }
+
+  .teamOverviewMonth {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .teamOverviewMonth strong { color: var(--ct-text); margin-inline-start: 5px; }
+
+  @media (max-width: 1050px) {
+    .page[data-page="team"] .teamOverview { grid-template-columns: minmax(0, 1fr); }
   }
 }
