@@ -77213,7 +77213,7 @@ html body[data-theme] .page[data-page="patient"] #patientCardRoot .premiumLabsPa
     .page[data-page="team"], #staffDrawer, .staffProfileModal, .staffSkillModal,
     .specializationEditorModal, .staffPasswordResetOverlay .financeAdjustModal
   ) {
-    --team-muted: color-mix(in srgb, var(--ct-muted) 86%, var(--ct-text));
+    --team-muted: color-mix(in srgb, var(--ct-muted) 70%, var(--ct-text));
     --team-danger: #f2a4ae;
     --text-main: var(--ct-text);
     --text-muted: var(--team-muted);
@@ -77242,7 +77242,7 @@ html body[data-theme] .page[data-page="patient"] #patientCardRoot .premiumLabsPa
   ) { --team-danger: #a42e43; }
 
   html body[data-theme] .page[data-page="team"] :is(
-    .teamPageCard, .teamDirectoryCard, .teamDashSidebar, .teamDashTop, .teamDashPanel,
+    .teamDirectoryCard, .teamDashSidebar, .teamDashTop, .teamDashPanel,
     .teamKpiCard, .teamSubHero, .teamCareerHero, .clinicRatingBoard, .staffSkillsPanel,
     .teamVisitCard, .teamVisitFilters, .teamPhotoSettings
   ),
@@ -77257,7 +77257,7 @@ html body[data-theme] .page[data-page="patient"] #patientCardRoot .premiumLabsPa
   }
 
   html body[data-theme] .page[data-page="team"] :is(
-    .teamDirectorySection, .teamDirectorySectionHeader, .teamDirectorySummary,
+    .teamDirectorySummary,
     .teamDirectorySearch, .teamDirectoryEmpty, .specPanel, .teamDirectoryCard .premiumVetMeta,
     .teamDashInsight, .teamDashIdBox, .teamDashEmergencyContact, .teamChartBox,
     .teamFinanceRow, .clinicRatingRow, .staffSkillCard
@@ -77370,6 +77370,77 @@ html body[data-theme] .page[data-page="patient"] #patientCardRoot .premiumLabsPa
     .teamDirectorySectionHeader, .teamDirectoryFilters button, .teamDashNav button,
     .teamDirectoryCard .premiumVetActions button, .teamGhostBtn
   ):hover:not(.active, :disabled) { background: var(--ct-hover) !important; }
+
+  html body[data-theme] .page[data-page="team"] .teamPageCard {
+    background: transparent !important;
+  }
+
+  html body[data-theme] .page[data-page="team"] .teamPageCard > .row:first-child {
+    display: flex !important;
+    flex-wrap: wrap;
+    gap: 12px 24px !important;
+    margin: 0 0 16px !important;
+    padding: clamp(16px, 2.5vw, 28px) !important;
+    background: linear-gradient(110deg, var(--ct-paper) 35%, var(--ct-accent-soft)) !important;
+    border: 1px solid var(--ct-line) !important;
+    border-radius: 18px;
+  }
+
+  html body[data-theme] .page[data-page="team"] .teamPageCard > .row:first-child h2 {
+    margin: 0 0 5px;
+    font-size: clamp(24px, 3vw, 32px);
+    line-height: 1.15;
+  }
+
+  html body[data-theme] .page[data-page="team"] .vetList {
+    gap: 18px;
+    margin-top: 16px;
+  }
+
+  html body[data-theme] .page[data-page="team"] .teamDirectorySection {
+    --team-group-edge: color-mix(in srgb, var(--team-group-color, #8294a3) 58%, var(--ct-line));
+    background: var(--ct-soft) !important;
+    border: 1px solid color-mix(in srgb, var(--team-group-edge) 46%, var(--ct-line)) !important;
+    border-inline-start: 3px solid var(--team-group-edge) !important;
+    padding: 10px !important;
+  }
+
+  html body[data-theme] .page[data-page="team"] .teamDirectorySectionHeader {
+    margin: 0 !important;
+    padding: 7px 8px !important;
+    background: color-mix(in srgb, var(--team-group-color, #8294a3) 10%, var(--ct-soft)) !important;
+    border: 0 !important;
+    border-radius: 11px !important;
+  }
+
+  html body[data-theme] .page[data-page="team"] .teamDirectorySectionHeader:hover {
+    background: color-mix(in srgb, var(--team-group-color, #8294a3) 16%, var(--ct-soft)) !important;
+  }
+
+  html body[data-theme] .page[data-page="team"] .teamDirectorySectionHeader:focus-visible {
+    outline-offset: -2px;
+  }
+
+  html body[data-theme] .page[data-page="team"] .teamDirectoryGroupCopy strong {
+    font-size: 15px;
+  }
+
+  html body[data-theme] .page[data-page="team"] .teamDirectorySectionHeader .teamDirectoryGroupCopy small {
+    display: block;
+    align-self: flex-start;
+    min-width: 0 !important;
+    width: auto !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
+    border: 0 !important;
+    text-align: left !important;
+  }
+
+  html body[data-theme] .page[data-page="team"] .teamDirectorySection:not(.isCollapsed) .teamDirectoryGrid {
+    margin-top: 8px !important;
+  }
 
   html body[data-theme] .page[data-page="team"] .teamDashTop {
     padding: clamp(14px, 2vw, 24px);
