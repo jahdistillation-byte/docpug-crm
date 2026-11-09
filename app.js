@@ -27566,6 +27566,24 @@ function getTeamSeasonDescription(
 }
 
 
+function teamAchievementIcon(name) {
+  const paths = {
+    cat_vaccines: '<path d="M5 13V5l5 4h4l5-4v8a7 7 0 0 1-14 0Z"/><path d="M9 13h.01m6 0h.01m-4 3h2"/>',
+    dog_vaccines: '<path d="M7 7h10l4 4-2 5-3-2v3a4 4 0 0 1-8 0v-3l-3 2-2-5 4-4Z"/><path d="M10 12h.01m4 0h.01M11 16h2"/>',
+    followup: '<path d="M4 10a8 8 0 1 1 1 7M4 5v5h5m3-1v4l3 1"/>',
+    surgery: '<path d="m5 16 8-8 3 3-8 8H5v-3ZM13 8l4-4h4v4l-5 3M5 22h14"/>',
+    dentistry: '<path d="M12 6c-4-4-8-1-8 3 0 4 3 5 3 10 0 2 2 2 3 0l2-5 2 5c1 2 3 2 3 0 0-5 3-6 3-10 0-4-4-7-8-3Z"/>',
+    ultrasound: '<path d="M3 13h4l2-6 4 12 3-8 2 2h3"/><path d="M4 5h16M4 21h16"/>',
+    hospital: '<rect x="4" y="4" width="16" height="16" rx="4"/><path d="M12 8v8m-4-4h8"/>',
+    frame: '<rect x="4" y="4" width="16" height="16" rx="5"/><rect x="8" y="8" width="8" height="8" rx="2"/>',
+    title: '<path d="M4 6h16v12H4zM8 10h8m-8 4h5"/>',
+    badge: '<path d="m12 3 8 5v8l-8 5-8-5V8l8-5Z"/><path d="m9 12 2 2 4-4"/>',
+    stickers: '<path d="M4 7a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v7l-6 6H7a3 3 0 0 1-3-3Z"/><path d="M14 20v-4a2 2 0 0 1 2-2h4M8 9h4m-2-2v4"/>',
+    secret: '<path d="m12 2 9 5v10l-9 5-9-5V7Z"/><path d="M9.5 9a2.5 2.5 0 1 1 4 2c-1 .8-1.5 1-1.5 2.5m0 3h.01"/>',
+  };
+  return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[name]}</svg>`;
+}
+
 async function renderTeamAchievementsTab(root, state) {
   root.innerHTML = `<section class="teamDashPanel" aria-busy="true"><p>Завантаження досягнень…</p></section>`;
   const loading = root.firstElementChild;
@@ -27588,6 +27606,7 @@ async function renderTeamAchievementsTab(root, state) {
   if (root.firstElementChild !== loading || !root.isConnected) return;
 
   const tracks = PUG_ACHIEVEMENT_TRACKS.map(({ id, title, steps }) => ({
+    id,
     title,
     steps,
     count: Number(counts[id] || 0),
@@ -27601,28 +27620,40 @@ async function renderTeamAchievementsTab(root, state) {
     <div class="teamAchievementWorkspace">
       <section class="teamCareerHero teamAchievementIntro">
         <div>
+          <span class="teamAchievementEyebrow">PUG COLLECTION</span>
           <h2>Досягнення</h2>
           <p>Збирайте відзнаки за підтверджену роботу. Ваш прогрес накопичується за весь час.</p>
         </div>
-        <strong>${unlocked} / 25</strong>
+        <div class="teamAchievementTotal"><strong>${unlocked} / 25</strong><span>Етапів пройдено</span></div>
       </section>
 
       <div class="teamAchievementTracks">
-        ${tracks.map(({ title, steps, count }) => {
+        ${tracks.map(({ id, title, steps, count }) => {
           const next = steps.findIndex(([target]) => count < target);
           const target = steps[next < 0 ? steps.length - 1 : next][0];
 
           return `
-            <section class="teamDashPanel teamAchievementTrack">
-              <header><h3>${escapeHtml(title)}</h3><strong>${count} / ${target}</strong></header>
+            <section class="teamDashPanel teamAchievementTrack" data-achievement-track="${id}">
+              <header>
+                <span class="teamAchievementMark">${teamAchievementIcon(id)}</span>
+                <h3>${escapeHtml(title)}</h3>
+                <strong>${count} / ${target}</strong>
+              </header>
               <progress aria-label="${escapeHtml(title)}" value="${Math.min(count, target)}" max="${target}"></progress>
-              <ol>
-                ${steps.map(([milestone, reward], index) => `
-                  <li class="${count >= milestone ? "is-unlocked" : ""}" ${index === next ? 'aria-current="step"' : ""}>
-                    <b>${milestone}</b>
-                    <div><span>${escapeHtml(reward)}</span><small>${count >= milestone ? "Етап пройдено" : index === next ? "Наступний етап" : "Попереду"}</small></div>
-                  </li>
-                `).join("")}
+              <ol class="teamAchievementSteps">
+                ${steps.map(([milestone, reward], index) => {
+                  const physical = id === "cat_vaccines" && index === 2;
+                  const icon = physical ? "stickers" : ["frame", "title", "badge"][index];
+                  return `
+                    <li class="${count >= milestone ? "is-unlocked" : ""} ${physical ? "is-physical" : ""}" ${index === next ? 'aria-current="step"' : ""}>
+                      <div class="teamAchievementStepTop">
+                        ${teamAchievementIcon(icon)}
+                        <b>${milestone}</b>
+                      </div>
+                      <span>${escapeHtml(reward)}</span>
+                      <small>${count >= milestone ? "Пройдено" : index === next ? "Наступна нагорода" : "Попереду"}</small>
+                    </li>`;
+                }).join("")}
               </ol>
             </section>`;
         }).join("")}
@@ -27633,10 +27664,10 @@ async function renderTeamAchievementsTab(root, state) {
         <p>Відкрийте другий етап у трьох напрямах, щоб відкрити колекційну композицію профілю.</p>
       </section>
 
-      <section class="teamDashPanel teamAchievementTrack">
+      <section class="teamDashPanel teamAchievementTrack teamAchievementLegendary">
         <header><h3>Легендарні</h3><strong>0 / 3</strong></header>
         <ol class="teamAchievementSecrets">
-          ${[1, 2, 3].map((number) => `<li aria-label="Секретна відзнака ${number}">?</li>`).join("")}
+          ${[1, 2, 3].map((number) => `<li aria-label="Секретна відзнака ${number}">${teamAchievementIcon("secret")}<span>0${number}</span></li>`).join("")}
         </ol>
         <p>Колекція фізичних емалевих пінів PUG готується. Умови відкриття залишаться таємницею.</p>
       </section>
