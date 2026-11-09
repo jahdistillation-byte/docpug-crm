@@ -44,7 +44,7 @@ class CheckboxTestClient:
         if payload is not None:
             headers["Content-Type"] = "application/json"
             data = json.dumps(payload).encode()
-        req = Request("https://api.checkbox.ua/api/v1/" + path, data, headers, method=method)
+        req = Request("https://api.checkbox.in.ua/api/v1/" + path, data, headers, method=method)
         try:
             with _open(req, timeout=8) as response:
                 if pdf:
@@ -62,7 +62,11 @@ class CheckboxTestClient:
             if error.code == 404 and missing:
                 return None
             if error.code in (401, 403):
-                raise CheckboxError("Checkbox відхилив доступ. Перевірте тестову касу та PIN.") from None
+                messages = {
+                    "cash-registers/info": "Checkbox відхилив перевірку ліцензії тестової каси.",
+                    "cashier/signinPinCode": "Checkbox відхилив вхід тестового касира. Перевірте ключ ліцензії та PIN.",
+                }
+                raise CheckboxError(messages.get(path, "Checkbox відхилив доступ до цієї операції.")) from None
             if error.code < 500:
                 raise CheckboxError("Checkbox відхилив операцію. Перевірте касу та стан зміни.") from None
             raise CheckboxError("Checkbox тимчасово недоступний. Перевірте статус перед повтором.", 502) from None
