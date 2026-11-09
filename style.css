@@ -77020,3 +77020,185 @@ html body[data-theme] .page[data-page="patient"] #patientCardRoot .premiumLabsPa
   color: var(--ct-text);
 }
 .checkboxVisitReceipts p { color: var(--ct-muted); }
+
+/* Finance uses the same surfaces, contrast and accents as the other PUG workspaces. */
+@layer pugReadableInterface {
+  html body[data-theme][data-current-route="finance"] {
+    background: var(--ct-bg) !important;
+  }
+
+  html body[data-theme] .page[data-page="finance"] {
+    --finance-accent: var(--ct-accent);
+    --finance-accent-2: var(--ct-accent-hover);
+    --finance-accent-soft: var(--ct-accent-soft);
+    --finance-surface-1: var(--ct-paper);
+    --finance-surface-2: var(--ct-paper);
+    --finance-surface-soft: var(--ct-soft);
+    --finance-surface-hover: var(--ct-hover);
+    --finance-input: var(--ct-paper);
+    --finance-text: var(--ct-text);
+    --finance-text-soft: var(--ct-text);
+    --finance-text-muted: var(--finance-readable-muted);
+    --finance-text-faint: var(--finance-readable-muted);
+    --finance-border: var(--ct-line);
+    --finance-border-strong: var(--ct-line);
+    --finance-color-scheme: var(--ct-scheme);
+    --finance-readable-muted: var(--ct-muted);
+    --finance-readable-danger: #f2a4ae;
+    --finance-readable-positive: var(--ct-positive);
+    --integration-muted: var(--finance-readable-muted);
+    --integration-border: var(--ct-line);
+    color: var(--ct-text) !important;
+    color-scheme: var(--ct-scheme);
+  }
+
+  html body[data-theme="white"] .page[data-page="finance"] {
+    --finance-readable-muted: #526779;
+    --finance-readable-danger: #ad3345;
+    --finance-readable-positive: #236448;
+  }
+
+  html body[data-theme] .page[data-page="finance"] :is(
+    .financeSectionNavigation, .financeHero, .financeControlHero, .financePanel,
+    .financeOperationsFilters, .financeAccountsPanel, .financeActionPanel, .financeDayBrief,
+    .financeClientCard, .financeClientsToolbar, .financeKpiCard, .financeSignalCard,
+    .financeIntegrationCard, .ownerReportMetric, .ownerReportPanel, .ownerReportTelegram,
+    .financeLoadError, .financePageLoading
+  ) {
+    background: var(--ct-paper) !important;
+    border-color: var(--ct-line) !important;
+    color: var(--ct-text) !important;
+    box-shadow: none !important;
+  }
+
+  html body[data-theme] .page[data-page="finance"] :is(
+    .financeOperationCard, .financeAccountCard, .financeClientVisit, .financeAttentionRow,
+    .financeTransactionRow, .financeIntegrationSecurityNote, .financeIntegrationForm,
+    .financeIntegrationDetails, .ownerReportAutoToggle, .ownerReportChips span
+  ) {
+    background: var(--ct-soft) !important;
+    border-color: var(--ct-line) !important;
+    color: var(--ct-text) !important;
+    box-shadow: none !important;
+  }
+
+  html body[data-theme] .page[data-page="finance"] :is(
+    h1, h2, h3, .financeIntegrationSecurityNote strong, .financeIntegrationDetails strong,
+    .financeOperationTitle, .financeAccountName, .ownerReportMetric > strong, .ownerReportRows b,
+    .ownerReportPanelHead > strong, .ownerReportServiceList strong, .ownerReportAutoToggle b
+  ) { color: var(--ct-text) !important; }
+
+  html body[data-theme] .page[data-page="finance"] :is(
+    p, small, label, .financeDateRange label > span, .financeDonut > div > span,
+    .financeOperationsPagination > span,
+    .financeIntegrationDetails span, .ownerReportMetric > span, .ownerReportServiceList span,
+    .ownerReportEmpty, .financeTransactionsEmpty, .financeClientsFilteredEmpty
+  ) { color: var(--finance-readable-muted) !important; }
+
+  html body[data-theme] .page[data-page="finance"] :is(
+    .financeEyebrow, .financeIntegrationBrand span, .ownerReportPanelHead span, .ownerReportTelegramCopy > span
+  ) { color: var(--ct-accent) !important; }
+
+  html body[data-theme] .page[data-page="finance"] :is(
+    .financeIntegrationSecurityNote > span, .ownerReportMetricIcon, .financeSectionButton > span
+  ) {
+    background: var(--ct-accent-soft) !important;
+    color: var(--ct-accent) !important;
+  }
+
+  html body[data-theme] .page[data-page="finance"] :is(
+    input:not([type="checkbox"]), select, textarea
+  ) {
+    min-width: 0;
+    max-width: 100%;
+    background: var(--ct-paper) !important;
+    border-color: var(--ct-line) !important;
+    color: var(--ct-text) !important;
+    color-scheme: var(--ct-scheme);
+  }
+
+  html body[data-theme] .page[data-page="finance"] :is(input, textarea)::placeholder {
+    color: var(--finance-readable-muted) !important;
+    opacity: 1;
+  }
+
+  html body[data-theme] .page[data-page="finance"] :is(
+    .financeSectionButton, .financeQuietAction, .financeRefreshButton, .financeOperationsReset,
+    .financeOperationActions button, .financeIntegrationActions button, .ownerReportHeroActions button
+  ) {
+    background: var(--ct-soft) !important;
+    border-color: var(--ct-line) !important;
+    color: var(--ct-text) !important;
+    box-shadow: none !important;
+  }
+
+  html body[data-theme] .page[data-page="finance"] :is(
+    .financeSectionButton.active, .financePrimaryAction, .financeOperationsApply,
+    .financeIntegrationForm button[type="submit"], .ownerReportTelegramControls .is-primary
+  ) {
+    background: var(--ct-button) !important;
+    border-color: var(--ct-button) !important;
+    color: var(--ct-on-button) !important;
+    box-shadow: none !important;
+  }
+
+  html body[data-theme] .page[data-page="finance"] .financeSectionButton.active > :is(span, strong) {
+    background: transparent !important;
+    color: inherit !important;
+  }
+
+  html body[data-theme] .page[data-page="finance"] :is(
+    .financeAddExpenseButton, .financeOperationCancelButton, .financeIntegrationActions .danger,
+    .financeIntegrationFormError
+  ) { color: var(--finance-readable-danger) !important; background: var(--ct-soft) !important; border-color: var(--ct-line) !important; }
+
+  html body[data-theme] .page[data-page="finance"] .financeIntegrationStatus {
+    background: var(--ct-soft) !important;
+    border-color: var(--ct-line) !important;
+    color: var(--finance-readable-muted) !important;
+  }
+
+  html body[data-theme] .page[data-page="finance"] :is(
+    .financeOperationAmount.is-income strong, .financeTransactionAmount.is-income strong,
+    .financeOperationStatus.is-completed
+  ) { color: var(--finance-readable-positive) !important; }
+
+  html body[data-theme] .page[data-page="finance"] :is(
+    .financeOperationAmount.is-outcome strong, .financeTransactionAmount.is-outcome strong
+  ) { color: var(--finance-readable-danger) !important; }
+
+  html body[data-theme] .page[data-page="finance"] .financeIntegrationStatus.is-ok {
+    color: var(--finance-readable-positive) !important;
+  }
+
+  html body[data-theme] .page[data-page="finance"] :is(button, a, input, select, textarea):focus-visible {
+    outline: 2px solid var(--ct-accent) !important;
+    outline-offset: 2px;
+  }
+
+  html body[data-theme] .page[data-page="finance"] .financeIntegrationCard {
+    margin-top: 12px !important;
+    gap: 16px;
+  }
+
+  html body[data-theme] .page[data-page="finance"] #financeCheckboxCard :is(
+    [data-checkbox-summary], [data-checkbox-message]
+  ) { color: var(--finance-readable-muted) !important; }
+
+  html body[data-theme] .page[data-page="finance"] .financeIntegrationHelpLink { color: var(--ct-accent) !important; }
+  .page[data-page="finance"] .ownerReportMetric::after { display: none; }
+
+  @media (max-width: 640px) {
+    html body[data-theme] .page[data-page="finance"] .financeIntegrationCard {
+      grid-template-columns: minmax(0, 1fr);
+      padding: 14px !important;
+    }
+
+    html body[data-theme] .page[data-page="finance"] .financeIntegrationTokenRow {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    html body[data-theme] .page[data-page="finance"] .financeIntegrationBrand { min-width: 0; }
+    html body[data-theme] .page[data-page="finance"] .financeIntegrationSecurityNote { max-width: 100%; }
+  }
+}
