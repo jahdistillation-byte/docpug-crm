@@ -14042,6 +14042,114 @@ function normalizeFinanceAmountInput(value) {
   );
 }
 
+async function requestCheckboxApi(path, payload) {
+  const response = await fetch(path, {
+    method: payload === undefined ? "GET" : "POST",
+    credentials: "include",
+    headers: { Accept: "application/json", "Content-Type": "application/json", ...getOrgHeaders() },
+    ...(payload === undefined ? {} : { body: JSON.stringify(payload) }),
+  });
+  const result = await response.json().catch(() => null);
+  if (!response.ok || !result?.ok) throw new Error(result?.error || "Checkbox тимчасово недоступний.");
+  return result.data;
+}
+
+function mountCheckboxSettings(page) {
+  const card = page.querySelector("#financeCheckboxCard");
+  if (!card) return;
+  const base = "/api/finance/payment-integrations/checkbox";
+  const summary = card.querySelector("[data-checkbox-summary]");
+  const form = card.querySelector("form");
+  const controls = card.querySelector("[data-checkbox-controls]");
+  const status = card.querySelector("[data-checkbox-message]");
+  const shiftLabels = {
+    OPENED: "Тестова зміна відкрита", CLOSED: "Тестова зміна закрита",
+    OPENING: "Зміна відкривається", CREATED: "Зміна відкривається", CLOSING: "Зміна закривається",
+  };
+  let connected = false;
+  let busy = false;
+  const run = async operation => {
+    if (busy) return;
+    busy = true;
+    card.setAttribute("aria-busy", "true");
+    card.querySelectorAll("button").forEach(button => { button.disabled = true; });
+    status.textContent = "";
+    try {
+      await operation();
+    } catch (error) {
+      status.textContent = error.message;
+    } finally {
+      busy = false;
+      card.removeAttribute("aria-busy");
+      card.querySelectorAll("button").forEach(button => { button.disabled = false; });
+    }
+  };
+  const showConnection = data => {
+    connected = data.connected === true;
+    summary.textContent = connected ? `Тестова каса · ${data.register_name || "Checkbox"}` : "Тестову касу ще не підключено";
+    form.hidden = connected;
+    controls.hidden = !connected;
+  };
+  const refreshShift = async action => {
+    const shift = await requestCheckboxApi(base + "/shift", action ? { action } : undefined);
+    status.textContent = shiftLabels[shift.status] || "Перевірте стан тестової зміни.";
+    controls.querySelector('[data-checkbox-shift="open"]').hidden = shift.status !== "CLOSED";
+    controls.querySelector('[data-checkbox-shift="close"]').hidden = shift.status !== "OPENED";
+  };
+  form.addEventListener("submit", event => {
+    event.preventDefault();
+    run(async () => {
+      const credentials = Object.fromEntries(new FormData(form));
+      const data = await requestCheckboxApi(base, credentials);
+      form.reset();
+      showConnection(data);
+      await refreshShift();
+    });
+  });
+  controls.addEventListener("click", event => {
+    const action = event.target.closest("[data-checkbox-shift]")?.dataset.checkboxShift;
+    if (event.target.closest("[data-checkbox-change]")) {
+      form.hidden = false;
+      form.elements.license_key.focus();
+    } else if (action) {
+      run(() => refreshShift(action === "check" ? undefined : action));
+    }
+  });
+  run(async () => {
+    showConnection(await requestCheckboxApi(base));
+    if (connected) await refreshShift();
+  });
+}
+
+function renderVisitCheckboxSection(data) {
+  if (!data?.connected && !data?.receipts?.length) return "";
+  const e = escapeHtml;
+  const rows = [
+    ...(data.available || []).map(item => {
+      const refund = item.transaction_type === "refund";
+      return `<div class="checkboxReceiptRow">
+        <span>${refund ? "Повернення" : "Оплата"} · ${e(formatVisitFinanceMoney(item.amount, "UAH"))}</span>
+        <button type="button" data-checkbox-receipt="${e(item.id)}">${refund ? "Тестовий чек повернення" : "Створити тестовий чек"}</button>
+      </div>`;
+    }),
+    ...(data.receipts || []).map(item => {
+      const id = e(item.transaction_id);
+      const label = item.kind === "return" ? "Тестовий чек повернення" : "Тестовий чек оплати";
+      const result = { DONE: item.fiscal_code, PENDING: "Очікує підтвердження", ERROR: "Checkbox відхилив чек" };
+      return `<div class="checkboxReceiptRow"><span>${label} · ${e(result[item.status])}</span>
+        ${item.status === "DONE" ? `<button type="button" data-checkbox-pdf="${id}">PDF чека</button>` : ""}
+        ${item.status === "PENDING" ? `<button type="button" data-checkbox-receipt="${id}" data-checkbox-check>Перевірити</button>
+          <button type="button" data-checkbox-receipt="${id}">Повторити запит</button>` : ""}
+      </div>`;
+    }),
+  ];
+  return `<section class="visitPaymentHistory checkboxVisitReceipts">
+    <div class="visitPaymentHistoryHead"><div><span>CHECKBOX · ТЕСТ</span><strong>Чеки візиту</strong></div></div>
+    ${rows.join("") || "<p>Тестовий чек доступний після одного повного платежу готівкою або карткою.</p>"}
+    <p class="checkboxReceiptNotice" role="status"></p>
+  </section>`;
+}
+
 async function registerVisitPaymentApi(
   visitId,
   {
@@ -14569,6 +14677,16 @@ async function openVisitPaymentModal(
     refunded: "Повернено",
   };
 
+  let checkbox = null;
+  const checkboxPath = `/api/visits/${encodeURIComponent(visitId)}/checkbox`;
+  const loadCheckboxReceipts = async () => {
+    try {
+      checkbox = await requestCheckboxApi(checkboxPath);
+    } catch {
+      checkbox = null;
+    }
+  };
+
   let finance = null;
   let selectedMethod = "cash";
   let submitting = false;
@@ -14653,6 +14771,7 @@ async function openVisitPaymentModal(
 
   const refreshAfterConfirmedPayment = async () => {
     finance = await loadVisitFinanceApi(visitId);
+    await loadCheckboxReceipts();
     await refreshVisitFinanceSummary(visitId);
 
     if (typeof onPaymentRecorded === "function") {
@@ -14988,6 +15107,7 @@ async function openVisitPaymentModal(
             }
           </div>
         </section>
+        ${renderVisitCheckboxSection(checkbox)}
       </div>
     `;
 
@@ -15013,7 +15133,46 @@ async function openVisitPaymentModal(
     }
   };
 
-  modal.addEventListener("click", (event) => {
+  modal.addEventListener("click", async (event) => {
+    const receiptButton = event.target.closest("[data-checkbox-receipt], [data-checkbox-pdf]");
+    if (receiptButton) {
+      if (submitting) return;
+      const notice = modal.querySelector(".checkboxReceiptNotice");
+      submitting = true;
+      receiptButton.disabled = true;
+      if (notice) notice.textContent = "Звертаємося до Checkbox…";
+      let message = "";
+      try {
+        const { checkboxPdf, checkboxReceipt } = receiptButton.dataset;
+        if (checkboxPdf) {
+          const response = await fetch(`${checkboxPath}/${encodeURIComponent(checkboxPdf)}/pdf`, {
+            credentials: "include", headers: getOrgHeaders(),
+          });
+          if (!response.ok) throw new Error("Не вдалося завантажити PDF тестового чека.");
+          const url = URL.createObjectURL(await response.blob());
+          const link = document.createElement("a");
+          link.href = url;
+          link.download = `checkbox-test-${checkboxPdf}.pdf`;
+          link.click();
+          setTimeout(() => URL.revokeObjectURL(url), 10000);
+        } else {
+          await requestCheckboxApi(checkboxPath, {
+            transaction_id: checkboxReceipt,
+            check_only: receiptButton.hasAttribute("data-checkbox-check"),
+          });
+        }
+      } catch (error) {
+        message = error.message;
+      } finally {
+        if (!receiptButton.dataset.checkboxPdf) await loadCheckboxReceipts();
+        submitting = false;
+        render();
+        const updatedNotice = modal.querySelector(".checkboxReceiptNotice");
+        if (updatedNotice) updatedNotice.textContent = message;
+      }
+      return;
+    }
+
     if (event.target.closest("[data-close-payment-modal]")) {
       close();
       return;
@@ -15195,6 +15354,7 @@ async function openVisitPaymentModal(
 
   try {
     finance = await loadVisitFinanceApi(visitId);
+    await loadCheckboxReceipts();
     render();
   } catch (error) {
     console.error("Opening visit payments failed:", error);
@@ -47430,14 +47590,34 @@ async function renderFinanceIntegrationsTab(page) {
           </form>
         </section>
 
-        <section class="financeIntegrationComingSoon">
-          <span>Інші банки</span>
-          <strong>Підключимо наступними</strong>
-          <p>Архітектура вже готова для окремих провайдерів кожної клініки.</p>
+        <section class="financeIntegrationCard" id="financeCheckboxCard">
+          <div class="financeIntegrationBrand">
+            <div class="financeIntegrationLogo">✓</div>
+            <div><span>ПРОГРАМНА КАСА · ТЕСТ</span><h2>Checkbox</h2>
+              <p>Тестові чеки оплати та повернення з каси візиту. Для перевірки використайте тестовий візит.</p></div>
+          </div>
+          <p data-checkbox-summary>Перевіряємо підключення…</p>
+          <form class="financeIntegrationForm" hidden>
+            <label><span>Ліцензійний ключ тестової каси</span>
+              <input type="password" name="license_key" autocomplete="new-password" maxlength="128" required>
+            </label>
+            <label><span>PIN тестового касира</span>
+              <input type="password" name="pin_code" inputmode="numeric" autocomplete="new-password" maxlength="32" required>
+            </label>
+            <div class="financeIntegrationActions"><button type="submit">Підключити тестову касу</button></div>
+          </form>
+          <div class="financeIntegrationActions" data-checkbox-controls hidden>
+            <button type="button" class="secondary" data-checkbox-shift="check">Перевірити зміну</button>
+            <button type="button" class="secondary" data-checkbox-shift="open" hidden>Відкрити тестову зміну</button>
+            <button type="button" class="secondary" data-checkbox-shift="close" hidden>Закрити тестову зміну</button>
+            <button type="button" class="secondary" data-checkbox-change>Змінити підключення</button>
+          </div>
+          <p data-checkbox-message role="status"></p>
         </section>
       </div>
     `;
 
+    mountCheckboxSettings(page);
     bindFinanceSectionNavigation(page);
 
     const form = page.querySelector("#financeMonoForm");

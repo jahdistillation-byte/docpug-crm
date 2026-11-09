@@ -41,6 +41,8 @@ from werkzeug.exceptions import RequestEntityTooLarge
 from supabase import create_client
 import qrcode
 
+from checkbox_client import CheckboxError, CheckboxTestClient, integer_units, sale_payload
+
 print("### RUNNING server.py ###")
 
 # =========================
@@ -6901,6 +6903,256 @@ def load_monobank_connection_credentials(current_org):
         )
 
     return connection, token
+
+
+def checkbox_connected_client(org_id):
+    connection = load_payment_provider_connection(org_id, "checkbox")
+    if not connection or connection["status"] != "connected":
+        raise CheckboxError("Спочатку підключіть тестову касу Checkbox.")
+    credentials = json.loads(load_payment_provider_secret(org_id, "checkbox"))
+    client = CheckboxTestClient(credentials["license_key"], credentials["pin_code"])
+    register = client.connect()
+    if str(register["id"]) != connection["merchant_id"]:
+        raise CheckboxError("Каса змінилася. Перевірте підключення в налаштуваннях.")
+    return client
+
+
+@app.route("/api/finance/payment-integrations/checkbox", methods=["GET", "POST"])
+def api_checkbox_connection():
+    user, auth_error = owner_or_admin_required()
+    if auth_error:
+        return auth_error
+    org_id = get_current_org_id()
+    try:
+        if request.method == "GET":
+            row = load_payment_provider_connection(org_id, "checkbox")
+            return ok({"connected": bool(row and row["status"] == "connected"),
+                       "register_name": row.get("merchant_name") if row else None})
+        data = request.get_json(silent=True)
+        if not isinstance(data, dict):
+            return fail("Вкажіть дані тестової каси.", 400)
+        credentials = {key: str(data.get(key) or "").strip() for key in ("license_key", "pin_code")}
+        client = CheckboxTestClient(**credentials)
+        register = client.connect()
+        name = register.get("fiscal_number") or register.get("title") or "Тестова каса"
+        supabase.rpc("save_checkbox_test_connection", {
+            "p_org_id": org_id, "p_user_id": user["id"],
+            "p_credentials": json.dumps(credentials), "p_register_id": register["id"],
+            "p_register_name": name,
+        }).execute()
+        return ok({"connected": True, "register_name": name})
+    except CheckboxError as error:
+        return fail(str(error), error.status)
+    except Exception:
+        return fail("Не вдалося зберегти або прочитати налаштування Checkbox.", 503)
+
+
+@app.route("/api/finance/payment-integrations/checkbox/shift", methods=["GET", "POST"])
+def api_checkbox_shift():
+    _, auth_error = owner_or_admin_required()
+    if auth_error:
+        return auth_error
+    try:
+        client = checkbox_connected_client(get_current_org_id())
+        if request.method == "GET":
+            shift = client.shift()
+        else:
+            data = request.get_json(silent=True)
+            action = data.get("action") if isinstance(data, dict) else None
+            if action not in ("open", "close"):
+                return fail("Оберіть дію зі зміною.", 400)
+            shift = client.change_shift(action)
+        return ok({"status": shift["status"] if shift else "CLOSED"})
+    except CheckboxError as error:
+        return fail(str(error), error.status)
+    except Exception:
+        return fail("Не вдалося перевірити тестову зміну Checkbox.", 503)
+
+
+def checkbox_visit_receipts(org_id, visit_id):
+    return supabase.table("checkbox_test_receipts").select("*").eq("org_id", org_id).eq(
+        "visit_id", visit_id
+    ).execute().data or []
+
+
+def checkbox_visit_transactions(org_id, visit_id):
+    return supabase.table("finance_transactions").select(
+        "id,transaction_type,status,amount,currency,payment_method,reverses_transaction_id"
+    ).eq("org_id", org_id).eq("visit_id", visit_id).execute().data or []
+
+
+def checkbox_receipt_summary(row):
+    return {key: row.get(key) for key in ("transaction_id", "kind", "status", "fiscal_code")}
+
+
+def checkbox_visit_payload(org_id, visit_id, transaction, transactions, receipts):
+    if transaction["currency"] != "UAH" or transaction["status"] != "completed":
+        raise CheckboxError("Потрібна проведена оплата або повернення в гривнях.")
+    if transaction["transaction_type"] == "refund":
+        original_id = str(transaction.get("reverses_transaction_id") or "")
+        original = next((row for row in receipts if
+                         row["transaction_id"] == original_id and row["kind"] == "sell"
+                         and row["status"] == "DONE"), None)
+        if not original:
+            raise CheckboxError("Спочатку потрібен підтверджений тестовий чек оплати.")
+        source = original["payload"]
+        paid = integer_units(transaction["amount"], 100, "Некоректна сума повернення.")
+        if paid != source["payments"][0]["value"]:
+            raise CheckboxError("Тестовий чек повернення підтримує повне повернення оплати.")
+        if any(row["kind"] == "return" and row["payload"].get("related_receipt_id") ==
+               original["receipt_id"] for row in receipts):
+            raise CheckboxError("Для цієї оплати вже створено повернення Checkbox.")
+        return "return", {
+            **source,
+            "goods": [{**item, "is_return": True} for item in source["goods"]],
+            "related_receipt_id": original["receipt_id"],
+        }, original["register_id"]
+
+    if transaction["transaction_type"] != "payment":
+        raise CheckboxError("Ця операція не підтримує тестовий чек.")
+    settled = [row for row in transactions if row["status"] == "completed"
+               and row["transaction_type"] in {"payment", "refund"}]
+    if len(settled) != 1 or settled[0]["id"] != transaction["id"]:
+        raise CheckboxError("Тестовий чек доступний для одного повного платежу за візит.")
+    visit = supabase.table("visits").select("discount_amount").eq("org_id", org_id).eq(
+        "id", visit_id
+    ).limit(1).execute().data
+    if not visit:
+        raise CheckboxError("Візит не знайдено.", 404)
+    lines = []
+    for table, prefix in (("visit_services", "service"), ("visit_stock", "stock")):
+        rows = supabase.table(table).select("id,name_snap,qty,price_snap").eq(
+            "visit_id", visit_id
+        ).order("id").execute().data or []
+        lines.extend((f"{prefix}-{row['id']}", row) for row in rows)
+    return "sell", sale_payload(lines, transaction["amount"], visit[0]["discount_amount"],
+                                transaction["payment_method"]), None
+
+
+@app.route("/api/visits/<uuid:visit_id>/checkbox", methods=["GET", "POST"])
+def api_visit_checkbox_receipts(visit_id):
+    _, auth_error = owner_or_admin_required()
+    if auth_error:
+        return auth_error
+    org_id = get_current_org_id()
+    visit_id = str(visit_id)
+    try:
+        receipts = checkbox_visit_receipts(org_id, visit_id)
+        transactions = checkbox_visit_transactions(org_id, visit_id)
+        if request.method == "GET":
+            row = load_payment_provider_connection(org_id, "checkbox")
+            connected = bool(row and row["status"] == "connected")
+            issued = {item["transaction_id"]: item for item in receipts}
+            available = []
+            if connected:
+                completed = [t for t in transactions if t["status"] == "completed"
+                             and t["transaction_type"] in {"payment", "refund"}]
+                for transaction in completed:
+                    if transaction["currency"] != "UAH" or transaction["id"] in issued:
+                        continue
+                    try:
+                        checkbox_visit_payload(org_id, visit_id, transaction, transactions, receipts)
+                    except CheckboxError:
+                        continue
+                    available.append(transaction)
+            return ok({"connected": connected, "available": available,
+                       "receipts": [checkbox_receipt_summary(row) for row in receipts]})
+
+        data = request.get_json(silent=True)
+        if not isinstance(data, dict):
+            return fail("Вкажіть операцію візиту.", 400)
+        transaction_id = str(data.get("transaction_id") or "")
+        transaction = next((row for row in transactions if row["id"] == transaction_id), None)
+        if not transaction:
+            return fail("Операцію візиту не знайдено.", 404)
+        receipt = next((row for row in receipts if row["transaction_id"] == transaction_id), None)
+        if receipt and receipt["status"] != "PENDING":
+            return ok(checkbox_receipt_summary(receipt))
+        client = checkbox_connected_client(org_id)
+        register_id = str(client.register["id"])
+        if receipt and receipt["register_id"] != register_id:
+            raise CheckboxError("Підключіть тестову касу, на якій сформовано цей чек.")
+        if not receipt:
+            kind, payload, original_register = checkbox_visit_payload(
+                org_id, visit_id, transaction, transactions, receipts
+            )
+            if original_register and original_register != register_id:
+                raise CheckboxError("Повернення потрібне на касі оригінального чека.")
+        existing = client.request("GET", f"receipts/{receipt['receipt_id']}", missing=True) if receipt else None
+        if existing is None and data.get("check_only") is not True:
+            if transaction["status"] != "completed":
+                raise CheckboxError("Цю операцію вже скасовано.")
+            if receipt and receipt["kind"] == "sell":
+                checkbox_visit_payload(org_id, visit_id, transaction, transactions, receipts)
+            shift = client.shift()
+            if not shift or shift["status"] != "OPENED":
+                raise CheckboxError("Відкрийте тестову зміну у фінансових інтеграціях.")
+            if not receipt:
+                reserved = {
+                    "org_id": org_id, "visit_id": visit_id, "transaction_id": transaction_id,
+                    "receipt_id": str(uuid.uuid4()), "register_id": register_id, "kind": kind,
+                    "payload": payload,
+                }
+                supabase.table("checkbox_test_receipts").upsert(
+                    reserved, on_conflict="transaction_id", ignore_duplicates=True
+                ).execute()
+                receipt = next((row for row in checkbox_visit_receipts(org_id, visit_id)
+                                if row["transaction_id"] == transaction_id), None)
+                if not receipt or receipt["register_id"] != register_id:
+                    raise CheckboxError("Не вдалося зарезервувати чек на поточній тестовій касі.", 503)
+            # Always reuse the persisted provider UUID, including after a network timeout.
+            existing = client.request("POST", "receipts/sell", {
+                **receipt["payload"], "id": receipt["receipt_id"]
+            })
+        if not receipt:
+            return fail("Чек для цієї операції ще не створено.", 404)
+        if existing and existing.get("status") in {"DONE", "ERROR"}:
+            status = existing["status"]
+            expected_amount = receipt["payload"]["payments"][0]["value"]
+            expected_type = "RETURN" if receipt["kind"] == "return" else "SELL"
+            if status == "DONE" and (str(existing.get("id")) != receipt["receipt_id"]
+                    or existing.get("type") != expected_type
+                    or existing.get("is_test") is False
+                    or (receipt["kind"] == "return" and
+                        existing.get("related_receipt_id") != receipt["payload"]["related_receipt_id"])
+                    or abs(existing.get("total_sum") or 0) != expected_amount
+                    or not existing.get("fiscal_code")):
+                raise CheckboxError("Checkbox повернув чек з неочікуваними реквізитами. Перевірте його в кабінеті.", 502)
+            changes = {"status": status, "fiscal_code": existing.get("fiscal_code") if status == "DONE" else None}
+            supabase.table("checkbox_test_receipts").update(changes).eq("org_id", org_id).eq(
+                "transaction_id", transaction_id
+            ).eq("status", "PENDING").execute()
+            receipt.update(changes)
+        return ok(checkbox_receipt_summary(receipt))
+    except CheckboxError as error:
+        return fail(str(error), error.status)
+    except Exception:
+        return fail("Не вдалося обробити тестовий чек Checkbox. Перевірте статус і повторіть.", 503)
+
+
+@app.get("/api/visits/<uuid:visit_id>/checkbox/<uuid:transaction_id>/pdf")
+def api_visit_checkbox_receipt_pdf(visit_id, transaction_id):
+    _, auth_error = owner_or_admin_required()
+    if auth_error:
+        return auth_error
+    org_id = get_current_org_id()
+    try:
+        receipt = next((row for row in checkbox_visit_receipts(org_id, str(visit_id))
+                        if row["transaction_id"] == str(transaction_id) and row["status"] == "DONE"), None)
+        if not receipt:
+            return fail("Підтверджений чек не знайдено.", 404)
+        client = checkbox_connected_client(org_id)
+        if str(client.register["id"]) != receipt["register_id"]:
+            raise CheckboxError("Підключіть тестову касу, на якій сформовано цей чек.")
+        pdf = client.request("GET", f"receipts/{receipt['receipt_id']}/pdf", pdf=True)
+        return app.response_class(pdf, mimetype="application/pdf", headers={
+            "Content-Disposition": f'inline; filename="checkbox-test-{transaction_id}.pdf"',
+            "Cache-Control": "no-store",
+        })
+    except CheckboxError as error:
+        return fail(str(error), error.status)
+    except Exception:
+        return fail("Не вдалося завантажити PDF чека.", 503)
 
 
 @app.get("/api/finance/payment-integrations")

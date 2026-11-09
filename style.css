@@ -76963,3 +76963,44 @@ html body[data-theme] .page[data-page="patient"] #patientCardRoot .premiumLabsPa
     }
   }
 }
+
+#financeCheckboxCard [hidden] { display: none !important; }
+#financeCheckboxCard [data-checkbox-summary],
+#financeCheckboxCard [data-checkbox-message] { color: var(--ct-muted); }
+#financeCheckboxCard [data-checkbox-message]:empty,
+.checkboxReceiptNotice:empty { display: none; }
+#financeCheckboxCard form {
+  display: grid;
+  gap: 12px;
+}
+#financeCheckboxCard input {
+  display: block;
+  width: 100%;
+  min-height: 42px;
+  padding: 8px 12px;
+  background: var(--ct-paper);
+  color: var(--ct-text);
+  border: 1px solid var(--ct-line);
+  border-radius: 9px;
+}
+#financeCheckboxCard button[type="submit"],
+.checkboxVisitReceipts button {
+  min-height: 38px;
+  padding: 7px 12px;
+  border-radius: 9px;
+  border: 1px solid var(--ct-line);
+  background: var(--ct-accent-soft);
+  color: var(--ct-accent);
+  font-weight: 650;
+  cursor: pointer;
+}
+.checkboxVisitReceipts .checkboxReceiptRow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--ct-line);
+  color: var(--ct-text);
+}
+.checkboxVisitReceipts p { color: var(--ct-muted); }
