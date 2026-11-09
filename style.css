@@ -41459,6 +41459,22 @@ body[data-theme="white"] .teamPageCard .premiumDeleteBtn {
     inset 0 1px 0 rgba(255, 255, 255, 0.055);
 }
 
+@media (min-width: 861px) {
+  .page[data-page="finance"] .financeSectionButton[data-finance-section="integrations"] {
+    grid-column: 2;
+  }
+
+  .page[data-page="finance"] .financeSectionButton[data-finance-section="report"] {
+    grid-column: 3;
+  }
+
+  .page[data-page="finance"] .financeSectionButton[data-finance-section="integrations"]:last-child {
+    grid-column: 2 / span 2;
+    justify-self: center;
+    width: calc((100% - 6px) / 2);
+  }
+}
+
 .page[data-page="finance"] .financeSectionButton {
   width: 100%;
   min-height: 44px;
