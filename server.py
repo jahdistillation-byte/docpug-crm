@@ -13856,13 +13856,37 @@ def api_receive_stock_purchase(
 # =========================
 # SERVICES API
 # =========================
+SERVICE_ACHIEVEMENT_TRACKS = ("surgery", "dentistry", "ultrasound", "followup")
+
+
+@app.get("/api/staff/<staff_id>/achievement-progress")
+def api_staff_achievement_progress(staff_id):
+    _, auth_error = self_or_manager_required(staff_id)
+    if auth_error:
+        return auth_error
+
+    org_id = get_current_org_id()
+    if not org_id:
+        return fail("Organization not selected", 400)
+
+    try:
+        result = supabase.rpc("get_staff_achievement_progress", {
+            "p_org_id": org_id,
+            "p_staff_id": staff_id,
+        }).execute()
+        return ok(result.data)
+    except Exception as error:
+        print("Staff achievement progress failed:", repr(error))
+        return fail("Не вдалося завантажити прогрес досягнень.", 503)
+
+
 @app.get("/api/services")
 def api_services_list():
     try:
         current_org = get_current_org_id()
         res = (
             supabase.table("services")
-            .select("id, name, price, active")
+            .select("id, name, price, active, achievement_track")
             .eq("org_id", current_org)
             .order("name")
             .execute()
@@ -13914,6 +13938,12 @@ def api_services_create():
             "active": bool(payload.get("active", True)),
         }
 
+        if "achievement_track" in payload:
+            track = payload["achievement_track"]
+            if track is not None and track not in SERVICE_ACHIEVEMENT_TRACKS:
+                return fail("Некоректний напрям досягнень.", 400)
+            service_data["achievement_track"] = track
+
         res = (
             supabase.table("services")
             .insert(service_data)
@@ -13956,6 +13986,12 @@ def api_services_update():
             patch["price"] = payload.get("price") or 0
         if "active" in payload:
             patch["active"] = bool(payload.get("active"))
+
+        if "achievement_track" in payload:
+            track = payload["achievement_track"]
+            if track is not None and track not in SERVICE_ACHIEVEMENT_TRACKS:
+                return fail("Некоректний напрям досягнень.", 400)
+            patch["achievement_track"] = track
 
         if not patch:
             return jsonify({"ok": False, "error": "nothing to update"}), 400
@@ -18930,6 +18966,27 @@ def api_create_patient_vaccination(
                 404,
             )
 
+
+        if source_visit_id:
+            visit_rows = (
+                supabase.table("visits")
+                .select("status, completed_at, closed_by")
+                .eq("org_id", current_org)
+                .eq("patient_id", patient_id)
+                .eq("id", source_visit_id)
+                .limit(1)
+                .execute()
+            ).data or []
+            if not visit_rows:
+                return fail("Візит цього пацієнта не знайдено.", 404)
+
+            visit = visit_rows[0]
+            status = str(visit.get("status") or "").strip().lower()
+            if status in ("cancelled", "canceled", "no_show") or not (
+                visit.get("completed_at") or visit.get("closed_by")
+                or status in ("completed", "done", "finished")
+            ):
+                return fail("Для вакцинації оберіть завершений візит.", 400)
 
         insert_data = {
             "org_id":

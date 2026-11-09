@@ -17950,6 +17950,16 @@ async function renderServicesTab() {
 // SERVICE EDITOR MODAL
 // =====================================================
 
+const PUG_ACHIEVEMENT_TRACKS = [
+  { id: "cat_vaccines", title: "Вакцинація котів", steps: [[10, "Рамка «Котяча лапа»"], [25, "Підпис «Котяча профілактика»"], [100, "Фізичний набір наклейок PUG"]] },
+  { id: "dog_vaccines", title: "Вакцинація собак", steps: [[10, "Рамка «Вірний друг»"], [25, "Підпис «Профілактика для собак»"], [100, "Відзнака «Захист поруч»"]] },
+  { id: "followup", title: "Контрольні огляди", service: true, steps: [[5, "Рамка «Зворотний зв’язок»"], [20, "Підпис «Тримаю зв’язок»"], [50, "Відзнака «Повний цикл»"]] },
+  { id: "surgery", title: "Хірургічна практика", service: true, steps: [[5, "Рамка «Точність»"], [25, "Підпис «Хірургічна практика»"], [75, "Відзнака «Точна робота»"]] },
+  { id: "dentistry", title: "Стоматологічна практика", service: true, steps: [[5, "Рамка «Усмішка»"], [20, "Підпис «Турбота про усмішку»"], [50, "Відзнака «Здорова усмішка»"]] },
+  { id: "ultrasound", title: "УЗД", service: true, steps: [[5, "Рамка «Контур»"], [25, "Підпис «Ультразвукова практика»"], [100, "Відзнака «У фокусі»"]] },
+  { id: "hospital", title: "Стаціонар", steps: [[5, "Рамка «Під наглядом»"], [20, "Підпис «Стаціонарна практика»"], [50, "Відзнака «Від прийому до виписки»"]] },
+];
+
 function openServiceEditorModal(
   service = null
 ) {
@@ -18115,6 +18125,17 @@ function openServiceEditorModal(
             >
           </label>
         </div>
+
+        <label class="serviceEditorField">
+          <span>Зараховувати до досягнень</span>
+          <select id="serviceEditorAchievement">
+            <option value="">Без прив’язки</option>
+            ${PUG_ACHIEVEMENT_TRACKS.filter((track) => track.service).map(({ id, title }) => `
+              <option value="${id}" ${service?.achievement_track === id ? "selected" : ""}>${escapeHtml(title)}</option>
+            `).join("")}
+          </select>
+          <small>Один випадок на завершений візит у вибраному напрямі. Прив’язка також застосовується до попередніх візитів.</small>
+        </label>
 
         <label class="serviceEditorStatus">
           <div>
@@ -18405,6 +18426,7 @@ function openServiceEditorModal(
             );
         }
 
+        const achievementTrack = modal.querySelector("#serviceEditorAchievement").value || null;
         let saved = null;
 
         if (isEdit) {
@@ -18416,6 +18438,7 @@ function openServiceEditorModal(
                 price,
                 active,
                 cat: category,
+                achievement_track: achievementTrack,
               }
             );
         } else {
@@ -18425,6 +18448,7 @@ function openServiceEditorModal(
               price,
               active,
               cat: category,
+              achievement_track: achievementTrack,
             });
         }
 
@@ -27508,79 +27532,6 @@ Object.assign(
 );
 
 
-function getTeamCareerLevelSummaryText(
-  level,
-  xp
-) {
-  const levelText =
-    getTeamLevelText(
-      level
-    );
-
-  const xpText =
-    Number(xp || 0)
-      .toLocaleString(
-        getCalendarLocale()
-      );
-
-  return (
-    `${levelText} · ` +
-    `${xpText} XP`
-  );
-}
-
-
-function getTeamClinicRankText(
-  rank,
-  total
-) {
-  if (!rank) {
-    return "—";
-  }
-
-  const rankText =
-    Number(rank)
-      .toLocaleString(
-        getCalendarLocale()
-      );
-
-  const totalText =
-    Number(total || 0)
-      .toLocaleString(
-        getCalendarLocale()
-      );
-
-  const language =
-    getInterfaceLanguage();
-
-  if (language === "en") {
-    return (
-      `#${rankText} of ` +
-      `${totalText}`
-    );
-  }
-
-  if (language === "de") {
-    return (
-      `#${rankText} von ` +
-      `${totalText}`
-    );
-  }
-
-  if (language === "pl") {
-    return (
-      `#${rankText} z ` +
-      `${totalText}`
-    );
-  }
-
-  return (
-    `#${rankText} із ` +
-    `${totalText}`
-  );
-}
-
-
 function getTeamSeasonDescription(
   seasonLabel
 ) {
@@ -27615,219 +27566,98 @@ function getTeamSeasonDescription(
 }
 
 
-async function renderTeamAchievementsTab(
-  root,
-  state
-) {
-  const career =
-    buildStaffCareer(
-      state
-    );
+async function renderTeamAchievementsTab(root, state) {
+  root.innerHTML = `<section class="teamDashPanel" aria-busy="true"><p>Завантаження досягнень…</p></section>`;
+  const loading = root.firstElementChild;
+  let counts;
+  try {
+    const response = await fetch(`/api/staff/${encodeURIComponent(state.doc.id)}/achievement-progress`, {
+      credentials: "include",
+      headers: { Accept: "application/json", ...getOrgHeaders() },
+    });
+    const result = await response.json();
+    if (!response.ok || !result.ok || !result.data) throw new Error("Achievement progress unavailable");
+    counts = result.data;
+  } catch {
+    if (root.firstElementChild === loading) {
+      root.innerHTML = `<section class="teamDashPanel"><h2>Досягнення</h2><p>Не вдалося завантажити прогрес. Відкрийте вкладку ще раз, щоб повторити спробу.</p></section>`;
+    }
+    return;
+  }
 
-  const rating =
-    await loadStaffRatingApi();
+  if (root.firstElementChild !== loading || !root.isConnected) return;
 
-  const ratingRows =
-    Array.isArray(
-      rating?.rows
-    )
-      ? rating.rows
-      : [];
-
-  const currentStaffId =
-    String(
-      state.doc.id ||
-      ""
-    );
-
-  const currentRank =
-    ratingRows.find(
-      (row) =>
-        String(
-          row.staff_id
-        ) ===
-        currentStaffId
-    );
-
-  const totalStaff =
-    ratingRows.length;
-
-  const translatedTitle =
-    translateAchievementText(
-      career.title
-    );
+  const tracks = PUG_ACHIEVEMENT_TRACKS.map(({ id, title, steps }) => ({
+    title,
+    steps,
+    count: Number(counts[id] || 0),
+  }));
+  const collection = tracks.filter(({ count, steps }) => count >= steps[1][0]).length;
+  const unlocked = tracks.reduce((total, { count, steps }) => (
+    total + steps.filter(([target]) => count >= target).length
+  ), Number(collection >= 3));
 
   root.innerHTML = `
-    <section class="teamSubHero">
-      <div>
-        <h2>
-          ${escapeHtml(
-            getTeamInterfaceText(
-              "🏆 Карʼєра ветеринара"
-            )
-          )}
-        </h2>
-
-        <p>
-          ${escapeHtml(
-            getTeamInterfaceText(
-              "Рівень, сезонний рейтинг клініки, титули та професійні досягнення."
-            )
-          )}
-        </p>
-      </div>
-    </section>
-
-    ${renderClinicRatingBoard(
-      ratingRows,
-      currentStaffId,
-      rating?.season_key
-    )}
-
-    <section class="teamCareerHero">
-      <div class="teamCareerLevel">
-        <div class="teamCareerBadge">
-          ${escapeHtml(
-            career.levelIcon
-          )}
-        </div>
-
+    <div class="teamAchievementWorkspace">
+      <section class="teamCareerHero teamAchievementIntro">
         <div>
-          <div class="teamCareerTitle">
-            ${escapeHtml(
-              translatedTitle
-            )}
-          </div>
-
-          <div
-            class="teamCareerSub"
-            data-team-content
-          >
-            ${escapeHtml(
-              getTeamCareerLevelSummaryText(
-                career.level,
-                career.xp
-              )
-            )}
-          </div>
+          <h2>Досягнення</h2>
+          <p>Збирайте відзнаки за підтверджену роботу. Ваш прогрес накопичується за весь час.</p>
         </div>
+        <strong>${unlocked} / 25</strong>
+      </section>
+
+      <div class="teamAchievementTracks">
+        ${tracks.map(({ title, steps, count }) => {
+          const next = steps.findIndex(([target]) => count < target);
+          const target = steps[next < 0 ? steps.length - 1 : next][0];
+
+          return `
+            <section class="teamDashPanel teamAchievementTrack">
+              <header><h3>${escapeHtml(title)}</h3><strong>${count} / ${target}</strong></header>
+              <progress aria-label="${escapeHtml(title)}" value="${Math.min(count, target)}" max="${target}"></progress>
+              <ol>
+                ${steps.map(([milestone, reward], index) => `
+                  <li class="${count >= milestone ? "is-unlocked" : ""}" ${index === next ? 'aria-current="step"' : ""}>
+                    <b>${milestone}</b>
+                    <div><span>${escapeHtml(reward)}</span><small>${count >= milestone ? "Етап пройдено" : index === next ? "Наступний етап" : "Попереду"}</small></div>
+                  </li>
+                `).join("")}
+              </ol>
+            </section>`;
+        }).join("")}
       </div>
 
-      <div class="teamCareerProgress">
-        <div>
-          <span>
-            ${escapeHtml(
-              getTeamInterfaceText(
-                "До наступного рівня"
-              )
-            )}
-          </span>
+      <section class="teamDashPanel teamAchievementTrack">
+        <header><h3>Різні грані практики</h3><strong>${Math.min(collection, 3)} / 3</strong></header>
+        <p>Відкрийте другий етап у трьох напрямах, щоб відкрити колекційну композицію профілю.</p>
+      </section>
 
-          <b data-team-content>
-            ${Number(
-              career.xpInLevel ||
-              0
-            ).toLocaleString(
-              getCalendarLocale()
-            )}
-            /
-            ${Number(
-              career.neededForNext ||
-              0
-            ).toLocaleString(
-              getCalendarLocale()
-            )}
-            XP
-          </b>
-        </div>
+      <section class="teamDashPanel teamAchievementTrack">
+        <header><h3>Легендарні</h3><strong>0 / 3</strong></header>
+        <ol class="teamAchievementSecrets">
+          ${[1, 2, 3].map((number) => `<li aria-label="Секретна відзнака ${number}">?</li>`).join("")}
+        </ol>
+        <p>Колекція фізичних емалевих пінів PUG готується. Умови відкриття залишаться таємницею.</p>
+      </section>
 
-        <i>
-          <em
-            style="width:${Math.max(
-              0,
-              Math.min(
-                100,
-                Number(
-                  career.progressPercent ||
-                  0
-                )
-              )
-            )}%"
-          ></em>
-        </i>
-      </div>
-    </section>
-
-    <section class="teamDashKpis">
-      ${renderTeamKpiCard(
-        "⭐",
-        "XP",
-        Number(
-          career.xp ||
-          0
-        ).toLocaleString(
-          getCalendarLocale()
-        ),
-        0
-      )}
-
-      ${renderTeamKpiCard(
-        "🏅",
-        "Відкрито",
-        (
-          `${Number(
-            career.unlockedCount ||
-            0
-          ).toLocaleString(
-            getCalendarLocale()
-          )} / ` +
-          `${Number(
-            career.achievements
-              ?.length ||
-            0
-          ).toLocaleString(
-            getCalendarLocale()
-          )}`
-        ),
-        0
-      )}
-
-      ${renderTeamKpiCard(
-        "👑",
-        "Титул",
-        translatedTitle,
-        0
-      )}
-
-      ${renderTeamKpiCard(
-        "🏆",
-        "Рейтинг клініки",
-        getTeamClinicRankText(
-          currentRank?.rank,
-          totalStaff
-        ),
-        0
-      )}
-    </section>
-
-    <section class="teamAchievementsGrid">
-      ${
-        (
-          career.achievements ||
-          []
-        )
-          .map(
-            (achievement) =>
-              renderAchievementCard(
-                achievement
-              )
-          )
-          .join("")
-      }
-    </section>
+      <details class="teamDashPanel teamAchievementRating">
+        <summary>Рейтинг клініки</summary>
+        <div data-achievement-rating></div>
+      </details>
+    </div>
   `;
-}
 
+  const ratingPanel = root.querySelector(".teamAchievementRating");
+  ratingPanel.addEventListener("toggle", async () => {
+    if (!ratingPanel.open || ratingPanel.dataset.loaded) return;
+    ratingPanel.dataset.loaded = "true";
+    const rating = await loadStaffRatingApi();
+    ratingPanel.querySelector("[data-achievement-rating]").innerHTML = renderClinicRatingBoard(
+      rating?.rows, String(state.doc.id), rating?.season_key
+    );
+  });
+}
 
 function renderClinicRatingBoard(
   rows,
@@ -58502,7 +58332,8 @@ function openPatientVaccinationEditor(
     );
 }
 function openPatientVaccinationPicker(
-  pet
+  pet,
+  patientVisits = []
 ) {
   document
     .querySelector(
@@ -58517,6 +58348,12 @@ function openPatientVaccinationPicker(
   const t =
     (key) =>
       translateInterfaceText(key);
+
+  const completedVisits = patientVisits.filter((visit) => {
+    const status = String(visit.status || "").toLowerCase();
+    return visit.id && !["cancelled", "canceled", "no_show"].includes(status)
+      && (visit.completed_at || visit.closed_by || ["completed", "done", "finished"].includes(status));
+  });
 
   const species =
     normalizeVaccineSpecies(
@@ -59064,6 +58901,23 @@ function openPatientVaccinationPicker(
                         </label>
                       </div>
 
+                      ${completedVisits.length ? `
+                        <div class="patientVaccineFormGrid">
+                          <label>
+                            <span>Візит, під час якого виконано вакцинацію</span>
+                            <select data-vaccine-source-visit>
+                              <option value="">Без прив’язки до візиту</option>
+                              ${completedVisits.map((visit) => `
+                                <option value="${escapeHtml(visit.id)}">${escapeHtml(
+                                  [formatCalendarDate(visit.date || visit.event_date || visit.created_at),
+                                    visit.reason || visit.diagnosis || String(visit.id).slice(0, 8)].join(" · ")
+                                )}</option>
+                              `).join("")}
+                            </select>
+                          </label>
+                        </div>
+                      ` : ""}
+
                       <div
                         class="patientVaccineSaveActions"
                       >
@@ -59198,6 +59052,7 @@ function openPatientVaccinationPicker(
                                 {
                                   vaccination_date:
                                     vaccinationDate,
+                                  source_visit_id: saveBox.querySelector("[data-vaccine-source-visit]")?.value || null,
                                   vaccine_name:
                                     fullName,
                                   vaccine_type:
@@ -61671,7 +61526,8 @@ if (addVaccinationBtn) {
     "click",
     () => {
       openPatientVaccinationPicker(
-        pet
+        pet,
+        sortedPatientVisits
       );
     }
   );
