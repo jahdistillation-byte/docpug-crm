@@ -76553,3 +76553,154 @@ html body[data-theme] .page[data-page="patient"] #patientCardRoot .premiumLabsPa
     opacity: 1;
   }
 }
+
+/* Shared client directory navigation and search. */
+@layer pugReadableInterface {
+  html body[data-theme] #clientDirectory:not([hidden]) {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px 20px;
+    margin: 0 0 20px;
+    color: var(--ct-text);
+  }
+
+  #clientDirectory[hidden],
+  #clientDirectory button[hidden] {
+    display: none !important;
+  }
+
+  #clientDirectory .clientDirectoryModes,
+  #clientDirectory .clientDirectorySearch {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    min-width: 0;
+    padding: 4px;
+    border: 1px solid var(--ct-line);
+    border-radius: 12px;
+    background: var(--ct-paper);
+  }
+
+  #clientDirectory .clientDirectoryModes a,
+  #clientDirectory button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 40px;
+    padding: 0 12px;
+    border: 0;
+    border-radius: 8px;
+    background: none;
+    color: var(--ct-muted);
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  #clientDirectory .clientDirectoryModes a[aria-current="page"],
+  #clientDirectory .clientDirectoryModes a:hover,
+  #clientDirectory button:hover {
+    background: var(--ct-soft);
+    color: var(--ct-accent);
+  }
+
+  #clientDirectory .clientDirectorySearch {
+    flex: 1 1 310px;
+    max-width: 620px;
+    padding-inline-start: 12px;
+  }
+
+  #clientDirectory .clientDirectorySearch > svg {
+    flex: 0 0 18px;
+    width: 18px;
+    height: 18px;
+    color: var(--ct-accent);
+  }
+
+  html body[data-theme] #clientDirectory #globalSearch {
+    flex: 1;
+    min-width: 0;
+    min-height: 40px;
+    margin: 0 !important;
+    padding: 6px 8px !important;
+    border: 0 !important;
+    border-radius: 8px;
+    background: transparent !important;
+    color: var(--ct-text) !important;
+    box-shadow: none !important;
+    font-size: 16px !important;
+  }
+
+  #clientDirectory #globalSearch::placeholder { color: var(--ct-muted); opacity: 1; }
+  #clientDirectory #globalSearch::-webkit-search-cancel-button { display: none; }
+  #clientDirectory :is(a, button, input):focus-visible,
+  #patientsTabList .clientPatientName:focus-visible {
+    outline: 2px solid var(--ct-accent) !important;
+    outline-offset: 2px;
+  }
+
+  html body[data-theme] .page[data-page="patients"] #patientsTabList > [data-open-pet] {
+    background: var(--ct-paper) !important;
+    border-color: var(--ct-line) !important;
+    color: var(--ct-text) !important;
+  }
+
+  html body[data-theme] #patientsTabList > [hidden] { display: none !important; }
+
+  html body[data-theme] #patientsTabList .clientPatientName {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    max-width: 100%;
+    padding: 0;
+    border: 0;
+    background: none !important;
+    color: var(--ct-text) !important;
+    font: inherit;
+    font-weight: 650;
+    text-align: start;
+    overflow-wrap: anywhere;
+    cursor: pointer;
+  }
+
+  #patientsTabList .clientPatientName svg,
+  .patientsTabLoadingIcon svg { flex: 0 0 18px; width: 18px; height: 18px; color: var(--ct-accent); }
+
+  html body[data-theme] .page[data-page="patients"] .mobilePatientsTools {
+    display: block;
+    margin-bottom: 12px;
+  }
+
+  html body[data-theme] .page[data-page="patients"] .mobilePatientsFilter {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    color: var(--ct-muted);
+  }
+
+  html body[data-theme] .page[data-page="patients"] .mobilePatientsFilter select {
+    width: auto;
+    min-height: 40px;
+    padding: 6px 10px;
+    border: 1px solid var(--ct-line) !important;
+    border-radius: 8px;
+    background: var(--ct-paper) !important;
+    color: var(--ct-text) !important;
+    color-scheme: var(--ct-scheme);
+  }
+
+  html body[data-theme] .page[data-page="patients"] .mobilePatientsNoResults:not([hidden]) {
+    display: block;
+    padding: 24px 12px;
+    text-align: center;
+    color: var(--ct-muted);
+  }
+
+  @media (max-width: 640px) {
+    #clientDirectory .clientDirectorySearch { flex-basis: 100%; }
+  }
+}

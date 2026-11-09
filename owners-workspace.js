@@ -21,25 +21,22 @@
     heading.innerHTML='<div><span class="pwEyebrow">PUG CRM</span><h1></h1><p></p></div>';
     if(add)heading.appendChild(add);
     previous.replaceWith(heading);
-    const search=document.getElementById('globalSearch');
-    if(search){
-      const wrap=search.parentElement;
-      wrap.classList.add('pwSearch');
-      wrap.insertAdjacentHTML('afterbegin',icon('search'));
-      const existingClear=document.getElementById('ownersGlobalSearchClear');
-      const clear=existingClear||document.createElement('button');clear.id='ownersGlobalSearchClear';clear.classList.add('pwClear');clear.type='button';clear.innerHTML=icon('close');
-      if(!existingClear)clear.addEventListener('click',()=>{search.value='';renderOwners();search.focus();});wrap.appendChild(clear);
-      const panel=document.createElement('div');panel.className='pwSearchPanel';panel.appendChild(wrap);
-      view.querySelector('.ownersCatalogToolbar').before(panel);
-    }
     const columns=document.createElement('div');columns.className='pwColumns';columns.setAttribute('aria-hidden','true');
     view.querySelector('#ownersCardsGrid').before(columns);
     const count=document.createElement('div');count.className='pwResultCount';count.setAttribute('role','status');count.setAttribute('aria-live','polite');
     view.querySelector('.ownersCatalogToolbar').after(count);
     page.addEventListener('click',event=>{
+      const petButton=event.target.closest('[data-open-client-pet]');
+      if(petButton){
+        event.stopPropagation();
+        openPatient(petButton.dataset.openClientPet);
+        return;
+      }
+
       if(event.target.closest('[data-owner-reset]')){
-        const input=document.getElementById('globalSearch');if(input)input.value='';
-        state.ownersCatalogFilter='all';renderOwners();input?.focus();
+        const input=document.getElementById('globalSearch');
+        state.ownersCatalogFilter='all';
+        if(input){input.value='';input.dispatchEvent(new Event('input'));input.focus();}else{renderOwners();}
       }
     });
     page.addEventListener('keydown',event=>{
@@ -60,12 +57,10 @@
     const petsByOwner=new Map();
     patients.forEach(patient=>{const key=String(patient.owner_id);if(!petsByOwner.has(key))petsByOwner.set(key,[]);petsByOwner.get(key).push(patient);});
     const petsOf=id=>petsByOwner.get(String(id))||[];
-    const input=document.getElementById('globalSearch'),query=contact(input?.value).toLowerCase(),digits=query.replace(/\D/g,'');
+    const input=document.getElementById('globalSearch'),query=contact(input?.value).toLowerCase();
     const filter=state.ownersCatalogFilter||'all',sort=state.ownersCatalogSort||'recent';
     page.querySelector('h1').textContent=t.title;page.querySelector('.pwHeading p').textContent=t.subtitle;
     const add=document.getElementById('btnAddOwner');if(add){add.removeAttribute('data-i18n');add.innerHTML=`${icon('plus')}<span>${esc(t.add)}</span>`;}
-    if(input){input.placeholder=t.search;input.setAttribute('aria-label',t.search);input.removeAttribute('data-i18n-placeholder');}
-    const clear=page.querySelector('.pwClear');if(clear){clear.hidden=!query;clear.setAttribute('aria-label',t.clear);}
     const missingCount=owners.filter(owner=>!hasContacts(owner)).length;
     view.querySelector('.ownersOverview').innerHTML=`<span><strong id="ownersTotalCount">${owners.length}</strong> ${esc(t.owners)}</span><span><strong id="ownersPatientsCount">${patients.length}</strong> ${esc(t.patients)}</span><span class="${missingCount?'pwNeedsContact':''}"><strong id="ownersMissingContactsCount">${missingCount}</strong> ${esc(t.noContacts)}</span>`;
     const labels={'all':t.all,'with-pets':t.with,'without-pets':t.without,'missing-contacts':t.missing};
@@ -76,8 +71,9 @@
     [...sortInput.options].forEach(option=>option.textContent=({recent:t.recent,name:t.nameSort,pets:t.petsSort})[option.value]);
     page.querySelector('.pwColumns').innerHTML=`<span>${esc(t.owner)}</span><span>${esc(t.contacts)}</span><span>${esc(t.pets)}</span><span></span>`;
     let visible=owners.filter(owner=>{
-      const pets=petsOf(owner.id),all=[owner.name,owner.phone,owner.email,owner.telegram,owner.note,...pets.flatMap(pet=>[pet.name,pet.breed,pet.species])].filter(Boolean).join(' ').toLowerCase();
-      if(query&&!all.includes(query)&&!(digits.length>=3&&contact(owner.phone).replace(/\D/g,'').includes(digits)))return false;
+      const pets=petsOf(owner.id);
+      const fields=[owner.name,owner.email,owner.telegram,owner.note,...pets.flatMap(pet=>[pet.name,pet.breed,pet.species])];
+      if(!matchesClientSearch(query,fields,owner.phone))return false;
       return filter==='with-pets'?pets.length>0:filter==='without-pets'?pets.length===0:filter==='missing-contacts'?!hasContacts(owner):true;
     });
     if(sort==='name')visible=[...visible].sort((a,b)=>contact(a.name).localeCompare(contact(b.name),getInterfaceLanguage(),{sensitivity:'base'}));
@@ -93,7 +89,7 @@
       return `<article class="ownerCatalogCard pwOwnerRow" data-open-owner="${id}">
         <div class="pwIdentity"><span class="ownerCatalogAvatar" aria-hidden="true">${esc(initials)}</span><div><button type="button" class="pwOwnerName" data-open-owner="${id}">${esc(name)}</button>${note?`<small class="pwOwnerNote" title="${esc(note)}">${esc(note)}</small>`:''}</div></div>
         <div class="ownerCatalogContacts">${contactHtml}${other?`<span class="ownerCatalogContact ${phone?'pwSecondaryContact':''}">${icon(email?'mail':'message')}<span>${esc(other)}</span></span>`:''}${!hasContacts(owner)?`<span class="pwMissingContact">${esc(t.missing)}</span>`:''}</div>
-        <div class="ownerCatalogPets" title="${esc(petsTitle)}">${pets.length?ordered.slice(0,2).map(pet=>`<span class="ownerCatalogPet" title="${esc([pet.name,pet.breed||pet.species].filter(Boolean).join(' · '))}">${icon('paw')}<span>${esc(contact(pet.name)||t.unnamedPet)}</span></span>`).join('')+(pets.length>2?`<span class="ownerCatalogPetMore" aria-label="${esc(petsTitle)}">+${pets.length-2}</span>`:''):`<span class="ownerCatalogPetsEmpty">${esc(t.noPets)}</span>`}</div>
+        <div class="ownerCatalogPets" title="${esc(petsTitle)}">${pets.length?ordered.slice(0,2).map(pet=>`<button type="button" class="ownerCatalogPet" data-open-client-pet="${esc(pet.id)}" title="${esc([pet.name,pet.breed||pet.species].filter(Boolean).join(' · '))}">${icon('paw')}<span>${esc(contact(pet.name)||t.unnamedPet)}</span></button>`).join('')+(pets.length>2?`<span class="ownerCatalogPetMore" aria-label="${esc(petsTitle)}">+${pets.length-2}</span>`:''):`<span class="ownerCatalogPetsEmpty">${esc(t.noPets)}</span>`}</div>
         <div class="pwRowActions"><button type="button" class="ownerCatalogOpen" data-open-owner="${id}" aria-label="${esc(t.open+': '+name)}">${esc(t.open)}${icon('arrow')}</button>
           <div class="ownerCatalogActions"><button type="button" class="ownerCatalogMenuButton" data-owner-menu="${id}" aria-label="${esc(t.actions+': '+name)}" aria-expanded="false">${icon('more')}</button>
           <div class="ownerCatalogMenu" data-owner-menu-panel="${id}"><button type="button" data-edit-owner="${id}">${icon('edit')}${esc(t.edit)}</button><button type="button" class="ownerCatalogDelete" data-delete-owner="${id}">${icon('trash')}${esc(t.remove)}</button></div></div></div>

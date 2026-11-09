@@ -14,7 +14,7 @@
   type="image/jpeg"
   fetchpriority="high"
 >
-<link rel="stylesheet" href="style.css?v=20261109-patient-files-v1">
+<link rel="stylesheet" href="style.css?v=20261109-clients-v1">
 <link rel="stylesheet" href="stock-catalog.css?v=20261106-8">
 <link rel="stylesheet" href="hospital-ward.css?v=20261107-4">
 <link rel="stylesheet" href="calendar-workspace.css?v=20261107-4">
@@ -255,15 +255,26 @@
         🐾 PUG<span style="color:var(--accent-color);">.CRM</span>
       </div>
 
-      <div class="search-bar" style="flex:1;max-width:400px;margin:0 20px;">
-        <input type="text" id="globalSearch" data-i18n-placeholder="calendar.header.search" placeholder="Пошук власника, пацієнта..." style="width:100%;">
-      </div>
-
       <div class="user-profile-badge" style="text-align:right;">
         <div id="clinicNameTitle" data-i18n="calendar.header.clinic" style="font-weight:600;color:#fff;">Клініка</div>
         <div style="font-size:.8rem;color:rgba(255,255,255,.5);" data-i18n="calendar.header.administrator">Адміністратор</div>
       </div>
     </header>
+
+    <div id="clientDirectory" hidden>
+      <nav class="clientDirectoryModes" data-i18n-aria-label="nav.clients" aria-label="Клієнти">
+        <a href="#owners" data-client-mode="owners" data-i18n="nav.owners">Власники</a>
+        <a href="#patients" data-client-mode="patients" data-i18n="nav.patients">Пацієнти</a>
+      </nav>
+      <div class="clientDirectorySearch">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
+          <circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/>
+        </svg>
+        <input id="globalSearch" type="search" data-i18n-placeholder="owners.search.placeholder"
+          data-i18n-aria-label="owners.search.label" placeholder="Власник, телефон, улюбленець, порода..." aria-label="Пошук клієнтів">
+        <button id="ownersGlobalSearchClear" type="button" data-i18n-aria-label="clients.search.clear" aria-label="Очистити пошук" hidden>×</button>
+      </div>
+    </div>
 
     <section class="page content-section" data-page="owners">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
@@ -1524,32 +1535,9 @@
 </span>
         <span
           class="dock-text"
-          data-i18n="nav.owners"
+          data-i18n="nav.clients"
         >
-          Власники
-        </span>
-      </a>
-    </li>
-
-    <li
-      class="menu-item"
-      data-target="patients"
-    >
-      <a href="#patients">
-        <span class="dock-icon">
-  <svg viewBox="0 0 24 24" aria-hidden="true">
-    <ellipse cx="12" cy="15.5" rx="5" ry="4"/>
-    <circle cx="6.5" cy="9" r="2"/>
-    <circle cx="10" cy="5.5" r="2"/>
-    <circle cx="14" cy="5.5" r="2"/>
-    <circle cx="17.5" cy="9" r="2"/>
-  </svg>
-</span>
-        <span
-          class="dock-text"
-          data-i18n="nav.patients"
-        >
-          Пацієнти
+          Клієнти
         </span>
       </a>
     </li>
@@ -3156,7 +3144,7 @@
   src="hospital-documents.js?v=20261107-2"
 ></script>
 <script defer src="calendar-workspace.js?v=20261107-4"></script>
-<script defer src="owners-workspace.js?v=20261107-1"></script>
+<script defer src="owners-workspace.js?v=20261109-1"></script>
 <script defer src="owner-profile-workspace.js?v=20261108-1"></script>
 <script defer src="patient-overview-workspace.js?v=20261108-2"></script>
 <script defer src="patient-records-workspace.js?v=20261108-1"></script>
@@ -3164,7 +3152,7 @@
 <script defer src="visit-catalog.js?v=20261108-1"></script>
 <script
   defer
-  src="app.js?v=20261109-patient-files-v1"
+  src="app.js?v=20261109-clients-v1"
 ></script>
 <div id="deleteModal" class="deleteModalOverlay" style="display:none;">
   <div class="deleteModal">
