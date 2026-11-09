@@ -76561,7 +76561,8 @@ html body[data-theme] .page[data-page="patient"] #patientCardRoot .premiumLabsPa
     flex-wrap: wrap;
     align-items: center;
     gap: 12px 20px;
-    margin: 0 0 20px;
+    max-width: 1480px;
+    margin: 0 auto 22px !important;
     color: var(--ct-text);
   }
 
@@ -76574,9 +76575,9 @@ html body[data-theme] .page[data-page="patient"] #patientCardRoot .premiumLabsPa
   #clientDirectory .clientDirectorySearch {
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: 8px;
     min-width: 0;
-    padding: 4px;
+    padding: 5px !important;
     border: 1px solid var(--ct-line);
     border-radius: 12px;
     background: var(--ct-paper);
@@ -76587,8 +76588,8 @@ html body[data-theme] .page[data-page="patient"] #patientCardRoot .premiumLabsPa
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-height: 40px;
-    padding: 0 12px;
+    min-height: 44px;
+    padding: 0 16px !important;
     border: 0;
     border-radius: 8px;
     background: none;
@@ -76597,6 +76598,11 @@ html body[data-theme] .page[data-page="patient"] #patientCardRoot .premiumLabsPa
     font-weight: 600;
     text-decoration: none;
     cursor: pointer;
+  }
+
+  #clientDirectory .clientDirectoryModes a {
+    min-width: 106px;
+    white-space: nowrap;
   }
 
   #clientDirectory .clientDirectoryModes a[aria-current="page"],
@@ -76609,7 +76615,7 @@ html body[data-theme] .page[data-page="patient"] #patientCardRoot .premiumLabsPa
   #clientDirectory .clientDirectorySearch {
     flex: 1 1 310px;
     max-width: 620px;
-    padding-inline-start: 12px;
+    padding-inline-start: 12px !important;
   }
 
   #clientDirectory .clientDirectorySearch > svg {
@@ -76633,7 +76639,10 @@ html body[data-theme] .page[data-page="patient"] #patientCardRoot .premiumLabsPa
     font-size: 16px !important;
   }
 
-  #clientDirectory #globalSearch::placeholder { color: var(--ct-muted); opacity: 1; }
+  html body[data-theme] #clientDirectory #globalSearch::placeholder {
+    color: var(--ct-muted) !important;
+    opacity: 1 !important;
+  }
   #clientDirectory #globalSearch::-webkit-search-cancel-button { display: none; }
   #clientDirectory :is(a, button, input):focus-visible,
   #patientsTabList .clientPatientName:focus-visible {
@@ -76701,6 +76710,18 @@ html body[data-theme] .page[data-page="patient"] #patientCardRoot .premiumLabsPa
   }
 
   @media (max-width: 640px) {
+    #clientDirectory .clientDirectoryModes {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      width: 100%;
+    }
+
+    #clientDirectory .clientDirectoryModes a {
+      min-width: 0;
+      padding-inline: 8px !important;
+      white-space: normal;
+    }
+
     #clientDirectory .clientDirectorySearch { flex-basis: 100%; }
   }
 }
