@@ -76725,3 +76725,241 @@ html body[data-theme] .page[data-page="patient"] #patientCardRoot .premiumLabsPa
     #clientDirectory .clientDirectorySearch { flex-basis: 100%; }
   }
 }
+
+/* Tasks workspace and editor use the shared PUG theme palette. */
+@layer pugReadableInterface {
+  html body[data-theme] .pugTaskWorkspace {
+    --task-alert: #9c3f47;
+    --task-priority: #815721;
+    --task-done: #236448;
+    color: var(--ct-text) !important;
+  }
+
+  html body[data-theme]:not([data-theme="white"]) .pugTaskWorkspace {
+    --task-alert: #f2a4ae;
+    --task-priority: #edbf84;
+    --task-done: var(--ct-positive);
+  }
+
+  html body[data-theme] .pugTaskWorkspace .taskWorkspaceHeading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 20px !important;
+  }
+
+  .pugTaskWorkspace .taskEyebrow {
+    color: var(--ct-accent);
+    font-size: 11px;
+    letter-spacing: .1em;
+    font-weight: 700;
+  }
+
+  html body[data-theme] .pugTaskWorkspace .taskWorkspaceHeading h1 {
+    color: var(--ct-text) !important;
+    font-size: clamp(24px, 4vw, 34px) !important;
+    margin: 4px 0 !important;
+  }
+
+  html body[data-theme] .pugTaskWorkspace :is(.taskWorkspaceHeading p, .taskRowDescription, .taskRowMeta, .taskWorkspaceMessage p) {
+    color: var(--ct-muted) !important;
+    margin: 4px 0 0 !important;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+  }
+
+  html body[data-theme="white"] .pugTaskWorkspace :is(.taskWorkspaceHeading p, .taskRowDescription, .taskRowMeta, .taskWorkspaceMessage p) {
+    color: #526779 !important;
+  }
+
+  html body[data-theme] .pugTaskWorkspace #tasksCreateButton,
+  html body[data-theme] .taskCreateOverlay #taskCreateSave {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 9px 16px !important;
+    border: 1px solid var(--ct-button) !important;
+    border-radius: 10px !important;
+    background: var(--ct-button) !important;
+    color: var(--ct-on-button) !important;
+    font-weight: 700;
+    box-shadow: none !important;
+    cursor: pointer;
+  }
+
+  html body[data-theme] .pugTaskWorkspace #tasksCreateButton:hover,
+  html body[data-theme] .taskCreateOverlay #taskCreateSave:hover { background: var(--ct-button-hover) !important; }
+
+  html body[data-theme] .pugTaskWorkspace .taskCenterScopes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 20px !important;
+  }
+
+  html body[data-theme] .pugTaskWorkspace :is(.taskCenterScopes button, .taskWorkspaceMessage button, .taskRowActions button, .taskStatusButton) {
+    min-height: 40px;
+    border: 1px solid var(--ct-line) !important;
+    border-radius: 9px !important;
+    background: var(--ct-soft) !important;
+    color: var(--ct-text) !important;
+    box-shadow: none !important;
+    cursor: pointer;
+  }
+
+  html body[data-theme] .pugTaskWorkspace :is(.taskCenterScopes button, .taskWorkspaceMessage button) {
+    padding: 8px 14px !important;
+    font-size: 13px;
+    font-weight: 650;
+  }
+
+  html body[data-theme] .pugTaskWorkspace .taskCenterScopes button[aria-pressed="true"] {
+    background: var(--ct-button) !important;
+    color: var(--ct-on-button) !important;
+    border-color: var(--ct-button) !important;
+  }
+
+  html body[data-theme] .pugTaskWorkspace :is(button, summary):focus-visible,
+  html body[data-theme] .taskCreateOverlay :is(button, input, textarea, select):focus-visible {
+    outline: 2px solid var(--ct-accent) !important;
+    outline-offset: 2px;
+  }
+
+  .pugTaskWorkspace .stockIcon { width: 17px; height: 17px; flex: 0 0 17px; vertical-align: middle; }
+  .pugTaskWorkspace .taskGroup { margin-bottom: 16px !important; min-width: 0; }
+
+  html body[data-theme] .pugTaskWorkspace .taskGroup > :is(h2, summary) {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 42px;
+    padding: 7px 12px !important;
+    margin: 0 0 6px !important;
+    border-radius: 9px;
+    background: var(--ct-soft) !important;
+    color: var(--ct-text) !important;
+    font-size: 14px !important;
+    font-weight: 700;
+  }
+
+  html body[data-theme] .pugTaskWorkspace [data-task-group="overdue"] > h2,
+  html body[data-theme] .pugTaskWorkspace [data-task-group="overdue"] .taskRowDeadline,
+  html body[data-theme] .pugTaskWorkspace [data-delete-global-task] { color: var(--task-alert) !important; }
+
+  .pugTaskWorkspace .taskGroupCount {
+    padding: 2px 7px;
+    border-radius: 999px;
+    background: var(--ct-paper);
+    font-variant-numeric: tabular-nums;
+    font-size: 12px;
+  }
+
+  .pugTaskWorkspace .taskDoneGroup summary { cursor: pointer; list-style: none; }
+  .pugTaskWorkspace .taskDoneGroup summary::-webkit-details-marker { display: none; }
+  .pugTaskWorkspace .taskDoneGroup summary svg { margin-inline-start: auto; }
+  .pugTaskWorkspace .taskDoneGroup[open] summary svg { transform: rotate(180deg); }
+
+  html body[data-theme] .pugTaskWorkspace :is(.taskWorkspaceRow, .taskWorkspaceMessage) {
+    background: var(--ct-paper) !important;
+    border: 1px solid var(--ct-line) !important;
+    border-radius: 12px;
+    color: var(--ct-text) !important;
+  }
+
+  .pugTaskWorkspace .taskGroupRows { display: grid; gap: 6px; }
+  .pugTaskWorkspace .taskWorkspaceRow {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: start;
+    gap: 10px 14px;
+    padding: 12px !important;
+  }
+
+  html body[data-theme] .pugTaskWorkspace :is(.taskStatusButton, .taskRowActions button) {
+    display: inline-grid;
+    place-items: center;
+    width: 40px;
+    padding: 0 !important;
+  }
+
+  html body[data-theme] .pugTaskWorkspace :is(.taskStatusButton, .taskRowActions button):hover {
+    background: var(--ct-hover) !important;
+    border-color: var(--ct-accent) !important;
+  }
+
+  html body[data-theme] .pugTaskWorkspace .taskStatusButton[aria-pressed="true"] { color: var(--task-done) !important; }
+  .pugTaskWorkspace .taskStatusButton[aria-pressed="false"]::before {
+    content: "";
+    width: 15px;
+    height: 15px;
+    border: 1px solid var(--ct-muted);
+    border-radius: 4px;
+  }
+
+  html body[data-theme] .pugTaskWorkspace .taskRowActions [data-delete-global-task] {
+    color: var(--task-alert) !important;
+  }
+
+  .pugTaskWorkspace button:disabled { opacity: .55; cursor: wait; }
+  .pugTaskWorkspace .taskRowTitle { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 9px; overflow-wrap: anywhere; }
+  .pugTaskWorkspace .taskRowTitle strong { font-size: 15px; color: var(--ct-text); }
+  .pugTaskWorkspace .taskPriority { color: var(--task-priority); font-size: 12px; font-weight: 650; }
+  .pugTaskWorkspace .taskRowDescription { font-size: 13px; white-space: pre-wrap; }
+  .pugTaskWorkspace .taskRowMeta { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 12px; }
+  .pugTaskWorkspace .taskRowMeta svg { width: 14px; height: 14px; }
+  .pugTaskWorkspace .taskRowEnd { display: grid; justify-items: end; gap: 5px; }
+  .pugTaskWorkspace .taskRowDeadline { font-size: 13px; font-weight: 650; font-variant-numeric: tabular-nums; }
+  .pugTaskWorkspace .taskRowActions { display: flex; gap: 5px; }
+  .pugTaskWorkspace .taskWorkspaceMessage { padding: 24px 14px !important; text-align: center; }
+  .pugTaskWorkspace .taskWorkspaceMessage button { margin-top: 12px; }
+
+  html body[data-theme] .taskCreateOverlay { background: #09101880 !important; backdrop-filter: blur(5px) !important; }
+  html body[data-theme] .taskCreateOverlay .taskEditorPanel {
+    max-height: calc(100dvh - 48px) !important;
+    background: var(--ct-paper) !important;
+    border-color: var(--ct-line) !important;
+    color: var(--ct-text) !important;
+    color-scheme: var(--ct-scheme);
+  }
+
+  html body[data-theme] .taskCreateOverlay .taskEditorPanel :is(label > div, small, div[style*="rgba(255,255,255"]) {
+    color: var(--ct-muted) !important;
+    border-color: var(--ct-line) !important;
+  }
+
+  html body[data-theme] .taskCreateOverlay .taskEditorPanel :is(input, select, textarea, button:not(#taskCreateSave)) {
+    background: var(--ct-soft) !important;
+    border-color: var(--ct-line) !important;
+    color: var(--ct-text) !important;
+  }
+
+  html body[data-theme] .taskCreateOverlay .taskEditorPanel h2 { color: var(--ct-text) !important; }
+
+  @media (max-width: 640px) {
+    .pugTaskWorkspace .taskWorkspaceRow { grid-template-columns: auto minmax(0, 1fr); }
+    .pugTaskWorkspace .taskRowEnd {
+      grid-column: 2;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    html body[data-theme] .taskCreateOverlay { padding: 10px !important; }
+    html body[data-theme] .taskCreateOverlay .taskEditorFields {
+      grid-template-columns: minmax(0, 1fr) !important;
+      gap: 12px !important;
+      padding: 16px !important;
+    }
+    html body[data-theme] .taskCreateOverlay .taskEditorPanel { max-height: calc(100dvh - 20px) !important; }
+    html body[data-theme] .taskCreateOverlay .taskEditorPanel :is(input, select, textarea) {
+      min-width: 0;
+      max-width: 100%;
+      box-sizing: border-box;
+      font-size: 16px !important;
+    }
+  }
+}

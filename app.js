@@ -19206,6 +19206,10 @@ function getTasksUi() {
         "Wczytywanie zadań…"
       ),
 
+    upcoming: pick("Заплановані", "Upcoming", "Anstehend", "Nadchodzące"),
+    unscheduled: pick("Без строку", "No due date", "Ohne Frist", "Bez terminu"),
+    completed: pick("Виконані", "Completed", "Erledigt", "Ukończone"),
+
     noOverdue:
       pick(
         "Прострочених задач немає",
@@ -20254,6 +20258,10 @@ console.log(
 
   overlay.innerHTML = `
     <div
+      class="taskEditorPanel"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="taskEditorTitle"
       style="
         width:min(680px, 100%);
         max-height:calc(100vh - 48px);
@@ -20291,10 +20299,11 @@ console.log(
               color:#d9b57c;
             "
           >
-            TASK CENTER
+            ${escapeHtml(getTasksUi().center)}
           </div>
 
           <h2
+            id="taskEditorTitle"
             style="
               margin:7px 0 0;
               font-size:22px;
@@ -20320,6 +20329,7 @@ console.log(
         <button
           type="button"
           data-close-task-modal
+          aria-label="${escapeHtml(getTasksUi().cancel)}"
           style="
             width:36px;
             height:36px;
@@ -20340,6 +20350,7 @@ console.log(
 
 
       <div
+        class="taskEditorFields"
         style="
           display:grid;
           grid-template-columns:
@@ -20414,15 +20425,15 @@ console.log(
             "
           >
             <option value="task">
-              ✓ Задача
+              Задача
             </option>
 
             <option value="reminder">
-              🔔 Нагадування
+              Нагадування
             </option>
 
             <option value="follow_up">
-              ↻ Follow-up
+              Follow-up
             </option>
           </select>
         </label>
@@ -20436,7 +20447,7 @@ console.log(
                 rgba(255,255,255,.55);
             "
           >
-            🐾 Пацієнт
+            Пацієнт
           </div>
 
           <select
@@ -20497,7 +20508,7 @@ console.log(
                 rgba(255,255,255,.55);
             "
           >
-            👤 Виконавець
+            Виконавець
           </div>
 
           <select
@@ -20965,7 +20976,7 @@ updateReminderVisibility();
 
     if (heading) {
       heading.textContent =
-        "✎ Редагувати задачу";
+        getTasksUi().editTask;
     }
 
 
@@ -21252,1348 +21263,182 @@ overlay
       }
     );
 }
-async function renderTasksTab(
-  activeScope = "all"
-) {
-  const page =
-    document.querySelector(
-      '[data-page="tasks"]'
-    );
+async function renderTasksTab(activeScope = "all") {
+  const page = document.querySelector('[data-page="tasks"]');
+  if (!page) return;
+  const ui = getTasksUi();
+  const e = escapeHtml;
+  const icon = getStockIcon;
+  const scopes = { all: ui.all, mine: ui.mine, today: ui.today, overdue: ui.overdue };
+  if (!Object.hasOwn(scopes, activeScope)) activeScope = "all";
+  const showCompleted = page.dataset.taskScope === activeScope &&
+    Boolean(page.querySelector(".taskDoneGroup[open]"));
+  page.dataset.taskScope = activeScope;
+  page.classList.add("pugTaskWorkspace");
 
-  if (!page) {
-    return;
-  }
-
-
-  const allowedScopes =
-    new Set([
-      "mine",
-      "today",
-      "overdue",
-      "all",
-    ]);
-
-
-  if (
-    !allowedScopes.has(
-      activeScope
-    )
-  ) {
-    activeScope =
-      "all";
-  }
-
-
-  // ==========================================
-  // LOCAL CLINIC DATE / TIME ф
-  // ==========================================
-
-  const now =
-    new Date();
-
-
-  const pad2 =
-    (value) =>
-      String(value)
-        .padStart(
-          2,
-          "0"
-        );
-
-
-  const localDate =
-    [
-      now.getFullYear(),
-
-      pad2(
-        now.getMonth() + 1
-      ),
-
-      pad2(
-        now.getDate()
-      ),
-    ].join("-");
-
-
-  const localTime =
-    `${pad2(
-      now.getHours()
-    )}:${pad2(
-      now.getMinutes()
-    )}`;
-
-
-  // ==========================================
-  // SKELETON
-  // ==========================================
-
+  const now = new Date();
+  const pad = value => String(value).padStart(2, "0");
+  const localDate = [now.getFullYear(), pad(now.getMonth() + 1), pad(now.getDate())].join("-");
+  const localTime = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
   page.innerHTML = `
-    <div
-      style="
-        display:flex;
-        align-items:flex-start;
-        justify-content:space-between;
-        gap:20px;
-        margin-bottom:18px;
-      "
-    >
-      <div>
-        <h2
-          style="
-            margin:0;
-          "
-        >
-          ✅ Задачі
-        </h2>
-
-        <div
-          style="
-            margin-top:6px;
-            color:
-              rgba(255,255,255,.48);
-          "
-        >
-          Задачі, нагадування
-          та follow-up пацієнтів
-        </div>
-      </div>
-
-
-      <button
-        type="button"
-        class="btn-primary"
-        id="tasksCreateButton"
-      >
-        + Нова задача
-      </button>
+    <header class="taskWorkspaceHeading">
+      <div><div class="taskEyebrow">${e(ui.center)}</div><h1>${e(ui.tasks)}</h1>
+        <p>${e(ui.tasksDescription)}</p></div>
+      <button type="button" id="tasksCreateButton">${icon("plus")} ${e(ui.newTask)}</button>
+    </header>
+    <div class="taskCenterScopes" role="group" aria-label="${e(ui.tasks)}">
+      ${Object.entries(scopes).map(([scope, label]) => `
+        <button type="button" data-task-scope="${scope}" aria-pressed="${scope === activeScope}">
+          ${e(label)}
+        </button>`).join("")}
     </div>
-
-
-    <div
-      class="taskCenterScopes"
-      style="
-        display:flex;
-        gap:8px;
-        flex-wrap:wrap;
-        margin-bottom:16px;
-      "
-    >
-      ${[
-        [
-          "mine",
-          "👤 Мої",
-        ],
-        [
-          "today",
-          "📅 Сьогодні",
-        ],
-        [
-          "overdue",
-          "⚠️ Прострочені",
-        ],
-        [
-          "all",
-          "☰ Усі",
-        ],
-      ]
-        .map(
-          ([scope, label]) => `
-            <button
-              type="button"
-              data-task-scope="${scope}"
-              style="
-                padding:9px 14px;
-                border-radius:10px;
-                border:
-                  1px solid
-                  ${
-                    scope ===
-                    activeScope
-                      ? "rgba(215,178,120,.50)"
-                      : "rgba(255,255,255,.08)"
-                  };
-                background:
-                  ${
-                    scope ===
-                    activeScope
-                      ? "rgba(215,178,120,.14)"
-                      : "rgba(255,255,255,.025)"
-                  };
-                color:
-                  ${
-                    scope ===
-                    activeScope
-                      ? "#f1d1a0"
-                      : "rgba(255,255,255,.65)"
-                  };
-                cursor:pointer;
-              "
-            >
-              ${label}
-            </button>
-          `
-        )
-        .join("")}
-    </div>
-
-
-    <div
-      id="taskCenterContent"
-      style="
-        min-height:150px;
-      "
-    >
-      <div
-        style="
-          padding:42px;
-          text-align:center;
-          border:
-            1px solid
-            rgba(255,255,255,.07);
-          border-radius:18px;
-          color:
-            rgba(255,255,255,.42);
-        "
-      >
-        Завантаження задач…
-      </div>
-    </div>
-  `;
-
-
-  // ==========================================
-  // FILTER EVENTS
-  // ==========================================
-
-  page
-    .querySelectorAll(
-      "[data-task-scope]"
-    )
-    .forEach(
-      (button) => {
-        button.onclick =
-          () => {
-            renderTasksTab(
-              button.dataset
-                .taskScope
-            );
-          };
-      }
-    );
-
-const createTaskButton =
-  page.querySelector(
-    "#tasksCreateButton"
-  );
-
-if (createTaskButton) {
-  createTaskButton.onclick =
-    () => {
-      openTaskCreateModal(
-        activeScope
-      );
+    <div id="taskCenterContent" aria-busy="true">
+      <div class="taskWorkspaceMessage" role="status">${e(ui.loading)}</div>
+    </div>`;
+  const content = page.querySelector("#taskCenterContent");
+  page.querySelector("#tasksCreateButton").onclick = () => openTaskCreateModal(activeScope);
+  page.querySelectorAll("[data-task-scope]").forEach(button => {
+    button.onclick = () => {
+      const scope = button.dataset.taskScope;
+      if (scope === activeScope) return;
+      renderTasksTab(scope);
+      page.querySelector(`[data-task-scope="${scope}"]`)?.focus({ preventScroll: true });
     };
-}
-  const content =
-    page.querySelector(
-      "#taskCenterContent"
-    );
-
-
-  // ==========================================
-  // LOAD TASKS
-  // ==========================================
+  });
 
   try {
-    const params =
-      new URLSearchParams({
-        scope:
-          activeScope,
-
-        date:
-          localDate,
-
-        time:
-          localTime,
-      });
-
-
-    const response =
-      await fetch(
-        `/api/tasks?${params.toString()}`,
-        {
-          credentials:
-            "include",
-
-          headers: {
-            Accept:
-              "application/json",
-
-            ...getOrgHeaders(),
-          },
-        }
-      );
-
-
-    const result =
-      await response
-        .json()
-        .catch(
-          () => null
-        );
-
-
-    if (
-      !response.ok ||
-      !result?.ok
-    ) {
-      throw new Error(
-        result?.error ||
-        "Не вдалося завантажити задачі."
-      );
-    }
-
-
-    const tasks =
-      Array.isArray(
-        result.data
-      )
-        ? result.data
-        : [];
-refreshMyTasksBadge();
-// =====================================================
-// TASK RELATIONS
-// =====================================================
-
-if (
-  !Array.isArray(state.patients) ||
-  !state.patients.length
-) {
-  await loadPatientsApi();
-}
-
-
-let taskStaffList =
-  Array.isArray(state.staff)
-    ? state.staff
-    : [];
-
-
-if (!taskStaffList.length) {
-  taskStaffList =
-    await loadStaffApi();
-}
-
-
-const taskPatientMap =
-  new Map(
-    (
-      Array.isArray(state.patients)
-        ? state.patients
-        : []
-    ).map(
-      (patient) => [
-        String(patient.id),
-        patient,
-      ]
-    )
-  );
-
-
-const taskStaffMap =
-  new Map(
-    (
-      Array.isArray(taskStaffList)
-        ? taskStaffList
-        : []
-    ).map(
-      (employee) => [
-        String(employee.id),
-        employee,
-      ]
-    )
-  );
-
-
-const taskRoleLabels = {
-  owner:
-    "Власник",
-
-  admin:
-    "Адміністратор",
-
-  vet:
-    "Ветеринар",
-
-  assistant:
-    "Асистент",
-
-  reception:
-    "Рецепція",
-
-  manager:
-    "Менеджер",
-};
-
-    // ========================================
-    // EMPTY STATE
-    // ========================================
-
+    const params = new URLSearchParams({ scope: activeScope, date: localDate, time: localTime });
+    const response = await fetch(`/api/tasks?${params}`, {
+      credentials: "include",
+      headers: { Accept: "application/json", ...getOrgHeaders() },
+    });
+    const result = await response.json().catch(() => null);
+    if (!response.ok || !result?.ok) throw new Error(result?.error || ui.loadFailed);
+    if (!content.isConnected) return;
+    const tasks = Array.isArray(result.data) ? result.data : [];
+    void refreshMyTasksBadge();
     if (!tasks.length) {
-      content.innerHTML = `
-        <div
-          style="
-            padding:48px 24px;
-            text-align:center;
-            border:
-              1px dashed
-              rgba(255,255,255,.10);
-            border-radius:18px;
-            background:
-              rgba(255,255,255,.015);
-          "
-        >
-          <div
-            style="
-              font-size:30px;
-              margin-bottom:10px;
-            "
-          >
-            ✓
-          </div>
-
-          <div
-            style="
-              font-weight:700;
-              color:
-                rgba(255,255,255,.78);
-            "
-          >
-            ${
-              activeScope ===
-              "overdue"
-                ? "Прострочених задач немає"
-                : activeScope ===
-                  "today"
-                  ? "На сьогодні задач немає"
-                  : activeScope ===
-                    "mine"
-                    ? "У вас немає задач"
-                    : "Задач поки немає"
-            }
-          </div>
-
-          <div
-            style="
-              margin-top:6px;
-              font-size:12px;
-              color:
-                rgba(255,255,255,.38);
-            "
-          >
-            Нові задачі та нагадування
-            з'являться тут.
-          </div>
-        </div>
-      `;
-
+      const empty = { all: ui.noTasks, mine: ui.noMine, today: ui.noToday, overdue: ui.noOverdue };
+      content.innerHTML = `<div class="taskWorkspaceMessage" role="status">
+        <strong>${e(empty[activeScope])}</strong><p>${e(ui.emptyDescription)}</p></div>`;
       return;
     }
 
-
-    // ========================================
-    // HELPERS
-    // ========================================
-
-    const formatTaskDate =
-  (value) => {
-    const clean =
-      String(
-        value ||
-        ""
-      ).slice(
-        0,
-        10
-      );
-
-    if (
-      !clean
-    ) {
-      return "";
+    // Names enrich the list. The list stays usable if one directory cannot load.
+    const [, staff] = await Promise.allSettled([
+      state.patients?.length ? Promise.resolve() : loadPatientsApi(),
+      state.staff?.length ? Promise.resolve(state.staff) : loadStaffApi(),
+    ]);
+    if (!content.isConnected) return;
+    const patientsById = new Map((state.patients || []).map(patient => [String(patient.id), patient]));
+    const staffById = new Map((Array.isArray(staff.value) ? staff.value : [])
+      .map(employee => [String(employee.id), employee]));
+    const groups = { overdue: [], today: [], upcoming: [], unscheduled: [], completed: [] };
+    for (const task of tasks) {
+      if (task.status === "completed") groups.completed.push(task);
+      else if (task.is_overdue) groups.overdue.push(task);
+      else if (task.is_today || String(task.due_date || "").slice(0, 10) === localDate) groups.today.push(task);
+      else if (task.due_date) groups.upcoming.push(task);
+      else groups.unscheduled.push(task);
     }
+    const labels = {
+      overdue: ui.overdue, today: ui.today, upcoming: ui.upcoming,
+      unscheduled: ui.unscheduled, completed: ui.completed,
+    };
+    const renderRow = task => {
+      const id = e(String(task.id ?? ""));
+      const patient = patientsById.get(String(task.patient_id));
+      const employee = staffById.get(String(task.staff_id));
+      const title = task.title || ui.unnamed;
+      const completed = task.status === "completed";
+      const toggleLabel = completed ? ui.restoreTask : ui.completeTask;
+      const kind = { reminder: ui.reminder, follow_up: ui.followUp }[task.task_kind] || ui.task;
+      const date = task.due_date ? formatCalendarDate(String(task.due_date).slice(0, 10), {
+        day: "2-digit", month: "2-digit", year: "numeric",
+      }) : "";
+      const time = String(task.due_time || "").slice(0, 5);
+      return `<article class="taskWorkspaceRow" data-task-id="${id}">
+        <button class="taskStatusButton" type="button" data-toggle-global-task="${id}"
+          aria-pressed="${completed}" title="${e(toggleLabel)}" aria-label="${e(toggleLabel + ": " + title)}">
+          ${completed ? icon("taskCheck") : ""}
+        </button>
+        <div class="taskRowMain">
+          <div class="taskRowTitle"><strong>${e(title)}</strong>
+            ${task.priority === "high" ? `<span class="taskPriority">${e(ui.priorityHigh)}</span>` : ""}
+          </div>
+          ${task.description ? `<p class="taskRowDescription">${e(task.description)}</p>` : ""}
+          <div class="taskRowMeta">
+            ${patient ? `<span>${icon("paw")} ${e(patient.name || ui.unnamed)}</span>` : ""}
+            <span>${icon("partners")} ${e(employee?.name || employee?.full_name || (task.staff_id ? ui.employee : ui.noAssignee))}</span>
+            <span>${e(kind)}</span>
+            ${task.priority === "low" ? `<span>${e(ui.priorityLow)}</span>` : ""}
+            ${task.source === "ai" ? "<span>PUG AI</span>" : ""}
+          </div>
+        </div>
+        <div class="taskRowEnd">
+          <div class="taskRowDeadline">${e([date, time].filter(Boolean).join(" · ") || ui.unscheduled)}</div>
+          <div class="taskRowActions">
+            <button type="button" data-edit-global-task="${id}" title="${e(ui.editTask)}" aria-label="${e(ui.editTask + ": " + title)}">${icon("edit")}</button>
+            <button type="button" data-delete-global-task="${id}" title="${e(ui.deleteTask)}" aria-label="${e(ui.deleteTask + ": " + title)}">${icon("trash")}</button>
+          </div>
+        </div>
+      </article>`;
+    };
+    content.innerHTML = Object.entries(groups).filter(([, rows]) => rows.length).map(([group, rows]) => {
+      const heading = `<span>${e(labels[group])}</span><span class="taskGroupCount">${rows.length}</span>`;
+      const list = `<div class="taskGroupRows">${rows.map(renderRow).join("")}</div>`;
+      return group === "completed"
+        ? `<details class="taskGroup taskDoneGroup"${showCompleted ? " open" : ""}>
+            <summary>${heading}${icon("chevron")}</summary>${list}</details>`
+        : `<section class="taskGroup" data-task-group="${group}"><h2>${heading}</h2>${list}</section>`;
+    }).join("");
 
-    return formatCalendarDate(
-      clean,
-      {
-        day:
-          "2-digit",
-
-        month:
-          "2-digit",
-
-        year:
-          "numeric",
+    const refreshCurrentList = () => {
+      if (state.route === "tasks") return renderTasksTab(page.dataset.taskScope);
+      return refreshMyTasksBadge();
+    };
+    content.addEventListener("click", async event => {
+      const button = event.target.closest("[data-toggle-global-task], [data-edit-global-task], [data-delete-global-task]");
+      if (!button || button.disabled) return;
+      const { toggleGlobalTask, editGlobalTask, deleteGlobalTask } = button.dataset;
+      const taskId = toggleGlobalTask ?? editGlobalTask ?? deleteGlobalTask;
+      const task = tasks.find(item => String(item.id) === taskId);
+      if (!task) return;
+      if (editGlobalTask !== undefined) {
+        openTaskCreateModal(activeScope, task);
+        return;
       }
-    );
-  };
-
-
-    const getKindInfo =
-      (task) => {
-        switch (
-          task.task_kind
-        ) {
-          case "reminder":
-            return {
-              icon: "🔔",
-              label:
-                "Нагадування",
-            };
-
-          case "follow_up":
-            return {
-              icon: "↻",
-              label:
-                "Follow-up",
-            };
-
-          default:
-            return {
-              icon: "✓",
-              label:
-                "Задача",
-            };
-        }
-      };
-
-
-    const getPriorityInfo =
-      (priority) => {
-        switch (
-          priority
-        ) {
-          case "high":
-            return {
-              label:
-                "Високий",
-              color:
-                "#ff9b8f",
-            };
-
-          case "low":
-            return {
-              label:
-                "Низький",
-              color:
-                "rgba(255,255,255,.42)",
-            };
-
-          default:
-            return {
-              label:
-                "Звичайний",
-              color:
-                "#e3c08b",
-            };
-        }
-      };
-
-
-    // ========================================
-    // RENDER
-    // ========================================
-
-    content.innerHTML = `
-      <div
-        style="
-          display:flex;
-          flex-direction:column;
-          gap:10px;
-        "
-      >
-        ${tasks
-          .map(
-            (task) => {
-              const kind =
-                getKindInfo(
-                  task
-                );
-
-              const priority =
-                getPriorityInfo(
-                  task.priority
-                );
-
-                const patient =
-  task.patient_id
-    ? taskPatientMap.get(
-        String(
-          task.patient_id
-        )
-      )
-    : null;
-
-
-const employee =
-  task.staff_id
-    ? taskStaffMap.get(
-        String(
-          task.staff_id
-        )
-      )
-    : null;
-
-
-const employeeRole =
-  String(
-    employee?.role || ""
-  )
-    .trim()
-    .toLowerCase();
-
-
-const employeeRoleLabel =
-  taskRoleLabels[
-    employeeRole
-  ] ||
-  employee?.specialization ||
-  "";
-
-              const completed =
-                task.status ===
-                "completed";
-
-              const overdue =
-                Boolean(
-                  task.is_overdue
-                );
-
-
-              return `
-                <article
-                  data-task-id="${escapeHtml(
-                    task.id || ""
-                  )}"
-                  style="
-                    display:grid;
-                    grid-template-columns:
-                      auto 1fr auto;
-                    gap:14px;
-                    align-items:center;
-                    padding:16px 18px;
-                    border-radius:16px;
-                    border:
-                      1px solid
-                      ${
-                        overdue
-                          ? "rgba(255,110,100,.22)"
-                          : "rgba(255,255,255,.07)"
-                      };
-                    background:
-                      ${
-                        overdue
-                          ? "rgba(120,40,35,.08)"
-                          : "rgba(255,255,255,.022)"
-                      };
-                    opacity:
-                      ${
-                        completed
-                          ? ".58"
-                          : "1"
-                      };
-                  "
-                >
-
-                  <button
-  type="button"
-  data-toggle-global-task="${escapeHtml(
-    String(task.id || "")
-  )}"
-  title="${
-    completed
-      ? "Повернути задачу"
-      : "Позначити виконаною"
-  }"
-  style="
-    width:38px;
-    height:38px;
-    border-radius:12px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    border:
-      1px solid
-      ${
-        completed
-          ? "rgba(95,210,145,.30)"
-          : "rgba(255,255,255,.06)"
-      };
-    background:
-      ${
-        completed
-          ? "rgba(70,180,120,.12)"
-          : "rgba(255,255,255,.05)"
-      };
-    color:
-      ${
-        completed
-          ? "#84e0ad"
-          : "#fff"
-      };
-    font-size:17px;
-    cursor:pointer;
-    flex-shrink:0;
-  "
->
-  ${
-    completed
-      ? "✓"
-      : kind.icon
-  }
-</button>
-
-
-                  <div
-                    style="
-                      min-width:0;
-                    "
-                  >
-                    <div
-                      style="
-                        display:flex;
-                        align-items:center;
-                        gap:8px;
-                        flex-wrap:wrap;
-                      "
-                    >
-                      <strong
-                        style="
-                          font-size:14px;
-                          ${
-                            completed
-                              ? "text-decoration:line-through;"
-                              : ""
-                          }
-                        "
-                      >
-                        ${escapeHtml(
-                          task.title ||
-                          "Без назви"
-                        )}
-                      </strong>
-
-
-                      ${
-                        overdue
-                          ? `
-                            <span
-                              style="
-                                font-size:10px;
-                                font-weight:700;
-                                color:#ff8e84;
-                              "
-                            >
-                              ПРОСТРОЧЕНО
-                            </span>
-                          `
-                          : ""
-                      }
-                    </div>
-
-
-                    ${
-                      task.description
-                        ? `
-                          <div
-                            style="
-                              margin-top:5px;
-                              font-size:12px;
-                              color:
-                                rgba(255,255,255,.45);
-                              white-space:
-                                nowrap;
-                              overflow:hidden;
-                              text-overflow:
-                                ellipsis;
-                            "
-                          >
-                            ${escapeHtml(
-                              task.description
-                            )}
-                          </div>
-                        `
-                        : ""
-                    }
-
-                    ${
-  patient ||
-  employee
-    ? `
-      <div
-        style="
-          display:flex;
-          flex-wrap:wrap;
-          gap:7px;
-          margin-top:9px;
-        "
-      >
-
-        ${
-          patient
-            ? `
-              <span
-                style="
-                  display:inline-flex;
-                  align-items:center;
-                  gap:5px;
-                  padding:5px 8px;
-                  border-radius:8px;
-                  background:
-                    rgba(255,255,255,.045);
-                  border:
-                    1px solid
-                    rgba(255,255,255,.06);
-                  font-size:10px;
-                  color:
-                    rgba(255,255,255,.68);
-                "
-              >
-                🐾
-
-                <b
-                  style="
-                    color:
-                      rgba(255,255,255,.86);
-                  "
-                >
-                  ${escapeHtml(
-                    patient.name ||
-                    "Пацієнт"
-                  )}
-                </b>
-
-                ${
-                  patient.breed
-                    ? `
-                      <span
-                        style="
-                          opacity:.55;
-                        "
-                      >
-                        ·
-                        ${escapeHtml(
-                          patient.breed
-                        )}
-                      </span>
-                    `
-                    : ""
-                }
-              </span>
-            `
-            : ""
-        }
-
-${
-  employee
-    ? `
-      <span
-        style="
-          display:inline-flex;
-          align-items:center;
-          gap:5px;
-          padding:5px 8px;
-          border-radius:8px;
-          background:
-            rgba(255,255,255,.045);
-          border:
-            1px solid
-            rgba(255,255,255,.06);
-          font-size:10px;
-          color:
-            rgba(255,255,255,.68);
-        "
-      >
-        👤
-
-        <b
-          style="
-            color:
-              rgba(255,255,255,.86);
-          "
-        >
-          ${escapeHtml(
-            employee.name ||
-            employee.full_name ||
-            "Співробітник"
-          )}
-        </b>
-
-        ${
-          employeeRoleLabel
-            ? `
-              <span
-                style="
-                  opacity:.55;
-                "
-              >
-                ·
-                ${escapeHtml(
-                  employeeRoleLabel
-                )}
-              </span>
-            `
-            : ""
-        }
-      </span>
-    `
-    : ""
-}
-
-      </div>
-    `
-    : ""
-}
-
-
-<div
-  style="
-    display:flex;
-    flex-wrap:wrap;
-    align-items:center;
-    gap:10px;
-    margin-top:9px;
-    font-size:10px;
-    color:
-      rgba(255,255,255,.38);
-  "
->
-  <span>
-    ${kind.label}
-  </span>
-
-  <span
-    style="
-      color:
-        ${priority.color};
-    "
-  >
-    ●
-    ${priority.label}
-  </span>
-
-  ${
-    task.source ===
-    "ai"
-      ? `
-        <span>
-          ✦ PUG AI
-        </span>
-      `
-      : ""
-  }
-</div>
-
-</div>
-
-
-<div
-  style="
-    text-align:right;
-    white-space:nowrap;
-    min-width:92px;
-  "
->
-  ${
-    task.due_date
-      ? `
-        <div
-          style="
-            font-size:12px;
-            font-weight:700;
-            color:
-              ${
-                overdue
-                  ? "#ff9187"
-                  : "rgba(255,255,255,.72)"
-              };
-          "
-        >
-          ${escapeHtml(
-            formatTaskDate(
-              task.due_date
-            )
-          )}
-        </div>
-      `
-      : ""
-  }
-
-
-  ${
-    task.due_time
-      ? `
-        <div
-          style="
-            margin-top:3px;
-            font-size:11px;
-            color:
-              rgba(255,255,255,.40);
-          "
-        >
-          ${escapeHtml(
-            String(
-              task.due_time
-            ).slice(
-              0,
-              5
-            )
-          )}
-        </div>
-      `
-      : ""
-  }
-
-
-  <div
-    style="
-      display:flex;
-      justify-content:flex-end;
-      align-items:center;
-      gap:5px;
-      margin-top:9px;
-    "
-  >
-
-    <button
-      type="button"
-      data-edit-global-task="${escapeHtml(
-        String(
-          task.id || ""
-        )
-      )}"
-      title="Редагувати задачу"
-      style="
-        width:26px;
-        height:26px;
-        border-radius:8px;
-        border:
-          1px solid
-          rgba(255,255,255,.09);
-        background:
-          rgba(255,255,255,.035);
-        color:
-          rgba(255,255,255,.65);
-        cursor:pointer;
-        font-size:12px;
-      "
-    >
-      ✎
-    </button>
-
-
-    <button
-      type="button"
-      data-delete-global-task="${escapeHtml(
-        String(
-          task.id || ""
-        )
-      )}"
-      title="Видалити задачу"
-      style="
-        width:26px;
-        height:26px;
-        border-radius:8px;
-        border:
-          1px solid
-          rgba(255,100,100,.12);
-        background:
-          rgba(255,80,80,.04);
-        color:
-          rgba(255,130,130,.62);
-        cursor:pointer;
-        font-size:12px;
-      "
-    >
-      ×
-    </button>
-
-  </div>
-
-</div>
-
-</article>
-`;
-    }
-  )
-  .join("")}
-
-</div>
-`;
-       
-
-content.addEventListener(
-  "click",
-  async (event) => {
-    const toggleButton =
-      event.target.closest(
-        "[data-toggle-global-task]"
-      );
-
-    if (!toggleButton) {
-      return;
-    }
-
-
-    const taskId =
-      String(
-        toggleButton.dataset
-          .toggleGlobalTask ||
-        ""
-      ).trim();
-
-
-    if (!taskId) {
-      return;
-    }
-
-
-    const task =
-      tasks.find(
-        (item) =>
-          String(item.id) ===
-          taskId
-      );
-
-
-    if (!task) {
-      return;
-    }
-
-
-    toggleButton.disabled =
-      true;
-
-
-    try {
-      await updateVisitTaskApi(
-        taskId,
-        {
-          status:
-            task.status ===
-            "completed"
-              ? "open"
-              : "completed",
-        }
-      );
-
-
-      await renderTasksTab(
-        activeScope
-      );
-
-    } catch (error) {
-      console.error(
-        "TOGGLE GLOBAL TASK:",
-        error
-      );
-
-
-      toggleButton.disabled =
-        false;
-
-
-      showCrmNotice({
-        icon: "⚠️",
-
-        title:
-          "Не вдалося оновити задачу",
-
-        text:
-          error?.message ||
-          "Спробуйте ще раз.",
-      });
-    }
-  }
-);
-content.addEventListener(
-  "click",
-  (event) => {
-    const editButton =
-      event.target.closest(
-        "[data-edit-global-task]"
-      );
-
-
-    if (!editButton) {
-      return;
-    }
-
-
-    const taskId =
-      String(
-        editButton.dataset
-          .editGlobalTask ||
-        ""
-      ).trim();
-
-
-    if (!taskId) {
-      return;
-    }
-
-
-    const task =
-      tasks.find(
-        (item) =>
-          String(item.id) ===
-          taskId
-      );
-
-
-    if (!task) {
-      return;
-    }
-
-
-    openTaskCreateModal(
-      activeScope,
-      task
-    );
-  }
-);
-content.addEventListener(
-  "click",
-  (event) => {
-    const deleteButton =
-      event.target.closest(
-        "[data-delete-global-task]"
-      );
-
-    if (!deleteButton) {
-      return;
-    }
-
-
-    const taskId =
-      String(
-        deleteButton.dataset
-          .deleteGlobalTask ||
-        ""
-      ).trim();
-
-
-    if (!taskId) {
-      return;
-    }
-
-
-    const task =
-      tasks.find(
-        (item) =>
-          String(item.id) ===
-          taskId
-      );
-
-
-    if (!task) {
-      return;
-    }
-
-
-    openDeleteModal(
-      `
-        Видалити задачу
-        <b>${escapeHtml(
-          task.title ||
-          "Без назви"
-        )}</b>?
-        <br><br>
-        Цю дію не можна скасувати.
-      `,
-
-      async () => {
-        try {
-          await deleteVisitTaskApi(
-            taskId
-          );
-
-
-          await renderTasksTab(
-            activeScope
-          );
-
-        } catch (error) {
-          console.error(
-            "DELETE GLOBAL TASK:",
-            error
-          );
-
-
-          showCrmNotice({
-            icon: "⚠️",
-
-            title:
-              "Не вдалося видалити задачу",
-
-            text:
-              error?.message ||
-              "Спробуйте ще раз.",
-          });
-        }
+      if (deleteGlobalTask !== undefined) {
+        openDeleteModal(`<b>${e(ui.deleteQuestion)}</b><br>${e(task.title || ui.unnamed)}<br><br>${e(ui.cannotUndo)}`, async () => {
+          button.disabled = true;
+          try {
+            await deleteVisitTaskApi(taskId);
+            await refreshCurrentList();
+          } catch (error) {
+            button.disabled = false;
+            showCrmNotice({ title: ui.deleteFailed, text: error?.message || ui.tryAgain });
+          }
+        });
+        return;
       }
-    );
-  }
-);
+      button.disabled = true;
+      try {
+        await updateVisitTaskApi(taskId, { status: task.status === "completed" ? "open" : "completed" });
+        await refreshCurrentList();
+      } catch (error) {
+        button.disabled = false;
+        showCrmNotice({ title: ui.updateFailed, text: error?.message || ui.tryAgain });
+      }
+    });
   } catch (error) {
-    console.error(
-      "TASK CENTER LOAD:",
-      error
-    );
-
-
-    content.innerHTML = `
-      <div
-        style="
-          padding:40px;
-          text-align:center;
-          border:
-            1px solid
-            rgba(255,100,100,.15);
-          border-radius:18px;
-        "
-      >
-        <div
-          style="
-            font-size:25px;
-          "
-        >
-          ⚠️
-        </div>
-
-        <div
-          style="
-            margin-top:10px;
-            font-weight:700;
-          "
-        >
-          Не вдалося завантажити задачі
-        </div>
-
-        <div
-          style="
-            margin-top:5px;
-            font-size:12px;
-            color:
-              rgba(255,255,255,.42);
-          "
-        >
-          ${escapeHtml(
-            error?.message ||
-            "Спробуйте ще раз."
-          )}
-        </div>
-      </div>
-    `;
+    if (!content.isConnected) return;
+    console.error("TASK CENTER LOAD:", error);
+    content.innerHTML = `<div class="taskWorkspaceMessage" role="alert"><strong>${e(ui.loadFailed)}</strong>
+      <p>${e(error?.message || ui.tryAgain)}</p>
+      <button type="button">${e(ui.tryAgain)}</button></div>`;
+    content.querySelector("button").onclick = () => renderTasksTab(activeScope);
+  } finally {
+    content.removeAttribute("aria-busy");
   }
 }
 const TEAM_INTERFACE_TEXT = {
@@ -32956,6 +31801,7 @@ function getStockIcon(name) {
     camera: '<path d="M3 7h4l2-3h6l2 3h4v13H3z"/><circle cx="12" cy="13" r="3.5"/>',
     monitor: '<rect x="3" y="4" width="18" height="13" rx="2"/><path d="M12 17v4m-4 0h8M6 11h3l2-3 2 5 2-2h3"/>',
     attachment: '<path d="m8 13 6-6a3 3 0 0 1 4 4l-8 8a5 5 0 0 1-7-7l9-9m-5 12a1 1 0 0 0 2 2l8-8"/>',
+    taskCheck: '<path d="m5 12 4 4L19 6"/>',
     play: '<path d="m9 5 11 7-11 7z"/>',
     grid: '<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',
     shield: '<path d="m12 3 8 3v6c0 4-4 7-8 9-4-2-8-5-8-9V6l8-3Z"/><path d="m8 12 3 3 5-6"/>',
