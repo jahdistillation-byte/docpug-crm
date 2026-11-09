@@ -76372,3 +76372,184 @@ html body[data-theme] .page[data-page="patient"] #patientCardRoot .premiumLabsPa
   }
 }
 }
+
+/* Patient file archive and upload dialog share the PUG theme palette. */
+@layer pugReadableInterface {
+  html body[data-theme] :is(#patientCardRoot .patientFilesArchive, .patientFileModalOverlay) {
+    --file-muted: var(--ct-muted);
+    --file-danger: #f2a4ae;
+    color: var(--ct-text) !important;
+    color-scheme: var(--ct-scheme);
+  }
+
+  html body[data-theme="white"] :is(#patientCardRoot .patientFilesArchive, .patientFileModalOverlay) {
+    --file-muted: #526779;
+    --file-danger: #ad3345;
+  }
+
+  html body[data-theme] #patientCardRoot .patientFilesArchive {
+    padding: 0 !important;
+    background: none !important;
+  }
+
+  html body[data-theme] #patientCardRoot .patientFilesArchive :is(.patientFilesArchiveHead, .patientFileCard, .patientFilesEmpty),
+  html body[data-theme] .patientFileModalOverlay .patientFileModal {
+    background: var(--ct-paper) !important;
+    color: var(--ct-text) !important;
+    border: 1px solid var(--ct-line) !important;
+    box-shadow: none !important;
+  }
+
+  html body[data-theme] #patientCardRoot .patientFilesArchive .patientFilesArchiveHead {
+    padding: clamp(16px, 2vw, 28px) !important;
+    border-radius: 18px;
+    align-items: center !important;
+  }
+
+  html body[data-theme] #patientCardRoot .patientFilesArchive :is(.patientFilesStats > div, .patientFilesFilters, .patientFilePreview),
+  html body[data-theme] .patientFileModalOverlay :is(.patientFileUploadZone, .patientFileUploadPreview, .patientFileModalField input, .patientFileModalField select, .patientFileModalField textarea) {
+    background: var(--ct-soft) !important;
+    border-color: var(--ct-line) !important;
+    color: var(--ct-text) !important;
+    box-shadow: none !important;
+  }
+
+  html body[data-theme] :is(#patientCardRoot .patientFilesArchive, .patientFileModalOverlay) :is(h2, h3, h4, .patientFilesStats strong) {
+    color: var(--ct-text) !important;
+  }
+
+  html body[data-theme] :is(#patientCardRoot .patientFilesArchive, .patientFileModalOverlay) :is(
+    p, .patientFilesStats span, .patientFilesGroupHead strong, .patientFileMeta,
+    .patientFileModalField > span, .patientFileUploadEmpty small, .patientFileUploadDocument span
+  ) {
+    color: var(--file-muted) !important;
+    opacity: 1 !important;
+  }
+
+  html body[data-theme] #patientCardRoot .patientFilesArchive :is(.patientFilesKicker, .patientFilesGroupHead > div > span) {
+    color: var(--ct-accent) !important;
+  }
+
+  html body[data-theme] :is(#patientCardRoot .patientFilesArchive, .patientFileModalOverlay) :is(
+    .patientFileCategory, .patientFileDocumentIcon, .patientFilesEmptyIcon, .patientFileModalIcon,
+    .patientFileOpenButton, .patientFileActionButton, .patientFileModalClose, .patientFileModalCancel, .patientFileUploadChoose
+  ) {
+    background: var(--ct-accent-soft) !important;
+    color: var(--ct-accent) !important;
+    border-color: var(--ct-line) !important;
+    box-shadow: none !important;
+  }
+
+  html body[data-theme] #patientCardRoot .patientFilesArchive .patientFileCategory {
+    background: var(--ct-paper) !important;
+    max-width: calc(100% - 26px);
+  }
+
+  html body[data-theme] #patientCardRoot .patientFilesArchive .patientFileActionButton.danger {
+    color: var(--file-danger) !important;
+  }
+
+  html body[data-theme] :is(#patientCardRoot .patientFilesArchive, .patientFileModalOverlay) :is(.patientFilesAddButton, .patientFileModalSave) {
+    background: var(--ct-button) !important;
+    color: var(--ct-on-button) !important;
+    border-color: var(--ct-button) !important;
+    box-shadow: none !important;
+  }
+
+  html body[data-theme] :is(#patientCardRoot .patientFilesArchive, .patientFileModalOverlay) :is(.patientFilesAddButton, .patientFileModalSave):hover {
+    background: var(--ct-button-hover) !important;
+  }
+
+  html body[data-theme] #patientCardRoot .patientFilesArchive .patientFilesFilter {
+    color: var(--file-muted) !important;
+    min-width: 0;
+    box-shadow: none !important;
+    transform: none !important;
+  }
+
+  html body[data-theme] #patientCardRoot .patientFilesArchive .patientFilesFilter b {
+    color: inherit !important;
+    overflow-wrap: anywhere;
+  }
+
+  html body[data-theme] #patientCardRoot .patientFilesArchive .patientFilesFilter em {
+    color: var(--ct-text) !important;
+    background: var(--ct-paper) !important;
+  }
+
+  html body[data-theme] #patientCardRoot .patientFilesArchive .patientFilesFilter.active {
+    color: var(--ct-accent) !important;
+    background: var(--ct-paper) !important;
+    border-color: var(--ct-accent) !important;
+  }
+
+  html body[data-theme] #patientCardRoot .patientFilesArchive :is(.patientFilesFilter, .patientFileOpenButton, .patientFileActionButton):not(:disabled):hover,
+  html body[data-theme] .patientFileModalOverlay :is(.patientFileUploadChoose, .patientFileModalClose, .patientFileModalCancel):hover {
+    background: var(--ct-hover) !important;
+    border-color: var(--ct-accent) !important;
+    transform: none !important;
+  }
+
+  html body[data-theme] :is(#patientCardRoot .patientFilesArchive, .patientFileModalOverlay) :is(button, a, input, select, textarea):focus-visible {
+    outline: 2px solid var(--ct-accent) !important;
+    outline-offset: 2px;
+  }
+
+  html body[data-theme] #patientCardRoot .patientFilesArchive .patientFileCard {
+    display: flex;
+    flex-direction: column;
+    transform: none !important;
+  }
+
+  html body[data-theme] #patientCardRoot .patientFilesArchive .patientFileCardBody {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    overflow-wrap: anywhere;
+  }
+
+  html body[data-theme] #patientCardRoot .patientFilesArchive .patientFileCardActions {
+    margin-top: auto !important;
+    padding-top: 14px !important;
+  }
+
+  html body[data-theme] #patientCardRoot .patientFilesArchive .patientFileNote {
+    min-height: 0 !important;
+    white-space: pre-wrap;
+  }
+
+  html body[data-theme] #patientCardRoot .patientFilesArchive .patientFilePreview :is(img, video),
+  html body[data-theme] .patientFileModalOverlay .patientFileUploadPreview :is(img, video) {
+    min-width: 0;
+    min-height: 0;
+    object-fit: contain !important;
+  }
+
+  html body[data-theme] :is(#patientCardRoot .patientFilesArchive, .patientFileModalOverlay) .stockIcon {
+    width: 17px;
+    height: 17px;
+    display: inline-block;
+    vertical-align: middle;
+    flex: none;
+  }
+
+  html body[data-theme] :is(#patientCardRoot .patientFilesArchive, .patientFileModalOverlay)
+    :is(.patientFileDocumentIcon, .patientFilesEmptyIcon, .patientFileModalIcon, .patientFileUploadDocument) .stockIcon {
+    width: 26px;
+    height: 26px;
+  }
+
+  html body[data-theme] .patientFileModalOverlay {
+    background: #09101880 !important;
+    backdrop-filter: blur(5px) !important;
+  }
+
+  html body[data-theme] .patientFileModalOverlay .patientFileModalActions {
+    background: var(--ct-paper) !important;
+  }
+
+  html body[data-theme] .patientFileModalOverlay :is(input, textarea)::placeholder {
+    color: var(--file-muted) !important;
+    opacity: 1;
+  }
+}

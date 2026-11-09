@@ -32968,6 +32968,11 @@ function getStockIcon(name) {
     bottle: '<path d="M9 3h6v4H9zM9 7l-2 4v9h10v-9l-2-4M7 14h10"/>',
     flask: '<path d="M9 3h6M10 3v7L5 19a1.3 1.3 0 0 0 1 2h12a1.3 1.3 0 0 0 1-2l-5-9V3M8 15h8"/>',
     medical: '<rect x="4" y="5" width="16" height="16" rx="3"/><path d="M9 5V3h6v2M12 10v6M9 13h6"/>',
+    file: '<path d="M6 3h8l4 4v14H6zM14 3v5h4M9 12h6m-6 4h6"/>',
+    camera: '<path d="M3 7h4l2-3h6l2 3h4v13H3z"/><circle cx="12" cy="13" r="3.5"/>',
+    monitor: '<rect x="3" y="4" width="18" height="13" rx="2"/><path d="M12 17v4m-4 0h8M6 11h3l2-3 2 5 2-2h3"/>',
+    attachment: '<path d="m8 13 6-6a3 3 0 0 1 4 4l-8 8a5 5 0 0 1-7-7l9-9m-5 12a1 1 0 0 0 2 2l8-8"/>',
+    play: '<path d="m9 5 11 7-11 7z"/>',
     grid: '<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',
     shield: '<path d="m12 3 8 3v6c0 4-4 7-8 9-4-2-8-5-8-9V6l8-3Z"/><path d="m8 12 3 3 5-6"/>',
     heart: '<path d="M20 5a5 5 0 0 0-8 1 5 5 0 0 0-8-1c-4 4 1 9 8 15 7-6 12-11 8-15Z"/><path d="M5 12h4l2-4 2 8 2-4h4"/>',
@@ -71930,32 +71935,32 @@ const PATIENT_FILES_KEY = "DOCPUG_PATIENT_FILES_V1";
 const PATIENT_FILE_CATEGORIES = {
   all: {
     label: "Усі",
-    icon: "▦",
+    icon: "grid",
   },
 
   xray: {
     label: "Рентген",
-    icon: "🩻",
+    icon: "layers",
   },
 
   ultrasound: {
     label: "УЗД",
-    icon: "🖥️",
+    icon: "monitor",
   },
 
   media: {
     label: "Фото / відео",
-    icon: "📷",
+    icon: "camera",
   },
 
   document: {
     label: "Документи",
-    icon: "📄",
+    icon: "file",
   },
 
   other: {
     label: "Інше",
-    icon: "📎",
+    icon: "attachment",
   },
 };
 
@@ -72099,7 +72104,7 @@ function renderPatientFilesTab(
           id="btnAddPatientFile"
           type="button"
         >
-          + ${escapeHtml(
+          ${getStockIcon("plus")} ${escapeHtml(
             ui.addFile
           )}
         </button>
@@ -72185,12 +72190,13 @@ function renderPatientFilesTab(
                       : ""
                   }"
                   type="button"
+                  aria-pressed="${patientFilesActiveFilter === key}"
                   data-patient-file-filter="${escapeHtml(
                     key
                   )}"
                 >
                   <span>
-                    ${meta.icon}
+                    ${getStockIcon(meta.icon)}
                   </span>
 
                   <b>
@@ -72252,9 +72258,8 @@ function renderPatientFilesTab(
                 .patientFileFilter ||
               "all";
 
-            renderPatientFilesTab(
-              pet
-            );
+            renderPatientFilesTab(pet);
+            box.querySelector('.patientFilesFilter[aria-pressed="true"]')?.focus({ preventScroll: true });
           }
         );
       }
@@ -72304,7 +72309,7 @@ function renderPatientFilesTab(
                     margin-bottom:12px;
                   "
                 >
-                  🗑️
+                  <span style="display:inline-block;width:24px;height:24px">${getStockIcon("trash")}</span>
                 </div>
 
                 <div
@@ -72636,7 +72641,7 @@ function renderPatientFilesArchive(
             >
               <div>
                 <span>
-                  ${meta.icon}
+                  ${getStockIcon(meta.icon)}
                 </span>
 
                 <h3>
@@ -72749,7 +72754,7 @@ function renderPatientFilesEmptyState(
       <div
         class="patientFilesEmptyIcon"
       >
-        ${meta.icon}
+        ${getStockIcon(meta.icon)}
       </div>
 
       <h3>
@@ -72877,14 +72882,14 @@ function renderPatientFileCard(
                 <div
                   class="patientFilePlayIcon"
                 >
-                  ▶
+                  ${getStockIcon("play")}
                 </div>
               `
               : `
                 <div
                   class="patientFileDocumentIcon"
                 >
-                  ${categoryMeta.icon}
+                  ${getStockIcon(categoryMeta.icon)}
                 </div>
               `
         }
@@ -72892,7 +72897,7 @@ function renderPatientFileCard(
         <span
           class="patientFileCategory"
         >
-          ${categoryMeta.icon}
+          ${getStockIcon(categoryMeta.icon)}
           ${escapeHtml(
             categoryMeta.label
           )}
@@ -72991,7 +72996,7 @@ function renderPatientFileCard(
               file.id
             )}"
           >
-            ✏️
+            ${getStockIcon("edit")}
           </button>
 
           <button
@@ -73010,7 +73015,7 @@ function renderPatientFileCard(
               file.id
             )}"
           >
-            🗑
+            ${getStockIcon("trash")}
           </button>
         </div>
       </div>
@@ -73093,7 +73098,7 @@ function openPatientFileModal(
         <div
           class="patientFileModalIcon"
         >
-          📁
+          ${getStockIcon("file")}
         </div>
 
         <div>
@@ -73163,7 +73168,6 @@ function openPatientFileModal(
                             : ""
                         }
                       >
-                        ${meta.icon}
                         ${escapeHtml(
                           meta.label
                         )}
@@ -73815,7 +73819,7 @@ function renderPatientFileModalPreview(
       <div
         class="patientFileUploadDocument"
       >
-        📄
+        ${getStockIcon("file")}
 
         <span>
           ${escapeHtml(
@@ -73832,7 +73836,7 @@ function renderPatientFileModalPreview(
       class="patientFileUploadEmpty"
     >
       <span>
-        ＋
+        ${getStockIcon("plus")}
       </span>
 
       <small>
@@ -73907,7 +73911,7 @@ function renderSelectedPatientFilePreview(
     <div
       class="patientFileUploadDocument"
     >
-      📄
+      ${getStockIcon("file")}
 
       <span>
         ${escapeHtml(
