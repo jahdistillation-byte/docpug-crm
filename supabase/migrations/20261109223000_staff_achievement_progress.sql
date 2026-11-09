@@ -9,7 +9,7 @@ language sql stable
 set search_path = ''
 as $$
   with completed_visits as (
-    select v.id, v.patient_id
+    select v.id, v.pet_id
     from public.visits v
     where v.org_id = p_org_id and v.staff_id = p_staff_id
       and coalesce(lower(trim(v.status::text)), '') not in ('cancelled', 'canceled', 'no_show')
@@ -26,9 +26,9 @@ as $$
     select v.id, lower(trim(p.species::text)) as species
     from completed_visits v
     join public.patient_vaccinations vaccination
-      on vaccination.source_visit_id = v.id and vaccination.patient_id = v.patient_id
+      on vaccination.source_visit_id = v.id and vaccination.patient_id = v.pet_id
       and vaccination.org_id = p_org_id
-    join public.patients p on p.id = v.patient_id and p.org_id = p_org_id
+    join public.patients p on p.id = v.pet_id and p.org_id = p_org_id
   )
   select coalesce((select jsonb_object_agg(track, total) from service_cases), '{}'::jsonb)
     || jsonb_build_object(

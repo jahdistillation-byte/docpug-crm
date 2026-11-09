@@ -18972,7 +18972,7 @@ def api_create_patient_vaccination(
                 supabase.table("visits")
                 .select("status, completed_at, closed_by")
                 .eq("org_id", current_org)
-                .eq("patient_id", patient_id)
+                .eq("pet_id", patient_id)
                 .eq("id", source_visit_id)
                 .limit(1)
                 .execute()
