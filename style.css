@@ -77202,3 +77202,192 @@ html body[data-theme] .page[data-page="patient"] #patientCardRoot .premiumLabsPa
     html body[data-theme] .page[data-page="finance"] .financeIntegrationSecurityNote { max-width: 100%; }
   }
 }
+
+/* Team directory, staff profiles and editors share the workspace palette. */
+@layer pugReadableInterface {
+  html body[data-theme][data-current-route="team"] {
+    background: var(--ct-bg) !important;
+  }
+
+  html body[data-theme] :is(
+    .page[data-page="team"], #staffDrawer, .staffProfileModal, .staffSkillModal,
+    .specializationEditorModal, .staffPasswordResetOverlay .financeAdjustModal
+  ) {
+    --team-muted: color-mix(in srgb, var(--ct-muted) 86%, var(--ct-text));
+    --team-danger: #f2a4ae;
+    --text-main: var(--ct-text);
+    --text-muted: var(--team-muted);
+    --card-bg: var(--ct-paper);
+    --accent-color: var(--ct-accent);
+    --module-surface-1: var(--ct-paper);
+    --module-surface-2: var(--ct-paper);
+    --module-surface-soft: var(--ct-soft);
+    --module-surface-hover: var(--ct-hover);
+    --module-border: var(--ct-line);
+    --module-border-strong: var(--ct-line);
+    --module-text: var(--ct-text);
+    --module-text-soft: var(--team-muted);
+    --module-text-muted: var(--team-muted);
+    --module-accent: var(--ct-accent);
+    --module-accent-2: var(--ct-accent-hover);
+    --module-accent-soft: var(--ct-accent-soft);
+    --module-accent-glow: transparent;
+    color: var(--ct-text);
+    color-scheme: var(--ct-scheme);
+  }
+
+  html body[data-theme="white"] :is(
+    .page[data-page="team"], #staffDrawer, .staffProfileModal, .staffSkillModal,
+    .specializationEditorModal, .staffPasswordResetOverlay .financeAdjustModal
+  ) { --team-danger: #a42e43; }
+
+  html body[data-theme] .page[data-page="team"] :is(
+    .teamPageCard, .teamDirectoryCard, .teamDashSidebar, .teamDashTop, .teamDashPanel,
+    .teamKpiCard, .teamSubHero, .teamCareerHero, .clinicRatingBoard, .staffSkillsPanel,
+    .teamVisitCard, .teamVisitFilters, .teamPhotoSettings
+  ),
+  html body[data-theme] :is(
+    #staffDrawer .modal-window, .staffProfileModal, .staffSkillModal,
+    .specializationEditorModal, .staffPasswordResetOverlay .financeAdjustModal
+  ) {
+    background: var(--ct-paper) !important;
+    border-color: var(--ct-line) !important;
+    color: var(--ct-text) !important;
+    box-shadow: none !important;
+  }
+
+  html body[data-theme] .page[data-page="team"] :is(
+    .teamDirectorySection, .teamDirectorySectionHeader, .teamDirectorySummary,
+    .teamDirectorySearch, .teamDirectoryEmpty, .specPanel, .teamDirectoryCard .premiumVetMeta,
+    .teamDashInsight, .teamDashIdBox, .teamDashEmergencyContact, .teamChartBox,
+    .teamFinanceRow, .clinicRatingRow, .staffSkillCard
+  ),
+  html body[data-theme] #staffDrawer :is(
+    .staffSpecializationMenu, .staffEmergencyContactBlock, .modal-window > div:last-child
+  ) {
+    background: var(--ct-soft) !important;
+    border-color: var(--ct-line) !important;
+    color: var(--ct-text) !important;
+  }
+
+  html body[data-theme] .page[data-page="team"] :is(
+    h1, h2, h3, .premiumVetName, .premiumMetaItem strong, .teamDirectoryGroupCopy strong,
+    .teamDirectorySummary strong, .specPanelTitle, .teamDashName, .teamDashPanelHead b,
+    .teamKpiValue, .teamCareerTitle, .teamVisitTitle
+  ),
+  html body[data-theme] :is(#staffDrawer, .staffProfileModal, .staffSkillModal, .specializationEditorModal)
+  :is(h2, h3, h4) { color: var(--ct-text) !important; }
+
+  html body[data-theme] .page[data-page="team"] :is(
+    p, small, .hint, .premiumVetRole, .premiumMetaItem > span, .teamDirectorySummary span,
+    .teamDirectoryEmpty span, .teamDashRole, .teamDashContact > div, .teamDashIdBox > span,
+    .teamDashPanelHead > span, .teamDashRows > p > span, .teamKpiTitle, .teamCareerSub,
+    .teamVisitMeta, .teamVisitOwner
+  ),
+  html body[data-theme] #staffDrawer :is(
+    label, .staffEmergencyContactHead span, .modal-window [style*="opacity:.5"]
+  ) {
+    color: var(--team-muted) !important;
+    opacity: 1 !important;
+  }
+
+  html body[data-theme] .page[data-page="team"] :is(
+    .teamDirectoryGroupCount, .teamDirectoryGroupChevron, .teamDirectoryCard .vetAvatarLetter,
+    .teamDashTitle, .teamKpiIcon, .teamDirectoryCard .premiumSpecTag
+  ) {
+    background: var(--ct-accent-soft) !important;
+    color: var(--ct-accent) !important;
+    border-color: var(--ct-line) !important;
+  }
+
+  html body[data-theme] :is(
+    .page[data-page="team"], #staffDrawer, .staffProfileModal, .staffSkillModal,
+    .specializationEditorModal, .staffPasswordResetOverlay
+  ) :is(input, select, textarea):not([type="color"], [type="checkbox"], [type="radio"]) {
+    background: var(--ct-paper) !important;
+    border-color: var(--ct-line) !important;
+    color: var(--ct-text) !important;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  html body[data-theme] .page[data-page="team"] .teamDirectorySearch input#teamDirectorySearchInput {
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+  }
+
+  html body[data-theme] :is(.page[data-page="team"], #staffDrawer) :is(input, textarea)::placeholder {
+    color: var(--team-muted) !important;
+    opacity: 1 !important;
+  }
+
+  html body[data-theme] .page[data-page="team"] :is(
+    .teamDirectoryFilters button, .teamDashNav button, .teamBackBtn, .teamGhostBtn,
+    .teamDirectoryCard .premiumProfileBtn, .teamDirectoryCard .premiumEditBtn,
+    .teamDirectoryCard .premiumDeleteBtn, .teamVisitOpenBtn
+  ),
+  html body[data-theme] #staffDrawer :is(.staffSpecializationToggle, [data-close-staff]) {
+    background: var(--ct-soft) !important;
+    border-color: var(--ct-line) !important;
+    color: var(--ct-text) !important;
+    box-shadow: none !important;
+  }
+
+  html body[data-theme] .page[data-page="team"] :is(
+    .teamDirectoryFilters button.active, .teamDashNav button.active, .teamPrimaryBtn,
+    #btnAddStaffTeam, #btnAddSpecTeam
+  ),
+  html body[data-theme] #staffDrawer .modal-window button#staffSave {
+    background: var(--ct-button) !important;
+    border-color: var(--ct-button) !important;
+    color: var(--ct-on-button) !important;
+    box-shadow: none !important;
+  }
+
+  html body[data-theme] .page[data-page="team"] .teamDirectoryCard .premiumDeleteBtn,
+  html body[data-theme] .page[data-page="team"] .teamDirectoryCard .premiumDeleteBtn .teamActionIcon {
+    color: var(--team-danger) !important;
+  }
+
+  html body[data-theme] .page[data-page="team"] :is(.teamDirectoryCard .premiumStatus, .teamDashStatus) {
+    background: var(--ct-soft) !important;
+    border-color: var(--ct-line) !important;
+    color: var(--team-muted) !important;
+  }
+
+  html body[data-theme] .page[data-page="team"] :is(.teamDirectoryCard .premiumStatus.active, .teamDashStatus) {
+    color: var(--ct-positive) !important;
+  }
+
+  html body[data-theme] :is(.page[data-page="team"], #staffDrawer, .staffSkillModal, .specializationEditorModal)
+  :is(button, a, input, select, textarea):focus-visible {
+    outline: 2px solid var(--ct-accent) !important;
+    outline-offset: 2px;
+  }
+
+  html body[data-theme] .page[data-page="team"] :is(
+    .teamDirectorySectionHeader, .teamDirectoryFilters button, .teamDashNav button,
+    .teamDirectoryCard .premiumVetActions button, .teamGhostBtn
+  ):hover:not(.active, :disabled) { background: var(--ct-hover) !important; }
+
+  html body[data-theme] .page[data-page="team"] .teamDashTop {
+    padding: clamp(14px, 2vw, 24px);
+    border: 1px solid var(--ct-line);
+    border-radius: 18px;
+  }
+
+  @media (min-width: 1251px) {
+    .page[data-page="team"] .teamDashSidebar {
+      overflow-y: auto;
+      scrollbar-color: var(--ct-line) transparent;
+    }
+  }
+
+  @media (max-width: 560px) {
+    html body[data-theme] .page[data-page="team"] .teamDirectoryCard
+    .premiumVetActions :is(.premiumEditBtn, .premiumDeleteBtn) {
+      font-size: 0 !important;
+    }
+  }
+}
