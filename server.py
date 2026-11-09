@@ -10784,6 +10784,29 @@ def api_finance_transactions_list():
 
         items = rows[:limit]
 
+        visit_operations = {
+            str(item["id"]): item for item in items
+            if item.get("visit_id") and item.get("transaction_type") in {"payment", "refund"}
+        }
+        if visit_operations:
+            try:
+                receipts = (
+                    supabase.table("checkbox_test_receipts")
+                    .select("transaction_id,visit_id")
+                    .eq("org_id", current_org)
+                    .eq("status", "DONE")
+                    .in_("transaction_id", list(visit_operations))
+                    .execute().data or []
+                )
+                for receipt in receipts:
+                    item = visit_operations.get(str(receipt["transaction_id"]))
+                    if item and str(item["visit_id"]) == str(receipt["visit_id"]):
+                        item["checkbox_pdf_available"] = True
+            except Exception as error:
+                # The journal remains usable if the optional integration is unavailable.
+                app.logger.warning("Checkbox receipt lookup failed (%s)", type(error).__name__)
+
+
         return ok({
             "items":
                 items,

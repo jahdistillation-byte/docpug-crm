@@ -14121,6 +14121,25 @@ function mountCheckboxSettings(page) {
   });
 }
 
+async function downloadCheckboxReceiptPdf(visitId, transactionId) {
+  const visit = encodeURIComponent(visitId);
+  const transaction = encodeURIComponent(transactionId);
+  const response = await fetch(`/api/visits/${visit}/checkbox/${transaction}/pdf`, {
+    credentials: "include",
+    headers: getOrgHeaders(),
+  });
+  if (!response.ok) {
+    const result = await response.json().catch(() => null);
+    throw new Error(result?.error || "Не вдалося завантажити PDF тестового чека.");
+  }
+  const url = URL.createObjectURL(await response.blob());
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `checkbox-test-${transaction}.pdf`;
+  link.click();
+  setTimeout(() => URL.revokeObjectURL(url), 10000);
+}
+
 function renderVisitCheckboxSection(data) {
   if (!data?.connected && !data?.receipts?.length) return "";
   const e = escapeHtml;
@@ -15145,16 +15164,7 @@ async function openVisitPaymentModal(
       try {
         const { checkboxPdf, checkboxReceipt } = receiptButton.dataset;
         if (checkboxPdf) {
-          const response = await fetch(`${checkboxPath}/${encodeURIComponent(checkboxPdf)}/pdf`, {
-            credentials: "include", headers: getOrgHeaders(),
-          });
-          if (!response.ok) throw new Error("Не вдалося завантажити PDF тестового чека.");
-          const url = URL.createObjectURL(await response.blob());
-          const link = document.createElement("a");
-          link.href = url;
-          link.download = `checkbox-test-${checkboxPdf}.pdf`;
-          link.click();
-          setTimeout(() => URL.revokeObjectURL(url), 10000);
+          await downloadCheckboxReceiptPdf(visitId, checkboxPdf);
         } else {
           await requestCheckboxApi(checkboxPath, {
             transaction_id: checkboxReceipt,
@@ -40089,6 +40099,12 @@ async function renderFinanceOperationsTab(
                               : ""
                           }
 
+                          ${transaction.visit_id && transaction.checkbox_pdf_available ? `
+                            <button type="button" class="financeOperationDocumentButton"
+                              data-finance-checkbox-pdf="${escapeHtml(transaction.id)}">
+                              PDF чека
+                            </button>` : ""}
+
                           ${
                             documentUrl
                               ? `
@@ -40285,6 +40301,21 @@ async function renderFinanceOperationsTab(
   ?.addEventListener(
     "click",
     async (event) => {
+      const checkboxButton = event.target.closest("[data-finance-checkbox-pdf]");
+      if (checkboxButton) {
+        const operation = items.find(item => String(item.id) === checkboxButton.dataset.financeCheckboxPdf);
+        if (!operation?.visit_id || !operation.checkbox_pdf_available || checkboxButton.disabled) return;
+        checkboxButton.disabled = true;
+        try {
+          await downloadCheckboxReceiptPdf(operation.visit_id, operation.id);
+        } catch (error) {
+          showFinanceAlert(error.message);
+        } finally {
+          checkboxButton.disabled = false;
+        }
+        return;
+      }
+
       const visitButton =
         event.target.closest(
           "[data-finance-open-visit]"
