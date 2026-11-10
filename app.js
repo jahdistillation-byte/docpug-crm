@@ -22238,11 +22238,15 @@ Object.assign(
       pl: "Osoba kontaktowa",
     },
 
+    "Огляд": { en: "Overview", de: "Übersicht", pl: "Przegląd" },
+
     "▦ Огляд": {
       en: "▦ Overview",
       de: "▦ Übersicht",
       pl: "▦ Przegląd",
     },
+
+    "Аналітика": { en: "Analytics", de: "Analyse", pl: "Analityka" },
 
     "📈 Аналітика": {
       en: "📈 Analytics",
@@ -22250,11 +22254,15 @@ Object.assign(
       pl: "📈 Analityka",
     },
 
+    "Прийоми": { en: "Visits", de: "Termine", pl: "Wizyty" },
+
     "🩺 Прийоми": {
       en: "🩺 Visits",
       de: "🩺 Termine",
       pl: "🩺 Wizyty",
     },
+
+    "Фінанси": { en: "Finance", de: "Finanzen", pl: "Finanse" },
 
     "💰 Фінанси": {
       en: "💰 Finance",
@@ -22262,11 +22270,15 @@ Object.assign(
       pl: "💰 Finanse",
     },
 
+    "Досягнення": { en: "Achievements", de: "Erfolge", pl: "Osiągnięcia" },
+
     "🏆 Досягнення": {
       en: "🏆 Achievements",
       de: "🏆 Erfolge",
       pl: "🏆 Osiągnięcia",
     },
+
+    "Налаштування": { en: "Settings", de: "Einstellungen", pl: "Ustawienia" },
 
     "⚙ Налаштування": {
       en: "⚙ Settings",
@@ -23781,7 +23793,7 @@ const revenue = Number(dashboard.revenue || 0);
       </div>
 
       <div class="teamDashName">${escapeHtml(staffName)}</div>
-${profileTitle ? `<div class="teamDashTitle">🏆 ${escapeHtml(profileTitle)}</div>` : ""}
+${profileTitle ? `<div class="teamDashTitle">${teamAchievementIcon("badge")} ${escapeHtml(profileTitle)}</div>` : ""}
 <div class="teamDashRole">${escapeHtml(roleLabel)}</div>
       <div class="teamDashStatus ${onShift ? "" : "is-off"}">
         ${escapeHtml(getTeamInterfaceText(onShift ? "На зміні" : "Вихідний"))}
@@ -23795,7 +23807,7 @@ ${profileTitle ? `<div class="teamDashTitle">🏆 ${escapeHtml(profileTitle)}</d
         : ""
     }
   >
-    📞
+    ${ownerCatalogIcon("phone")}
     ${escapeHtml(
       doc.phone ||
       getTeamInterfaceText(
@@ -23805,7 +23817,7 @@ ${profileTitle ? `<div class="teamDashTitle">🏆 ${escapeHtml(profileTitle)}</d
   </div>
 
   <div>
-    ✉ Email не вказано
+    ${ownerCatalogIcon("mail")} <span>Email не вказано</span>
   </div>
 
   ${
@@ -23814,7 +23826,7 @@ ${profileTitle ? `<div class="teamDashTitle">🏆 ${escapeHtml(profileTitle)}</d
       ? `
         <div class="teamDashEmergencyContact">
           <span>
-            ☎ Екстрений контакт
+            ${ownerCatalogIcon("phone")} <span>Екстрений контакт</span>
           </span>
 
           <strong
@@ -23876,24 +23888,20 @@ ${profileTitle ? `<div class="teamDashTitle">🏆 ${escapeHtml(profileTitle)}</d
 </div>
 
       <div class="teamDashNav" id="teamProfileNav">
-  <button class="active" type="button" data-profile-tab="overview">▦ Огляд</button>
-  <button type="button" data-profile-tab="analytics">📈 Аналітика</button>
-  <button type="button" data-profile-tab="visits">🩺 Прийоми</button>
-  ${
-  isOwnerOrAdmin()
-    ? `
-      <button
-        type="button"
-        data-profile-tab="finance"
-      >
-        💰 Фінанси
-      </button>
-    `
-    : ""
-}
-  <button type="button" data-profile-tab="achievements">🏆 Досягнення</button>
-  <button type="button" data-profile-tab="settings">⚙ Налаштування</button>
-</div>
+        ${[
+          ["overview", "grid", "Огляд"],
+          ["analytics", "trend", "Аналітика"],
+          ["visits", "medical", "Прийоми"],
+          ...(isOwnerOrAdmin() ? [["finance", "wallet", "Фінанси"]] : []),
+          ["achievements", "badge", "Досягнення"],
+          ["settings", "settings", "Налаштування"],
+        ].map(([tab, icon, label]) => `
+          <button type="button" data-profile-tab="${tab}" class="${tab === "overview" ? "active" : ""}">
+            ${tab === "achievements" || tab === "settings" ? teamAchievementIcon(icon) : getStockIcon(icon)}
+            <span>${escapeHtml(getTeamInterfaceText(label))}</span>
+          </button>`
+        ).join("")}
+      </div>
 
       <div class="teamDashIdBox">
         <span>ID співробітника</span>
@@ -27532,40 +27540,6 @@ Object.assign(
 );
 
 
-function getTeamSeasonDescription(
-  seasonLabel
-) {
-  const language =
-    getInterfaceLanguage();
-
-  if (language === "en") {
-    return (
-      `Season ${seasonLabel} · ` +
-      "updated every 3 months"
-    );
-  }
-
-  if (language === "de") {
-    return (
-      `Saison ${seasonLabel} · ` +
-      "Aktualisierung alle 3 Monate"
-    );
-  }
-
-  if (language === "pl") {
-    return (
-      `Sezon ${seasonLabel} · ` +
-      "aktualizacja co 3 miesiące"
-    );
-  }
-
-  return (
-    `Сезон ${seasonLabel} · ` +
-    "оновлення кожні 3 місяці"
-  );
-}
-
-
 function teamAchievementIcon(name) {
   const paths = {
     cat_vaccines: '<path d="M5 13V5l5 4h4l5-4v8a7 7 0 0 1-14 0Z"/><path d="M9 13h.01m6 0h.01m-4 3h2"/>',
@@ -27579,6 +27553,7 @@ function teamAchievementIcon(name) {
     title: '<path d="M4 6h16v12H4zM8 10h8m-8 4h5"/>',
     badge: '<path d="m12 3 8 5v8l-8 5-8-5V8l8-5Z"/><path d="m9 12 2 2 4-4"/>',
     stickers: '<path d="M4 7a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v7l-6 6H7a3 3 0 0 1-3-3Z"/><path d="M14 20v-4a2 2 0 0 1 2-2h4M8 9h4m-2-2v4"/>',
+    settings: '<path d="M4 6h16M4 12h16M4 18h16"/><path d="M8 4v4m8 2v4m-6 2v4"/>',
     secret: '<path d="m12 2 9 5v10l-9 5-9-5V7Z"/><path d="M9.5 9a2.5 2.5 0 1 1 4 2c-1 .8-1.5 1-1.5 2.5m0 3h.01"/>',
   };
   return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[name]}</svg>`;
@@ -27680,286 +27655,48 @@ async function renderTeamAchievementsTab(root, state) {
   `;
 
   const ratingPanel = root.querySelector(".teamAchievementRating");
+  const ratingContent = ratingPanel.querySelector("[data-achievement-rating]");
   ratingPanel.addEventListener("toggle", async () => {
     if (!ratingPanel.open || ratingPanel.dataset.loaded) return;
     ratingPanel.dataset.loaded = "true";
+    ratingContent.textContent = "Завантаження рейтингу…";
     const rating = await loadStaffRatingApi();
-    ratingPanel.querySelector("[data-achievement-rating]").innerHTML = renderClinicRatingBoard(
-      rating?.rows, String(state.doc.id), rating?.season_key
-    );
+    if (!rating) {
+      delete ratingPanel.dataset.loaded;
+      ratingContent.textContent = "Не вдалося завантажити рейтинг. Згорніть і відкрийте блок ще раз.";
+      return;
+    }
+    const categories = PUG_ACHIEVEMENT_TRACKS.filter((track) => track.service);
+    const initial = categories.find(({ id }) => rating.rankings[id]?.length) || categories[0];
+    ratingContent.innerHTML = `
+      <div class="clinicSeasonToolbar">
+        <div><b>${escapeHtml(formatSeasonLabel(rating.season_key))}</b>
+          <p>Один підтверджений випадок на завершений візит. Однакова кількість випадків дає однакове місце.</p>
+        </div>
+        <label>Номінація <select>
+          ${categories.map(({ id, title }) => `<option value="${id}" ${id === initial.id ? "selected" : ""}>${escapeHtml(title)}</option>`).join("")}
+        </select></label>
+      </div>
+      <div class="clinicSeasonResults" aria-live="polite"></div>`;
+    const category = ratingContent.querySelector("select");
+    const results = ratingContent.querySelector(".clinicSeasonResults");
+    const render = () => {
+      const rows = rating.rankings[category.value] || [];
+      results.innerHTML = rows.length ? `<ol>${rows.map((row) => {
+        const name = String(row.staff_name || "Працівник");
+        const current = String(row.staff_id) === String(state.doc.id);
+        return `<li class="${current ? "is-current" : ""} ${row.rank === 1 ? "is-leader" : ""}">
+          <strong class="clinicSeasonRank">#${Number(row.rank)}</strong>
+          <span class="clinicSeasonAvatar">${row.avatar ? `<img src="${escapeHtml(row.avatar)}" alt="">` : escapeHtml(name.trim().charAt(0).toUpperCase())}</span>
+          <span class="clinicSeasonName"><b data-team-content>${escapeHtml(name)}</b>${current ? "<small>Цей профіль</small>" : ""}</span>
+          <span class="clinicSeasonCount"><strong>${Number(row.count)}</strong> <small>Випадки</small></span>
+        </li>`;
+      }).join("")}</ol>` : "<p>У цій номінації ще немає завершених випадків за квартал.</p>";
+    };
+    category.addEventListener("change", render);
+    render();
   });
 }
-
-function renderClinicRatingBoard(
-  rows,
-  currentStaffId,
-  seasonKey
-) {
-  if (
-    !Array.isArray(rows) ||
-    !rows.length
-  ) {
-    return `
-      <section class="clinicRatingBoard">
-        <div class="clinicRatingHead">
-          <div>
-            <h3>
-              ${escapeHtml(
-                getTeamInterfaceText(
-                  "🏆 Рейтинг клініки"
-                )
-              )}
-            </h3>
-
-            <p>
-              ${escapeHtml(
-                getTeamInterfaceText(
-                  "Поки немає даних рейтингу. Перерахуйте сезон на сервері."
-                )
-              )}
-            </p>
-          </div>
-        </div>
-      </section>
-    `;
-  }
-
-  const seasonLabel =
-    formatSeasonLabel(
-      seasonKey
-    );
-
-  return `
-    <section class="clinicRatingBoard">
-      <div class="clinicRatingHead">
-        <div>
-          <h3>
-            ${escapeHtml(
-              getTeamInterfaceText(
-                "🏆 Рейтинг клініки"
-              )
-            )}
-          </h3>
-
-          <p data-team-content>
-            ${escapeHtml(
-              getTeamSeasonDescription(
-                seasonLabel
-              )
-            )}
-          </p>
-        </div>
-
-        <span data-team-content>
-          ${escapeHtml(
-            seasonKey ||
-            "—"
-          )}
-        </span>
-      </div>
-
-      <div class="clinicRatingTable">
-        ${
-          rows
-            .map(
-              (row) =>
-                renderClinicRatingRow(
-                  row,
-                  currentStaffId
-                )
-            )
-            .join("")
-        }
-      </div>
-    </section>
-  `;
-}
-
-
-function renderClinicRatingRow(
-  row,
-  currentStaffId
-) {
-  const rank =
-    Number(
-      row.rank ||
-      0
-    );
-
-  const isCurrent =
-    String(
-      row.staff_id
-    ) ===
-    String(
-      currentStaffId
-    );
-
-  const medal =
-    rank === 1
-      ? "🥇"
-      : rank === 2
-        ? "🥈"
-        : rank === 3
-          ? "🥉"
-          : `#${rank}`;
-
-  const staffName =
-    String(
-      row.staff_name ||
-      getTeamInterfaceText(
-        "Працівник"
-      )
-    );
-
-  const staffLetter =
-    staffName
-      .trim()
-      .charAt(0)
-      .toUpperCase() ||
-    "?";
-
-  const avatar =
-    row.avatar
-      ? `
-        <img
-          src="${escapeHtml(
-            row.avatar
-          )}"
-          alt="${escapeHtml(
-            staffName
-          )}"
-        >
-      `
-      : `
-        <span>
-          ${escapeHtml(
-            staffLetter
-          )}
-        </span>
-      `;
-
-  return `
-    <div
-      class="
-        clinicRatingRow
-        ${
-          isCurrent
-            ? "current"
-            : ""
-        }
-        rank-${rank}
-      "
-    >
-      <div
-        class="clinicRatingPlace"
-        data-team-content
-      >
-        ${escapeHtml(
-          medal
-        )}
-      </div>
-
-      <div class="clinicRatingAvatar">
-        ${avatar}
-      </div>
-
-      <div class="clinicRatingPerson">
-        <b data-team-content>
-          ${escapeHtml(
-            staffName
-          )}
-        </b>
-
-        <span>
-          ${escapeHtml(
-            getTeamInterfaceText(
-              isCurrent
-                ? "Ваш профіль"
-                : "Співробітник клініки"
-            )
-          )}
-        </span>
-      </div>
-
-      <div class="clinicRatingStats">
-        <div>
-          <span>
-            ${escapeHtml(
-              getTeamInterfaceText(
-                "Бал"
-              )
-            )}
-          </span>
-
-          <b data-team-content>
-            ${Number(
-              row.score ||
-              0
-            ).toLocaleString(
-              getCalendarLocale()
-            )}
-          </b>
-        </div>
-
-        <div>
-          <span>
-            ${escapeHtml(
-              getTeamInterfaceText(
-                "Візити"
-              )
-            )}
-          </span>
-
-          <b data-team-content>
-            ${Number(
-              row.visits_count ||
-              0
-            ).toLocaleString(
-              getCalendarLocale()
-            )}
-          </b>
-        </div>
-
-        <div>
-          <span>
-            ${escapeHtml(
-              getTeamInterfaceText(
-                "Виручка"
-              )
-            )}
-          </span>
-
-          <b data-team-content>
-            ${escapeHtml(
-              getTeamMoneyText(
-                row.revenue
-              )
-            )}
-          </b>
-        </div>
-
-        <div>
-          <span>
-            ${escapeHtml(
-              getTeamInterfaceText(
-                "Сер. чек"
-              )
-            )}
-          </span>
-
-          <b data-team-content>
-            ${escapeHtml(
-              getTeamMoneyText(
-                row.avg_check
-              )
-            )}
-          </b>
-        </div>
-      </div>
-    </div>
-  `;
-}
-
 
 function formatSeasonLabel(
   seasonKey
@@ -53585,54 +53322,21 @@ function printA4Only(visitId) {
 // PATIENTS TAB — ИСПРАВЛЕННЫЙ РЕНДЕР
 // =========================
 function renderPatientsTab() {
-  const page =
-    document.querySelector(
-      '.page[data-page="patients"]'
-    );
-
-  if (!page) {
-    return;
-  }
+  const page = document.querySelector('.page[data-page="patients"]');
+  if (!page) return;
 
   window.pugMobilePatientsListCleanup?.();
   page.innerHTML = `
-    <div
-      class="glass-card"
-      style="
-        padding: 24px;
-        border-radius: 20px;
-        border: 1px solid rgba(255,255,255,0.1);
-      "
-    >
-      <div
-        style="
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 24px;
-        "
-      >
-        <h2 style="margin:0;">
-          ${escapeHtml(
-            translateInterfaceText(
-              "patients.page.title"
-            )
-          )}
-        </h2>
-
-        <div class="hint">
-          ${escapeHtml(
-            translateInterfaceText(
-              "patients.page.subtitle"
-            )
-          )}
+    <div class="patientDirectory">
+      <header class="patientDirectoryHeading">
+        <span class="patientDirectoryMark">${getStockIcon("paw")}</span>
+        <div>
+          <h2>${escapeHtml(translateInterfaceText("patients.page.title"))}</h2>
+          <p>${escapeHtml(translateInterfaceText("patients.page.subtitle"))}</p>
         </div>
-      </div>
-
+      </header>
       <div id="patientsTabList"></div>
-    </div>
-  `;
-
+    </div>`;
   const patientListElement =
     document.getElementById(
       "patientsTabList"
@@ -53818,30 +53522,18 @@ function renderPatientsTab() {
             "div"
           );
 
-        element.className =
-          "glass-card";
-
-        element.style.cssText =
-          "padding:16px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;border-radius:12px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05);cursor:pointer;transition:0.2s;";
+        element.className = "patientDirectoryRow";
 
         element.dataset.openPet =
           String(patient.id);
 
         element.innerHTML = `
-          <div style="flex:1;">
+          <div class="patientDirectoryInfo">
             <button type="button" class="clientPatientName">
-              ${getStockIcon("paw")} ${escapeHtml(patientName)}
+              <span class="patientDirectoryMark">${getStockIcon("paw")}</span>
+              <span>${escapeHtml(patientName)}</span>
             </button>
-
-            <div
-              style="
-                font-size: 0.9rem;
-                opacity: 0.6;
-                margin-top: 4px;
-              "
-            >
-              ${meta}
-            </div>
+            <div class="patientDirectoryMeta">${meta}</div>
           </div>
 
           <div class="patientActionsCell">
@@ -123459,88 +123151,16 @@ async function loadStaffScheduleRangeApi(
   return [];
 }
 async function loadStaffRatingApi() {
-  const emptyRating = {
-    season_key: "—",
-    rows: [],
-  };
-
   try {
-    const headers = {
-      Accept: "application/json",
-      ...getOrgHeaders(),
-    };
-
-    // Сначала пробуем получить готовый рейтинг сезона.
-    const ratingResponse = await fetch(
-      "/api/staff/rating",
-      {
-        method: "GET",
-        credentials: "include",
-        headers,
-      }
-    );
-
-    const ratingJson =
-      await ratingResponse.json();
-
-    if (
-      !ratingResponse.ok ||
-      ratingJson?.ok !== true
-    ) {
-      throw new Error(
-        ratingJson?.error ||
-        "Не вдалося завантажити рейтинг."
-      );
-    }
-
-    const rating =
-      ratingJson.data || emptyRating;
-
-    if (
-      Array.isArray(rating.rows) &&
-      rating.rows.length > 0
-    ) {
-      return rating;
-    }
-
-    // Якщо сезон ще порожній —
-    // автоматично створюємо рейтинг.
-    const rebuildResponse = await fetch(
-      "/api/staff/rating/rebuild",
-      {
-        method: "POST",
-        credentials: "include",
-        headers,
-      }
-    );
-
-    const rebuildJson =
-      await rebuildResponse.json();
-
-    if (
-      !rebuildResponse.ok ||
-      rebuildJson?.ok !== true
-    ) {
-      throw new Error(
-        rebuildJson?.error ||
-        "Не вдалося розрахувати рейтинг."
-      );
-    }
-
-    return (
-      rebuildJson.data || {
-        season_key:
-          rating.season_key || "—",
-        rows: [],
-      }
-    );
+    const response = await fetch("/api/staff/rating", {
+      credentials: "include",
+      headers: { Accept: "application/json", ...getOrgHeaders() },
+    });
+    const result = await response.json();
+    return response.ok && result.ok && result.data?.rankings ? result.data : null;
   } catch (error) {
-    console.error(
-      "loadStaffRatingApi failed:",
-      error
-    );
-
-    return emptyRating;
+    console.error("loadStaffRatingApi failed:", error);
+    return null;
   }
 }
 function getOwnerModalState() {

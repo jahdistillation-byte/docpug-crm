@@ -16193,281 +16193,91 @@ def api_delete_staff_adjustment(
     except Exception as e:
         return fail(str(e), 500)
 
-def get_current_season_key():
-    now = datetime.now(timezone.utc)
-    quarter = ((now.month - 1) // 3) + 1
-    return f"{now.year}-Q{quarter}"
+def staff_rating_rows(query):
+    offset = 0
+    while True:
+        batch = query.order("id").range(offset, offset + 499).execute().data or []
+        yield from batch
+        if len(batch) < 500:
+            return
+        offset += 500
 
-
-def calc_rating_visit_total(visit):
-    total = 0
-
-    if not visit:
-        return 0
-
-    visit_id = visit.get("id")
-
-    # 1) Считаем услуги/склад, если они лежат прямо в visits
-    for arr_key in ["services", "services_json"]:
-        items = visit.get(arr_key) or []
-        if isinstance(items, list):
-            for x in items:
-                try:
-                    qty = float(x.get("qty") or 1)
-                    price = float(
-                        x.get("priceSnap")
-                        or x.get("price_snap")
-                        or x.get("price")
-                        or 0
-                    )
-                    total += qty * price
-                except Exception:
-                    pass
-
-    for arr_key in ["stock", "stock_json"]:
-        items = visit.get(arr_key) or []
-        if isinstance(items, list):
-            for x in items:
-                try:
-                    qty = float(x.get("qty") or 1)
-                    price = float(
-                        x.get("priceSnap")
-                        or x.get("price_snap")
-                        or x.get("price")
-                        or 0
-                    )
-                    total += qty * price
-                except Exception:
-                    pass
-
-    # 2) Если в самом визите суммы нет — пробуем visit_services / visit_stock
-    if total > 0 or not visit_id:
-        return round(total)
-
-    try:
-        services_res = (
-            supabase.table("visit_services")
-            .select("*")
-            .eq("visit_id", visit_id)
-            .execute()
-        )
-
-        for s in services_res.data or []:
-            qty = float(s.get("qty") or 1)
-            price = float(s.get("price_snap") or 0)
-            total += qty * price
-    except Exception:
-        pass
-
-    try:
-        stock_res = (
-            supabase.table("visit_stock")
-            .select("*")
-            .eq("visit_id", visit_id)
-            .execute()
-        )
-
-        for st in stock_res.data or []:
-            qty = float(st.get("qty") or 1)
-            price = float(st.get("price_snap") or 0)
-            total += qty * price
-    except Exception:
-        pass
-
-    return round(total)
-
-
-@app.post("/api/staff/rating/rebuild")
-def api_rebuild_staff_rating():
-    user, auth_error = (
-        owner_or_admin_required()
-    )
-
-    if auth_error:
-        return auth_error    
-    try:    
-        current_org = get_current_org_id()
-        season_key = get_current_season_key()
-
-        staff_res = (
-            supabase.table("staff")
-            .select("*")
-            .eq("org_id", current_org)
-            .execute()
-        )
-        staff_list = staff_res.data or []
-
-        visits_res = (
-            supabase.table("visits")
-            .select("*")
-            .eq("org_id", current_org)
-            .execute()
-        )
-        visits = visits_res.data or []
-
-        visit_ids = [v.get("id") for v in visits if v.get("id")]
-        services_by_visit, stock_by_visit = load_visit_lines(visit_ids)
-
-        # подтягиваем справочник услуг
-        services_res = (
-            supabase.table("services")
-            .select("*")
-            .eq("org_id", current_org)
-            .execute()
-        )
-        services_map = {
-            str(s.get("id")): s
-            for s in (services_res.data or [])
-            if s.get("id")
-        }
-
-        # подтягиваем справочник склада
-        stock_res = (
-            supabase.table("stock")
-            .select("*")
-            .eq("org_id", current_org)
-            .execute()
-        )
-        stock_map = {
-            str(s.get("id")): s
-            for s in (stock_res.data or [])
-            if s.get("id")
-        }
-
-        def calc_rating_total(v):
-            visit_id = v.get("id")
-            total = 0
-
-            for s in services_by_visit.get(visit_id, []):
-                try:
-                    qty = float(s.get("qty") or 1)
-
-                    service_id = str(
-                        s.get("serviceId")
-                        or s.get("service_id")
-                        or ""
-                    )
-
-                    service_row = services_map.get(service_id) or {}
-
-                    price = float(
-                        s.get("priceSnap")
-                        or s.get("price_snap")
-                        or s.get("price")
-                        or service_row.get("price")
-                        or 0
-                    )
-
-                    total += qty * price
-                except Exception:
-                    pass
-
-            for st in stock_by_visit.get(visit_id, []):
-                try:
-                    qty = float(st.get("qty") or 1)
-
-                    stock_id = str(
-                        st.get("stockId")
-                        or st.get("stock_id")
-                        or ""
-                    )
-
-                    stock_row = stock_map.get(stock_id) or {}
-
-                    price = float(
-                        st.get("priceSnap")
-                        or st.get("price_snap")
-                        or st.get("price")
-                        or stock_row.get("price")
-                        or 0
-                    )
-
-                    total += qty * price
-                except Exception:
-                    pass
-
-            return round(total)
-
-        rows = []
-
-        for staff in staff_list:
-            staff_id = str(staff.get("id"))
-
-            staff_visits = [
-                v for v in visits
-                if str(v.get("staff_id") or v.get("doctor_id") or v.get("vet_id") or "") == staff_id
-            ]
-
-            visits_count = len(staff_visits)
-            revenue = round(sum(calc_rating_total(v) for v in staff_visits))
-            avg_check = round(revenue / visits_count) if visits_count else 0
-            xp = visits_count * 10
-
-            score = round(
-                visits_count * 25 +
-                revenue * 0.01 +
-                avg_check * 0.05 +
-                xp
-            )
-
-            rows.append({
-                "org_id": current_org,
-                "season_key": season_key,
-                "staff_id": staff_id,
-                "staff_name": staff.get("name") or "Працівник",
-                "avatar": staff.get("avatar") or "",
-                "score": score,
-                "visits_count": visits_count,
-                "revenue": revenue,
-                "avg_check": avg_check,
-                "xp": xp,
-                "rank": 0,
-                "updated_at": datetime.now(timezone.utc).isoformat(),
-            })
-
-        rows.sort(key=lambda x: x["score"], reverse=True)
-
-        for i, row in enumerate(rows, start=1):
-            row["rank"] = i
-
-        for row in rows:
-            supabase.table("staff_rating_snapshots").upsert(
-                row,
-                on_conflict="org_id,season_key,staff_id"
-            ).execute()
-
-        return ok({
-            "season_key": season_key,
-            "rows": rows,
-        })
-
-    except Exception as e:
-        print("❌ /api/staff/rating/rebuild error:", repr(e))
-        return fail(str(e), 500)
 
 @app.get("/api/staff/rating")
+@app.post("/api/staff/rating/rebuild")
 def api_get_staff_rating():
+    authorize = owner_or_admin_required if request.method == "POST" else auth_required
+    _, auth_error = authorize()
+    if auth_error:
+        return auth_error
+
+    org_id = get_current_org_id()
+    if not org_id:
+        return fail("Organization not selected", 400)
+
+    today = datetime.now(REPORT_TIMEZONE).date()
+    quarter = (today.month - 1) // 3 + 1
+    start_month = 3 * quarter - 2
+    start = today.replace(month=start_month, day=1)
+    end = start.replace(year=start.year + 1, month=1) if quarter == 4 else start.replace(month=start_month + 3)
+
     try:
-        current_org = get_current_org_id()
-        season_key = request.args.get("season") or get_current_season_key()
+        staff = {str(row["id"]): row for row in staff_rating_rows(
+            supabase.table("staff").select("id,name,avatar")
+            .eq("org_id", org_id).eq("is_active", True).eq("role", "vet")
+        )}
+        services = {str(row["id"]): row["achievement_track"] for row in staff_rating_rows(
+            supabase.table("services").select("id,achievement_track").eq("org_id", org_id)
+            .in_("achievement_track", list(SERVICE_ACHIEVEMENT_TRACKS))
+        )}
+        visits = {}
+        if staff and services:
+            for row in staff_rating_rows(
+                supabase.table("visits").select("id,staff_id,status,completed_at,closed_by")
+                .eq("org_id", org_id).gte("date", start.isoformat())
+                .lt("date", end.isoformat()).lte("date", today.isoformat())
+            ):
+                staff_id = str(row.get("staff_id") or "")
+                status = str(row.get("status") or "").strip().lower()
+                if staff_id in staff and status not in {"cancelled", "canceled", "no_show"} and (
+                    status in {"completed", "done", "finished"} or row.get("completed_at") or row.get("closed_by")
+                ):
+                    visits[str(row["id"])] = staff_id
 
-        res = (
-            supabase.table("staff_rating_snapshots")
-            .select("*")
-            .eq("org_id", current_org)
-            .eq("season_key", season_key)
-            .order("rank")
-            .execute()
-        )
+        cases = {track: {} for track in SERVICE_ACHIEVEMENT_TRACKS}
+        ids = list(visits)
+        for offset in range(0, len(ids), 100):
+            for row in staff_rating_rows(
+                supabase.table("visit_services").select("id,visit_id,service_id")
+                .in_("visit_id", ids[offset:offset + 100])
+            ):
+                track = services.get(str(row.get("service_id") or "").strip().lower())
+                visit_id = str(row["visit_id"])
+                if track:
+                    cases[track].setdefault(visits[visit_id], set()).add(visit_id)
 
-        return ok({
-            "season_key": season_key,
-            "rows": res.data or [],
-        })
+        rankings = {}
+        for track, by_staff in cases.items():
+            ordered = sorted(by_staff.items(), key=lambda item: (
+                -len(item[1]), (staff[item[0]].get("name") or "").casefold(), item[0]
+            ))
+            rankings[track] = []
+            rank = previous_count = 0
+            for position, (staff_id, visit_ids) in enumerate(ordered, 1):
+                count = len(visit_ids)
+                if count != previous_count:
+                    rank = position
+                    previous_count = count
+                rankings[track].append({
+                    "rank": rank, "count": count, "staff_id": staff_id,
+                    "staff_name": staff[staff_id].get("name"), "avatar": staff[staff_id].get("avatar"),
+                })
 
-    except Exception as e:
-        print("❌ /api/staff/rating error:", repr(e))
-        return fail(str(e), 500)
+        return ok({"season_key": f"{today.year}-Q{quarter}", "rankings": rankings})
+    except Exception as error:
+        print("Staff seasonal ranking failed:", repr(error))
+        return fail("Не вдалося завантажити рейтинг клініки.", 503)
+
 
 # =====================================================
 # APPOINTMENT TEMPLATES
