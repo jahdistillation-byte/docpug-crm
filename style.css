@@ -77644,7 +77644,8 @@ html body[data-theme] .page[data-page="patient"] #patientCardRoot .premiumLabsPa
   .teamAchievementTrack { --achievement-hue: 261; }
   .teamAchievementTrack.teamAchievementLegendary { --achievement-hue: 43; }
   .teamAchievementTrack[data-achievement-track="dog_vaccines"] { --achievement-hue: 32; }
-  .teamAchievementTrack[data-achievement-track="followup"] { --achievement-hue: 190; }
+  .teamAchievementTrack[data-achievement-track="canine"] { --achievement-hue: 190; }
+  .teamAchievementTrack[data-achievement-track="feline"] { --achievement-hue: 294; }
   .teamAchievementTrack[data-achievement-track="surgery"] { --achievement-hue: 337; }
   .teamAchievementTrack[data-achievement-track="dentistry"] { --achievement-hue: 158; }
   .teamAchievementTrack[data-achievement-track="ultrasound"] { --achievement-hue: 218; }
@@ -77662,6 +77663,8 @@ html body[data-theme] .page[data-page="patient"] #patientCardRoot .premiumLabsPa
     align-items: center;
     gap: 10px;
   }
+
+  .teamAchievementTrackHint { margin: 7px 0 0 !important; }
 
   .teamAchievementTrack header h3 {
     flex: 1;

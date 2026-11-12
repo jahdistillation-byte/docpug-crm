@@ -17953,7 +17953,8 @@ async function renderServicesTab() {
 const PUG_ACHIEVEMENT_TRACKS = [
   { id: "cat_vaccines", title: "Вакцинація котів", steps: [[10, "Рамка «Котяча лапа»"], [25, "Підпис «Котяча профілактика»"], [100, "Фізичний набір наклейок PUG"]] },
   { id: "dog_vaccines", title: "Вакцинація собак", steps: [[10, "Рамка «Вірний друг»"], [25, "Підпис «Профілактика для собак»"], [100, "Відзнака «Захист поруч»"]] },
-  { id: "followup", title: "Контрольні огляди", service: true, steps: [[5, "Рамка «Зворотний зв’язок»"], [20, "Підпис «Тримаю зв’язок»"], [50, "Відзнака «Повний цикл»"]] },
+  { id: "canine", title: "Спеціаліст Canine", steps: [[10, "Рамка «Собача практика»"], [25, "Підпис «Спеціаліст Canine»"], [100, "Відзнака Canine"]] },
+  { id: "feline", title: "Спеціаліст Feline", steps: [[10, "Рамка «Котяча практика»"], [25, "Підпис «Спеціаліст Feline»"], [100, "Відзнака Feline"]] },
   { id: "surgery", title: "Хірургічна практика", service: true, steps: [[5, "Рамка «Точність»"], [25, "Підпис «Хірургічна практика»"], [75, "Відзнака «Точна робота»"]] },
   { id: "dentistry", title: "Стоматологічна практика", service: true, steps: [[5, "Рамка «Усмішка»"], [20, "Підпис «Турбота про усмішку»"], [50, "Відзнака «Здорова усмішка»"]] },
   { id: "ultrasound", title: "УЗД", service: true, steps: [[5, "Рамка «Контур»"], [25, "Підпис «Ультразвукова практика»"], [100, "Відзнака «У фокусі»"]] },
@@ -27544,7 +27545,6 @@ function teamAchievementIcon(name) {
   const paths = {
     cat_vaccines: '<path d="M5 13V5l5 4h4l5-4v8a7 7 0 0 1-14 0Z"/><path d="M9 13h.01m6 0h.01m-4 3h2"/>',
     dog_vaccines: '<path d="M7 7h10l4 4-2 5-3-2v3a4 4 0 0 1-8 0v-3l-3 2-2-5 4-4Z"/><path d="M10 12h.01m4 0h.01M11 16h2"/>',
-    followup: '<path d="M4 10a8 8 0 1 1 1 7M4 5v5h5m3-1v4l3 1"/>',
     surgery: '<path d="m5 16 8-8 3 3-8 8H5v-3ZM13 8l4-4h4v4l-5 3M5 22h14"/>',
     dentistry: '<path d="M12 6c-4-4-8-1-8 3 0 4 3 5 3 10 0 2 2 2 3 0l2-5 2 5c1 2 3 2 3 0 0-5 3-6 3-10 0-4-4-7-8-3Z"/>',
     ultrasound: '<path d="M3 13h4l2-6 4 12 3-8 2 2h3"/><path d="M4 5h16M4 21h16"/>',
@@ -27599,8 +27599,13 @@ async function renderTeamAchievementsTab(root, state) {
           <h2>Досягнення</h2>
           <p>Збирайте відзнаки за підтверджену роботу. Ваш прогрес накопичується за весь час.</p>
         </div>
-        <div class="teamAchievementTotal"><strong>${unlocked} / 25</strong><span>Етапів пройдено</span></div>
+        <div class="teamAchievementTotal"><strong>${unlocked} / ${tracks.reduce((total, track) => total + track.steps.length, 4)}</strong><span>Етапів пройдено</span></div>
       </section>
+
+      <details class="teamDashPanel teamAchievementRating" open>
+        <summary>Рейтинг клініки</summary>
+        <div data-achievement-rating></div>
+      </details>
 
       <div class="teamAchievementTracks">
         ${tracks.map(({ id, title, steps, count }) => {
@@ -27610,10 +27615,11 @@ async function renderTeamAchievementsTab(root, state) {
           return `
             <section class="teamDashPanel teamAchievementTrack" data-achievement-track="${id}">
               <header>
-                <span class="teamAchievementMark">${teamAchievementIcon(id)}</span>
+                <span class="teamAchievementMark">${teamAchievementIcon(({ canine: "dog_vaccines", feline: "cat_vaccines" })[id] || id)}</span>
                 <h3>${escapeHtml(title)}</h3>
                 <strong>${count} / ${target}</strong>
               </header>
+              ${id === "canine" || id === "feline" ? `<p class="teamAchievementTrackHint">${id === "canine" ? "Завершені візити собак" : "Завершені візити котів"}</p>` : ""}
               <progress aria-label="${escapeHtml(title)}" value="${Math.min(count, target)}" max="${target}"></progress>
               <ol class="teamAchievementSteps">
                 ${steps.map(([milestone, reward], index) => {
@@ -27647,16 +27653,13 @@ async function renderTeamAchievementsTab(root, state) {
         <p>Колекція фізичних емалевих пінів PUG готується. Умови відкриття залишаться таємницею.</p>
       </section>
 
-      <details class="teamDashPanel teamAchievementRating">
-        <summary>Рейтинг клініки</summary>
-        <div data-achievement-rating></div>
-      </details>
+
     </div>
   `;
 
   const ratingPanel = root.querySelector(".teamAchievementRating");
   const ratingContent = ratingPanel.querySelector("[data-achievement-rating]");
-  ratingPanel.addEventListener("toggle", async () => {
+  const renderRating = async () => {
     if (!ratingPanel.open || ratingPanel.dataset.loaded) return;
     ratingPanel.dataset.loaded = "true";
     ratingContent.textContent = "Завантаження рейтингу…";
@@ -27666,36 +27669,27 @@ async function renderTeamAchievementsTab(root, state) {
       ratingContent.textContent = "Не вдалося завантажити рейтинг. Згорніть і відкрийте блок ще раз.";
       return;
     }
-    const categories = PUG_ACHIEVEMENT_TRACKS.filter((track) => track.service);
-    const initial = categories.find(({ id }) => rating.rankings[id]?.length) || categories[0];
     ratingContent.innerHTML = `
       <div class="clinicSeasonToolbar">
         <div><b>${escapeHtml(formatSeasonLabel(rating.season_key))}</b>
-          <p>Один підтверджений випадок на завершений візит. Однакова кількість випадків дає однакове місце.</p>
+          <p>Завершені візити всіх активних ветеринарів клініки за квартал.</p>
         </div>
-        <label>Номінація <select>
-          ${categories.map(({ id, title }) => `<option value="${id}" ${id === initial.id ? "selected" : ""}>${escapeHtml(title)}</option>`).join("")}
-        </select></label>
       </div>
-      <div class="clinicSeasonResults" aria-live="polite"></div>`;
-    const category = ratingContent.querySelector("select");
-    const results = ratingContent.querySelector(".clinicSeasonResults");
-    const render = () => {
-      const rows = rating.rankings[category.value] || [];
-      results.innerHTML = rows.length ? `<ol>${rows.map((row) => {
-        const name = String(row.staff_name || "Працівник");
-        const current = String(row.staff_id) === String(state.doc.id);
-        return `<li class="${current ? "is-current" : ""} ${row.rank === 1 ? "is-leader" : ""}">
-          <strong class="clinicSeasonRank">#${Number(row.rank)}</strong>
-          <span class="clinicSeasonAvatar">${row.avatar ? `<img src="${escapeHtml(row.avatar)}" alt="">` : escapeHtml(name.trim().charAt(0).toUpperCase())}</span>
-          <span class="clinicSeasonName"><b data-team-content>${escapeHtml(name)}</b>${current ? "<small>Цей профіль</small>" : ""}</span>
-          <span class="clinicSeasonCount"><strong>${Number(row.count)}</strong> <small>Випадки</small></span>
-        </li>`;
-      }).join("")}</ol>` : "<p>У цій номінації ще немає завершених випадків за квартал.</p>";
-    };
-    category.addEventListener("change", render);
-    render();
-  });
+      <div class="clinicSeasonResults">
+        ${rating.rows.length ? `<ol>${rating.rows.map((row) => {
+          const name = String(row.staff_name || "Працівник");
+          const current = String(row.staff_id) === String(state.doc.id);
+          return `<li class="${current ? "is-current" : ""} ${row.rank === 1 ? "is-leader" : ""}">
+            <strong class="clinicSeasonRank">${row.rank ? `#${Number(row.rank)}` : "—"}</strong>
+            <span class="clinicSeasonAvatar">${row.avatar ? `<img src="${escapeHtml(row.avatar)}" alt="">` : escapeHtml(name.trim().charAt(0).toUpperCase())}</span>
+            <span class="clinicSeasonName"><b data-team-content>${escapeHtml(name)}</b>${current ? "<small>Цей профіль</small>" : ""}</span>
+            <span class="clinicSeasonCount">${row.count ? `<strong>${Number(row.count)}</strong> <small>Візити</small>` : "<small>Ще немає візитів</small>"}</span>
+          </li>`;
+        }).join("")}</ol>` : "<p>У клініці ще немає активних ветеринарів.</p>"}
+      </div>`;
+  };
+  ratingPanel.addEventListener("toggle", renderRating);
+  renderRating();
 }
 
 function formatSeasonLabel(
@@ -123157,7 +123151,7 @@ async function loadStaffRatingApi() {
       headers: { Accept: "application/json", ...getOrgHeaders() },
     });
     const result = await response.json();
-    return response.ok && result.ok && result.data?.rankings ? result.data : null;
+    return response.ok && result.ok && Array.isArray(result.data?.rows) ? result.data : null;
   } catch (error) {
     console.error("loadStaffRatingApi failed:", error);
     return null;

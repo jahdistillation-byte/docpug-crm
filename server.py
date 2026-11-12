@@ -13856,7 +13856,7 @@ def api_receive_stock_purchase(
 # =========================
 # SERVICES API
 # =========================
-SERVICE_ACHIEVEMENT_TRACKS = ("surgery", "dentistry", "ultrasound", "followup")
+SERVICE_ACHIEVEMENT_TRACKS = ("surgery", "dentistry", "ultrasound")
 
 
 @app.get("/api/staff/<staff_id>/achievement-progress")
@@ -13874,7 +13874,32 @@ def api_staff_achievement_progress(staff_id):
             "p_org_id": org_id,
             "p_staff_id": staff_id,
         }).execute()
-        return ok(result.data)
+        visits_by_patient = {}
+        for visit in staff_rating_rows(
+            supabase.table("visits").select("id,pet_id,status,completed_at,closed_by")
+            .eq("org_id", org_id).eq("staff_id", staff_id)
+        ):
+            if visit.get("pet_id") and is_completed_staff_visit(visit):
+                patient_id = str(visit["pet_id"])
+                visits_by_patient[patient_id] = visits_by_patient.get(patient_id, 0) + 1
+
+        species_tracks = {
+            "dog": "canine", "собака": "canine", "пес": "canine",
+            "cat": "feline", "кіт": "feline", "кішка": "feline",
+            "кот": "feline", "кошка": "feline",
+        }
+        counts = {**result.data, "canine": 0, "feline": 0}
+        patient_ids = list(visits_by_patient)
+        for offset in range(0, len(patient_ids), 100):
+            for patient in staff_rating_rows(
+                supabase.table("patients").select("id,species").eq("org_id", org_id)
+                .in_("id", patient_ids[offset:offset + 100])
+            ):
+                track = species_tracks.get(str(patient.get("species") or "").strip().lower())
+                if track:
+                    counts[track] += visits_by_patient[str(patient["id"])]
+        counts.pop("followup", None)
+        return ok(counts)
     except Exception as error:
         print("Staff achievement progress failed:", repr(error))
         return fail("Не вдалося завантажити прогрес досягнень.", 503)
@@ -16203,6 +16228,13 @@ def staff_rating_rows(query):
         offset += 500
 
 
+def is_completed_staff_visit(visit):
+    status = str(visit.get("status") or "").strip().lower()
+    return status not in {"cancelled", "canceled", "no_show"} and (
+        status in {"completed", "done", "finished"} or visit.get("completed_at") or visit.get("closed_by")
+    )
+
+
 @app.get("/api/staff/rating")
 @app.post("/api/staff/rating/rebuild")
 def api_get_staff_rating():
@@ -16226,54 +16258,33 @@ def api_get_staff_rating():
             supabase.table("staff").select("id,name,avatar")
             .eq("org_id", org_id).eq("is_active", True).eq("role", "vet")
         )}
-        services = {str(row["id"]): row["achievement_track"] for row in staff_rating_rows(
-            supabase.table("services").select("id,achievement_track").eq("org_id", org_id)
-            .in_("achievement_track", list(SERVICE_ACHIEVEMENT_TRACKS))
-        )}
-        visits = {}
-        if staff and services:
-            for row in staff_rating_rows(
+        counts = dict.fromkeys(staff, 0)
+        if staff:
+            for visit in staff_rating_rows(
                 supabase.table("visits").select("id,staff_id,status,completed_at,closed_by")
                 .eq("org_id", org_id).gte("date", start.isoformat())
                 .lt("date", end.isoformat()).lte("date", today.isoformat())
             ):
-                staff_id = str(row.get("staff_id") or "")
-                status = str(row.get("status") or "").strip().lower()
-                if staff_id in staff and status not in {"cancelled", "canceled", "no_show"} and (
-                    status in {"completed", "done", "finished"} or row.get("completed_at") or row.get("closed_by")
-                ):
-                    visits[str(row["id"])] = staff_id
+                staff_id = str(visit.get("staff_id") or "")
+                if staff_id in counts and is_completed_staff_visit(visit):
+                    counts[staff_id] += 1
 
-        cases = {track: {} for track in SERVICE_ACHIEVEMENT_TRACKS}
-        ids = list(visits)
-        for offset in range(0, len(ids), 100):
-            for row in staff_rating_rows(
-                supabase.table("visit_services").select("id,visit_id,service_id")
-                .in_("visit_id", ids[offset:offset + 100])
-            ):
-                track = services.get(str(row.get("service_id") or "").strip().lower())
-                visit_id = str(row["visit_id"])
-                if track:
-                    cases[track].setdefault(visits[visit_id], set()).add(visit_id)
+        ordered = sorted(staff, key=lambda staff_id: (
+            -counts[staff_id], (staff[staff_id].get("name") or "").casefold(), staff_id
+        ))
+        rows = []
+        rank = previous_count = None
+        for position, staff_id in enumerate(ordered, 1):
+            count = counts[staff_id]
+            if count != previous_count:
+                rank = position if count else None
+                previous_count = count
+            rows.append({
+                "rank": rank, "count": count, "staff_id": staff_id,
+                "staff_name": staff[staff_id].get("name"), "avatar": staff[staff_id].get("avatar"),
+            })
 
-        rankings = {}
-        for track, by_staff in cases.items():
-            ordered = sorted(by_staff.items(), key=lambda item: (
-                -len(item[1]), (staff[item[0]].get("name") or "").casefold(), item[0]
-            ))
-            rankings[track] = []
-            rank = previous_count = 0
-            for position, (staff_id, visit_ids) in enumerate(ordered, 1):
-                count = len(visit_ids)
-                if count != previous_count:
-                    rank = position
-                    previous_count = count
-                rankings[track].append({
-                    "rank": rank, "count": count, "staff_id": staff_id,
-                    "staff_name": staff[staff_id].get("name"), "avatar": staff[staff_id].get("avatar"),
-                })
-
-        return ok({"season_key": f"{today.year}-Q{quarter}", "rankings": rankings})
+        return ok({"season_key": f"{today.year}-Q{quarter}", "rows": rows})
     except Exception as error:
         print("Staff seasonal ranking failed:", repr(error))
         return fail("Не вдалося завантажити рейтинг клініки.", 503)
