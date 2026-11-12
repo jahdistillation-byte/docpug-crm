@@ -13856,7 +13856,7 @@ def api_receive_stock_purchase(
 # =========================
 # SERVICES API
 # =========================
-SERVICE_ACHIEVEMENT_TRACKS = ("surgery", "dentistry", "ultrasound")
+SERVICE_ACHIEVEMENT_TRACKS = ("surgery", "dentistry", "ultrasound", "therapy", "dermatology")
 
 
 @app.get("/api/staff/<staff_id>/achievement-progress")
@@ -13898,6 +13898,11 @@ def api_staff_achievement_progress(staff_id):
                 track = species_tracks.get(str(patient.get("species") or "").strip().lower())
                 if track:
                     counts[track] += visits_by_patient[str(patient["id"])]
+        awards = (
+            supabase.table("staff_legendary_awards").select("award_number")
+            .eq("org_id", org_id).eq("staff_id", staff_id).execute()
+        ).data or []
+        counts["legendary_awards"] = [row["award_number"] for row in awards]
         counts.pop("followup", None)
         return ok(counts)
     except Exception as error:
@@ -16258,29 +16263,25 @@ def api_get_staff_rating():
             supabase.table("staff").select("id,name,avatar")
             .eq("org_id", org_id).eq("is_active", True).eq("role", "vet")
         )}
-        counts = dict.fromkeys(staff, 0)
-        if staff:
-            for visit in staff_rating_rows(
-                supabase.table("visits").select("id,staff_id,status,completed_at,closed_by")
-                .eq("org_id", org_id).gte("date", start.isoformat())
-                .lt("date", end.isoformat()).lte("date", today.isoformat())
-            ):
-                staff_id = str(visit.get("staff_id") or "")
-                if staff_id in counts and is_completed_staff_visit(visit):
-                    counts[staff_id] += 1
+        scores = supabase.rpc("get_clinic_rating_points", {
+            "p_org_id": org_id,
+            "p_start": start.isoformat(),
+            "p_end": min(end, today + timedelta(days=1)).isoformat(),
+        }).execute().data or {}
+        points = {staff_id: scores.get(staff_id, {}).get("points", 0) for staff_id in staff}
 
         ordered = sorted(staff, key=lambda staff_id: (
-            -counts[staff_id], (staff[staff_id].get("name") or "").casefold(), staff_id
+            -points[staff_id], (staff[staff_id].get("name") or "").casefold(), staff_id
         ))
         rows = []
         rank = previous_count = None
         for position, staff_id in enumerate(ordered, 1):
-            count = counts[staff_id]
+            count = points[staff_id]
             if count != previous_count:
                 rank = position if count else None
                 previous_count = count
             rows.append({
-                "rank": rank, "count": count, "staff_id": staff_id,
+                "rank": rank, "points": count, "staff_id": staff_id,
                 "staff_name": staff[staff_id].get("name"), "avatar": staff[staff_id].get("avatar"),
             })
 

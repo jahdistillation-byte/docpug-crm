@@ -17957,6 +17957,8 @@ const PUG_ACHIEVEMENT_TRACKS = [
   { id: "feline", title: "Спеціаліст Feline", steps: [[10, "Рамка «Котяча практика»"], [25, "Підпис «Спеціаліст Feline»"], [100, "Відзнака Feline"]] },
   { id: "surgery", title: "Хірургічна практика", service: true, steps: [[5, "Рамка «Точність»"], [25, "Підпис «Хірургічна практика»"], [75, "Відзнака «Точна робота»"]] },
   { id: "dentistry", title: "Стоматологічна практика", service: true, steps: [[5, "Рамка «Усмішка»"], [20, "Підпис «Турбота про усмішку»"], [50, "Відзнака «Здорова усмішка»"]] },
+  { id: "therapy", title: "Терапевтична практика", service: true, steps: [[5, "Рамка «Терапія»"], [20, "Підпис «Терапевтична практика»"], [50, "Відзнака «Терапія»"]] },
+  { id: "dermatology", title: "Дерматологічна практика", service: true, steps: [[5, "Рамка «Дерматологія»"], [20, "Підпис «Дерматологічна практика»"], [50, "Відзнака «Дерматологія»"]] },
   { id: "ultrasound", title: "УЗД", service: true, steps: [[5, "Рамка «Контур»"], [25, "Підпис «Ультразвукова практика»"], [100, "Відзнака «У фокусі»"]] },
   { id: "hospital", title: "Стаціонар", steps: [[5, "Рамка «Під наглядом»"], [20, "Підпис «Стаціонарна практика»"], [50, "Відзнака «Від прийому до виписки»"]] },
 ];
@@ -27553,6 +27555,8 @@ function teamAchievementIcon(name) {
     title: '<path d="M4 6h16v12H4zM8 10h8m-8 4h5"/>',
     badge: '<path d="m12 3 8 5v8l-8 5-8-5V8l8-5Z"/><path d="m9 12 2 2 4-4"/>',
     stickers: '<path d="M4 7a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v7l-6 6H7a3 3 0 0 1-3-3Z"/><path d="M14 20v-4a2 2 0 0 1 2-2h4M8 9h4m-2-2v4"/>',
+    therapy: '<path d="M12 20 4 12a5 5 0 0 1 8-6 5 5 0 0 1 8 6Z"/><path d="M8 12h2l2-3 2 6 2-3h2"/>',
+    dermatology: '<path d="M12 3c3 4 6 7 6 11a6 6 0 0 1-12 0c0-4 3-7 6-11Z"/><path d="M9 14a3 3 0 0 0 3 3"/>',
     settings: '<path d="M4 6h16M4 12h16M4 18h16"/><path d="M8 4v4m8 2v4m-6 2v4"/>',
     secret: '<path d="m12 2 9 5v10l-9 5-9-5V7Z"/><path d="M9.5 9a2.5 2.5 0 1 1 4 2c-1 .8-1.5 1-1.5 2.5m0 3h.01"/>',
   };
@@ -27587,9 +27591,10 @@ async function renderTeamAchievementsTab(root, state) {
     count: Number(counts[id] || 0),
   }));
   const collection = tracks.filter(({ count, steps }) => count >= steps[1][0]).length;
+  const legendary = new Set(counts.legendary_awards || []);
   const unlocked = tracks.reduce((total, { count, steps }) => (
     total + steps.filter(([target]) => count >= target).length
-  ), Number(collection >= 3));
+  ), Number(collection >= 3) + legendary.size);
 
   root.innerHTML = `
     <div class="teamAchievementWorkspace">
@@ -27646,9 +27651,9 @@ async function renderTeamAchievementsTab(root, state) {
       </section>
 
       <section class="teamDashPanel teamAchievementTrack teamAchievementLegendary">
-        <header><h3>Легендарні</h3><strong>0 / 3</strong></header>
+        <header><h3>Легендарні</h3><strong>${legendary.size} / 3</strong></header>
         <ol class="teamAchievementSecrets">
-          ${[1, 2, 3].map((number) => `<li aria-label="Секретна відзнака ${number}">${teamAchievementIcon("secret")}<span>0${number}</span></li>`).join("")}
+          ${[1, 2, 3].map((number) => `<li aria-label="${legendary.has(number) ? "Відкрита легендарна відзнака" : "Секретна відзнака"} ${number}">${teamAchievementIcon(legendary.has(number) ? "badge" : "secret")}<span>0${number}</span></li>`).join("")}
         </ol>
         <p>Колекція фізичних емалевих пінів PUG готується. Умови відкриття залишаться таємницею.</p>
       </section>
@@ -27672,7 +27677,7 @@ async function renderTeamAchievementsTab(root, state) {
     ratingContent.innerHTML = `
       <div class="clinicSeasonToolbar">
         <div><b>${escapeHtml(formatSeasonLabel(rating.season_key))}</b>
-          <p>Завершені візити всіх активних ветеринарів клініки за квартал.</p>
+          <p>За квартал · +10 за візит · +20 за візит із хірургією, терапією або стоматологією · +50 за етап · +250 за легендарне досягнення.</p>
         </div>
       </div>
       <div class="clinicSeasonResults">
@@ -27683,7 +27688,7 @@ async function renderTeamAchievementsTab(root, state) {
             <strong class="clinicSeasonRank">${row.rank ? `#${Number(row.rank)}` : "—"}</strong>
             <span class="clinicSeasonAvatar">${row.avatar ? `<img src="${escapeHtml(row.avatar)}" alt="">` : escapeHtml(name.trim().charAt(0).toUpperCase())}</span>
             <span class="clinicSeasonName"><b data-team-content>${escapeHtml(name)}</b>${current ? "<small>Цей профіль</small>" : ""}</span>
-            <span class="clinicSeasonCount">${row.count ? `<strong>${Number(row.count)}</strong> <small>Візити</small>` : "<small>Ще немає візитів</small>"}</span>
+            <span class="clinicSeasonCount"><strong>${Number(row.points).toLocaleString(getCalendarLocale())}</strong> <small>Бали</small></span>
           </li>`;
         }).join("")}</ol>` : "<p>У клініці ще немає активних ветеринарів.</p>"}
       </div>`;
