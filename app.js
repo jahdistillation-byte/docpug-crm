@@ -121539,11 +121539,12 @@ function ensureStaffEmergencyContactFields() {
         pl: "☎ Kontakt alarmowy",
       },
 
-      "Контакт близької людини": {
-        en: "Contact details of a close person",
-        de: "Kontaktdaten einer nahestehenden Person",
-        pl: "Dane kontaktowe bliskiej osoby",
-      },
+      "Основні дані": { en: "Basic details", de: "Stammdaten", pl: "Dane podstawowe" },
+      "Оплата праці": { en: "Compensation", de: "Vergütung", pl: "Wynagrodzenie" },
+      "Додатково": { en: "Additional details", de: "Weitere Angaben", pl: "Dodatkowe dane" },
+      "Колір у календарі": { en: "Calendar color", de: "Kalenderfarbe", pl: "Kolor w kalendarzu" },
+      "Необов’язково": { en: "Optional", de: "Optional", pl: "Opcjonalnie" },
+      "Закрити": { en: "Close", de: "Schließen", pl: "Zamknij" },
 
       "Ім’я контактної особи": {
         en: "Contact person’s name",
@@ -121624,11 +121625,7 @@ function ensureStaffEmergencyContactFields() {
         ${ui("☎ Екстрений контакт").replace(/^☎\s*/, "")}
       </strong>
 
-      <span>
-        ${ui(
-          "Контакт близької людини"
-        )}
-      </span>
+      <span>${ui("Необов’язково")}</span>
     </div>
 
     <label>

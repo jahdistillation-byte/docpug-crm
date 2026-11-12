@@ -14,7 +14,7 @@
   type="image/jpeg"
   fetchpriority="high"
 >
-<link rel="stylesheet" href="style.css?v=20261112-subscription-banner-v2">
+<link rel="stylesheet" href="style.css?v=20261112-staff-editor-v3">
 <link rel="stylesheet" href="stock-catalog.css?v=20261106-8">
 <link rel="stylesheet" href="hospital-ward.css?v=20261107-4">
 <link rel="stylesheet" href="calendar-workspace.css?v=20261107-4">
@@ -2518,73 +2518,92 @@
 <div id="staffDrawer" class="modal-overlay" aria-hidden="true">
   <div class="modal-window staffEditor" role="dialog" aria-modal="true" aria-labelledby="staffEditorTitle">
     <header class="staffEditorHeader">
+      <span class="staffEditorIcon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="7" r="3"/><path d="M4 20v-2a6 6 0 0 1 10-4.5M19 13v6m-3-3h6"/></svg>
+      </span>
       <h3 id="staffEditorTitle">Ветеринар</h3>
+      <button type="button" class="staffEditorClose" data-close-staff aria-label="Закрити">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
+      </button>
     </header>
     <input type="hidden" id="staffId">
 
     <div class="staffEditorBody">
-      <div class="staffEditorFields">
-        <label for="staffName">ПІБ *
-          <input id="staffName" class="premium-input" placeholder="Іванов Іван Іванович">
-        </label>
-        <label for="staffRole">Роль
-          <select id="staffRole" class="premium-select">
-            <option value="vet">Ветеринар</option>
-            <option value="assistant">Асистент</option>
-          </select>
-        </label>
-        <div>
-          <span id="staffSpecializationLabel" class="staffEditorLabel">Спеціалізація</span>
-          <div
-            class="staffSpecializationSelect"
-            id="staffSpecializationSelect"
-          >
-            <button
-              class="staffSpecializationToggle"
-              id="staffSpecializationToggle"
-              type="button"
-              aria-expanded="false"
-              aria-controls="staffSpecsBox"
-              aria-labelledby="staffSpecializationLabel staffSpecializationSummary"
-            >
-              <span
-                class="staffSpecializationSummary"
-                id="staffSpecializationSummary"
-              >
-                Оберіть напрями
-              </span>
-              <span
-                class="staffSpecializationChevron"
-                aria-hidden="true"
-              >
-                ▾
-              </span>
-            </button>
-
+      <section class="staffEditorSection">
+        <h4>Основні дані</h4>
+        <div class="staffEditorFields">
+          <label for="staffName">ПІБ *
+            <input id="staffName" class="premium-input" placeholder="Іванов Іван Іванович">
+          </label>
+          <label for="staffRole">Роль
+            <select id="staffRole" class="premium-select">
+              <option value="vet">Ветеринар</option>
+              <option value="assistant">Асистент</option>
+            </select>
+          </label>
+          <div>
+            <span id="staffSpecializationLabel" class="staffEditorLabel">Спеціалізація</span>
             <div
-              class="staffSpecializationMenu"
-              id="staffSpecsBox"
-              aria-hidden="true"
-              hidden
-            ></div>
+              class="staffSpecializationSelect"
+              id="staffSpecializationSelect"
+            >
+              <button
+                class="staffSpecializationToggle"
+                id="staffSpecializationToggle"
+                type="button"
+                aria-expanded="false"
+                aria-controls="staffSpecsBox"
+                aria-labelledby="staffSpecializationLabel staffSpecializationSummary"
+              >
+                <span
+                  class="staffSpecializationSummary"
+                  id="staffSpecializationSummary"
+                >
+                  Оберіть напрями
+                </span>
+                <span
+                  class="staffSpecializationChevron"
+                  aria-hidden="true"
+                >
+                  ▾
+                </span>
+              </button>
+
+              <div
+                class="staffSpecializationMenu"
+                id="staffSpecsBox"
+                aria-hidden="true"
+                hidden
+              ></div>
+            </div>
           </div>
+          <label for="staffPhone">Телефон
+            <input id="staffPhone" class="premium-input" type="tel" placeholder="+380...">
+          </label>
         </div>
-        <label for="staffPhone">Телефон
-          <input id="staffPhone" class="premium-input" type="tel" placeholder="+380...">
-        </label>
-        <label for="staffShiftRate">Ставка (грн/зміна)
-          <input id="staffShiftRate" class="premium-input" type="number" value="0">
-        </label>
-        <label for="staffPercentRate">Відсоток %
-          <input id="staffPercentRate" class="premium-input" type="number" value="0">
-        </label>
-        <label for="staffColor">Колір
-          <input id="staffColor" type="color" value="#7C5CFF">
-        </label>
-        <label for="staffNote">Нотатка
-          <textarea id="staffNote" class="premium-input" rows="2"></textarea>
-        </label>
-      </div>
+      </section>
+      <section class="staffEditorSection">
+        <h4>Оплата праці</h4>
+        <div class="staffEditorFields">
+          <label for="staffShiftRate">Ставка (грн/зміна)
+            <input id="staffShiftRate" class="premium-input" type="number" value="0">
+          </label>
+          <label for="staffPercentRate">Відсоток %
+            <input id="staffPercentRate" class="premium-input" type="number" value="0">
+          </label>
+        </div>
+      </section>
+      <section class="staffEditorSection">
+        <h4>Додатково</h4>
+        <div class="staffEditorFields">
+          <label for="staffColor">Колір у календарі
+            <input id="staffColor" type="color" value="#7C5CFF">
+          </label>
+          <label for="staffNote">Нотатка
+            <textarea id="staffNote" class="premium-input" rows="2"></textarea>
+          </label>
+        </div>
+      </section>
     </div>
 
     <div class="staffEditorActions">
@@ -3142,7 +3161,7 @@
 <script defer src="visit-catalog.js?v=20261108-1"></script>
 <script
   defer
-  src="app.js?v=20261112-subscription-banner-v2"
+  src="app.js?v=20261112-staff-editor-v3"
 ></script>
 <div id="deleteModal" class="deleteModalOverlay" style="display:none;">
   <div class="deleteModal">
