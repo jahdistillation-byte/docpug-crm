@@ -16296,6 +16296,17 @@ function getServiceCategoryIcon(category) {
 }
 
 
+function renderServiceCategoryIcon(category) {
+  const iconNames = {
+    "🩺": "medical", "🧪": "flask", "🔬": "monitor", "🚑": "medical",
+    "💉": "syringe", "🏥": "partners",
+  };
+  const categoryIcon = getServiceCategoryIcon(category);
+  if (categoryIcon === "✂️") return teamAchievementIcon("surgery");
+  if (categoryIcon === "🦷") return teamAchievementIcon("dentistry");
+  return getStockIcon(iconNames[categoryIcon] || "layers");
+}
+
 function getServiceCategoryColor(
   category
 ) {
@@ -17141,7 +17152,7 @@ async function renderServicesTab() {
           id="servicesPremiumAdd"
           type="button"
         >
-          <span>＋</span>
+          ${getStockIcon("plus")}
           Додати послугу
         </button>
       </header>
@@ -17214,7 +17225,7 @@ async function renderServicesTab() {
 
       <section class="servicesPremiumControls">
         <div class="servicesPremiumSearchWrap">
-          <span>⌕</span>
+          ${getStockIcon("search")}
 
           <input
             id="servicesPremiumSearch"
@@ -17277,7 +17288,7 @@ async function renderServicesTab() {
           }"
           data-service-category="all"
         >
-          <span>▦</span>
+          <span>${getStockIcon("grid")}</span>
           Усі категорії
           <b>
             ${services.length}
@@ -17310,7 +17321,7 @@ async function renderServicesTab() {
                 )}"
               >
                 <span>
-                  ${getServiceCategoryIcon(
+                  ${renderServiceCategoryIcon(
                     category
                   )}
                 </span>
@@ -17527,7 +17538,7 @@ async function renderServicesTab() {
                 <div class="servicesPremiumGroupHead">
                   <div class="servicesPremiumGroupTitle">
                     <span>
-                      ${getServiceCategoryIcon(
+                      ${renderServiceCategoryIcon(
                         categoryName
                       )}
                     </span>
@@ -17594,13 +17605,10 @@ async function renderServicesTab() {
                               )
                             )}"
                           >
+                            <div class="servicesPremiumCardIcon">
+                              ${renderServiceCategoryIcon(serviceCategory)}
+                            </div>
                             <div class="servicesPremiumCardTop">
-                              <div class="servicesPremiumCardIcon">
-                                ${getServiceCategoryIcon(
-                                  serviceCategory
-                                )}
-                              </div>
-
                               <label
                                 class="servicesPremiumSwitch"
                                 title="${escapeHtml(
@@ -17618,6 +17626,7 @@ async function renderServicesTab() {
                                       ? "checked"
                                       : ""
                                   }
+                                  aria-label="${escapeHtml(serviceName + " · " + getServicesInterfaceText(isActive ? "Вимкнути послугу" : "Увімкнути послугу"))}"
                                   data-service-toggle="${escapeHtml(
                                     String(
                                       service.id
@@ -17630,14 +17639,6 @@ async function renderServicesTab() {
                             </div>
 
                             <div class="servicesPremiumCardBody">
-                              <div class="servicesPremiumCardCategory">
-                                ${escapeHtml(
-                                  getLocalizedServiceCategory(
-                                    serviceCategory
-                                  )
-                                )}
-                              </div>
-
                               <h3
                                 data-services-content
                               >
@@ -17646,32 +17647,12 @@ async function renderServicesTab() {
                                 )}
                               </h3>
 
-                                                            <div class="servicesPremiumCardPrice">
-                                <strong>
-                                  ${escapeHtml(
-                                    formatClinicMoney(price)
-                                  )}
-                                </strong>
-                              </div>
+                            </div>
+                            <div class="servicesPremiumCardPrice">
+                              <strong>${escapeHtml(formatClinicMoney(price))}</strong>
                             </div>
 
                             <div class="servicesPremiumCardFooter">
-                              <span
-                                class="servicesPremiumCardStatus ${
-                                  isActive
-                                    ? "active"
-                                    : "inactive"
-                                }"
-                              >
-                                <i></i>
-
-                                ${getServicesInterfaceText(
-                                  isActive
-                                    ? "Активна"
-                                    : "Вимкнена"
-                                )}
-                              </span>
-
                               <div class="servicesPremiumCardActions">
                                 <button
                                   type="button"
@@ -17686,7 +17667,7 @@ async function renderServicesTab() {
                                     )
                                   )}"
                                 >
-                                  ✎
+                                  ${getStockIcon("edit")}
                                 </button>
 
                                 <button
@@ -17703,7 +17684,7 @@ async function renderServicesTab() {
                                     )
                                   )}"
                                 >
-                                  ×
+                                  ${getStockIcon("trash")}
                                 </button>
                               </div>
                             </div>
@@ -18018,15 +17999,15 @@ function openServiceEditorModal(
         type="button"
         data-close-service-editor
       >
-        ✕
+        ${getStockIcon("close")}
       </button>
 
       <header class="serviceEditorHeader">
         <div class="serviceEditorIcon">
           ${
             isEdit
-              ? "✎"
-              : "＋"
+              ? getStockIcon("edit")
+              : getStockIcon("plus")
           }
         </div>
 
@@ -18172,7 +18153,7 @@ function openServiceEditorModal(
             class="serviceEditorPreviewIcon"
             id="serviceEditorPreviewIcon"
           >
-            ${getServiceCategoryIcon(
+            ${renderServiceCategoryIcon(
               selectedCategory
             )}
           </div>
@@ -18326,8 +18307,8 @@ function openServiceEditorModal(
       );
 
     if (previewIcon) {
-      previewIcon.textContent =
-        getServiceCategoryIcon(
+      previewIcon.innerHTML =
+        renderServiceCategoryIcon(
           category
         );
     }
@@ -18545,7 +18526,7 @@ function openServiceDeleteConfirm(
           aria-modal="true"
         >
           <div class="serviceDeleteIcon">
-            🗑
+            ${getStockIcon("trash")}
           </div>
 
           <div class="serviceDeleteEyebrow">
@@ -18563,7 +18544,7 @@ function openServiceDeleteConfirm(
 
           <div class="serviceDeleteService">
             <span>
-              ${getServiceCategoryIcon(
+              ${renderServiceCategoryIcon(
                 serviceCategory
               )}
             </span>

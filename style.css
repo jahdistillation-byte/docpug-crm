@@ -77929,3 +77929,162 @@ html body[data-theme] .page[data-page="patient"] #patientCardRoot .premiumLabsPa
     .clinicSeasonCount small { display: block; }
   }
 }
+
+html body[data-theme]:is(
+  [data-current-route="tasks"], [data-current-route="hospital"], [data-current-route="services"],
+  [data-current-route="stock"], [data-current-route="audit"], [data-current-route="settings"],
+  [data-current-route="visits"]
+) {
+  --module-surface-1: var(--ct-paper);
+  --module-surface-2: var(--ct-paper);
+  --module-surface-soft: var(--ct-soft);
+  --module-surface-hover: var(--ct-hover);
+  --module-input: var(--ct-paper);
+  --module-border: var(--ct-line);
+  --module-border-strong: var(--ct-line);
+  --module-text: var(--ct-text);
+  --module-text-soft: color-mix(in srgb, var(--ct-muted) 72%, var(--ct-text));
+  --module-text-muted: var(--module-text-soft);
+  --module-accent: var(--ct-button);
+  --module-accent-2: var(--ct-accent);
+  --module-accent-soft: var(--ct-accent-soft);
+  --module-accent-glow: transparent;
+}
+
+@layer pugReadableInterface {
+  html body[data-theme] :is(.hospitalWardPrimary, .stockPremiumPage .stockPremiumAddButton) {
+    background: var(--ct-button) !important;
+    border-color: var(--ct-button) !important;
+    color: var(--ct-on-button) !important;
+  }
+
+  html body[data-theme] .servicesPremiumPage .servicesPremiumHero {
+    padding: 0 0 18px !important;
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+  }
+
+  html body[data-theme] .servicesPremiumHero h1 {
+    font-size: clamp(25px, 3vw, 34px) !important;
+    letter-spacing: -.025em;
+  }
+
+  html body[data-theme] .servicesPremiumPage .servicesPremiumStat {
+    background: var(--ct-paper) !important;
+    border-color: var(--ct-line) !important;
+    box-shadow: none !important;
+  }
+
+  html body[data-theme] .servicesPremiumPage :is(.servicesPremiumAddButton, .servicesPremiumStatusFilter button.active) {
+    background: var(--ct-button) !important;
+    border-color: var(--ct-button) !important;
+    color: var(--ct-on-button) !important;
+    box-shadow: none !important;
+  }
+
+  html body[data-theme] .servicesPremiumPage .servicesPremiumCategory.active {
+    background: var(--ct-accent-soft) !important;
+    border-color: var(--ct-accent) !important;
+    color: var(--ct-accent) !important;
+    box-shadow: none !important;
+  }
+
+  html body[data-theme] .servicesPremiumSearchWrap input::placeholder {
+    color: var(--module-text-muted) !important;
+    opacity: 1 !important;
+  }
+
+  :is(.servicesPremiumPage, .serviceEditorModal, .serviceDeleteModal) svg {
+    width: 17px;
+    height: 17px;
+    flex-shrink: 0;
+    vertical-align: middle;
+  }
+
+  .servicesPremiumSearchWrap > svg { color: var(--ct-muted); }
+
+  html body[data-theme] .servicesPremiumPage .servicesPremiumCards {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 0 !important;
+    overflow: hidden;
+    border: 1px solid var(--ct-line);
+    border-radius: 15px;
+    background: var(--ct-paper);
+  }
+
+  html body[data-theme] .servicesPremiumPage .servicesPremiumCard {
+    display: grid !important;
+    grid-template-columns: 36px minmax(0, 1fr) minmax(76px, auto) 42px auto;
+    grid-template-areas: "icon name price switch actions";
+    align-items: center;
+    gap: 12px;
+    min-height: 0 !important;
+    min-width: 0;
+    padding: 10px 14px !important;
+    margin: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: var(--ct-paper) !important;
+    box-shadow: none !important;
+    opacity: 1 !important;
+  }
+
+  html body[data-theme] .servicesPremiumPage .servicesPremiumCard + .servicesPremiumCard {
+    border-top: 1px solid var(--ct-line) !important;
+  }
+
+  html body[data-theme] .servicesPremiumPage .servicesPremiumCard:focus-within {
+    background: var(--ct-hover) !important;
+  }
+
+  html body[data-theme] .servicesPremiumPage .servicesPremiumCardIcon {
+    grid-area: icon;
+    width: 36px;
+    height: 36px;
+    color: var(--ct-accent) !important;
+    background: var(--ct-accent-soft) !important;
+    border-color: var(--ct-line) !important;
+  }
+
+  .servicesPremiumCardBody { grid-area: name; min-width: 0; }
+  .servicesPremiumCardPrice { grid-area: price; text-align: end; font-variant-numeric: tabular-nums; }
+  .servicesPremiumCardTop { grid-area: switch; justify-content: center; }
+  .servicesPremiumCardFooter { grid-area: actions; }
+  html body[data-theme] .servicesPremiumPage :is(.servicesPremiumCardTop, .servicesPremiumCardBody, .servicesPremiumCardPrice, .servicesPremiumCardFooter) {
+    padding: 0 !important;
+    margin: 0 !important;
+    border: 0 !important;
+  }
+
+  html body[data-theme] .servicesPremiumPage :is(.servicesPremiumCardBody h3, .servicesPremiumCardPrice strong) {
+    font-size: 14px !important;
+    margin: 0 !important;
+    overflow-wrap: anywhere;
+  }
+
+  html body[data-theme] .servicesPremiumPage .servicesPremiumCardActions button {
+    background: var(--ct-soft) !important;
+    border-color: var(--ct-line) !important;
+    color: var(--ct-text) !important;
+  }
+
+  html body[data-theme] .servicesPremiumPage .servicesPremiumSwitch input:checked + span {
+    background: var(--ct-button) !important;
+    box-shadow: none !important;
+  }
+
+  .servicesPremiumSwitch:focus-within { outline: 2px solid var(--ct-accent); outline-offset: 3px; }
+
+  @media (max-width: 560px) {
+    html body[data-theme] .servicesPremiumPage .servicesPremiumCard {
+      grid-template-columns: 36px minmax(0, 1fr) auto;
+      grid-template-areas: "icon name price" ". switch actions";
+      gap: 6px 9px;
+      padding: 10px !important;
+    }
+    .servicesPremiumCardTop { justify-content: start; }
+    .servicesPremiumCardFooter { justify-content: end; }
+  }
+}

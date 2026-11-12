@@ -1,6 +1,11 @@
 /* Owner directory: shared PUG materials, scoped to the owners list. */
 html body[data-theme] .page[data-page="owners"].pugOwnersWorkspace{--ow-text:var(--ct-text,#1c3040);--ow-muted:var(--ct-muted,#627b8d);--ow-paper:var(--ct-paper,#fbfdff);--ow-soft:var(--ct-soft,#edf4f9);--ow-line:var(--ct-line,#dfe8ef);--ow-accent:var(--ct-accent,#326b96);color:var(--ow-text)!important;width:100%!important;max-width:1480px!important;margin:0 auto!important;padding-bottom:110px!important;background:transparent!important;box-shadow:none!important;color-scheme:var(--ct-scheme)}
-html body[data-theme]:is([data-current-route="owners"],[data-current-route="patients"]){background:var(--ct-bg,#f1f6fa)!important;--text-main:var(--ct-text);--text-muted:var(--ct-muted);--accent-color:var(--ct-accent);--accent-glow:transparent;--primary-glow:none}
+html body[data-theme]:is(
+  [data-current-route="owners"], [data-current-route="patients"],
+  [data-current-route="tasks"], [data-current-route="hospital"],
+  [data-current-route="services"], [data-current-route="stock"],
+  [data-current-route="audit"], [data-current-route="settings"], [data-current-route="visits"]
+){background:var(--ct-bg,#f1f6fa)!important;--text-main:var(--ct-text);--text-muted:var(--ct-muted);--accent-color:var(--ct-accent);--accent-glow:transparent;--primary-glow:none}
 html body[data-theme] .page[data-page="owners"].pugOwnersWorkspace :is(.data-table-container,#ownersList){display:none!important}
 html body[data-theme] .page[data-page="owners"].pugOwnersWorkspace .pwHeading{display:flex;align-items:center;justify-content:space-between;gap:20px;margin:0 0 22px}
 html body[data-theme] .page[data-page="owners"].pugOwnersWorkspace .pwEyebrow{display:block;margin-bottom:8px;font-size:11px;font-weight:700;letter-spacing:1.7px;color:var(--ow-accent)}
