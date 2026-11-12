@@ -116331,7 +116331,7 @@ async function renderOwnerSubscriptionStatus(
 
     container.innerHTML = `
       <div class="ownerSubscriptionIcon">
-        🗓️
+        ${getStockIcon("clock")}
       </div>
 
       <div>
@@ -116396,6 +116396,17 @@ async function renderOwnerSubscriptionStatus(
       );
   }
 }
+Object.assign(SETTINGS_INTERFACE_TEXT, {
+  "Підписка": { en: "Subscription", de: "Abonnement", pl: "Subskrypcja" },
+  "Імпорт даних": { en: "Data import", de: "Datenimport", pl: "Import danych" },
+  "Клініки платформи": { en: "Platform clinics", de: "Plattformkliniken", pl: "Kliniki platformy" },
+  "Вибір теми одразу змінює вигляд у цьому браузері. Збережіть тему, щоб застосувати її для клініки.": {
+    en: "Choosing a theme updates this browser immediately. Save the theme to apply it to the clinic.",
+    de: "Die Auswahl ändert das Design sofort in diesem Browser. Speichern Sie es, um es für die Klinik zu übernehmen.",
+    pl: "Wybór motywu od razu zmienia wygląd w tej przeglądarce. Zapisz motyw, aby zastosować go w klinice.",
+  },
+});
+
 async function initSettingsUI() {
   const page =
     document.querySelector(
@@ -116744,12 +116755,6 @@ async function initSettingsUI() {
     <div class="clinicSettingsPage">
       <section class="clinicSettingsHero">
         <div>
-          <div class="clinicSettingsKicker">
-            ${ui(
-              "НАЛАШТУВАННЯ СИСТЕМИ"
-            )}
-          </div>
-
           <h1>
             ${ui(
               "Налаштування"
@@ -116790,7 +116795,7 @@ async function initSettingsUI() {
               <div class="clinicSettingsPanelHead">
                 <div>
                   <div class="clinicSettingsPanelIcon">
-                    ✨
+                    ${getStockIcon("partners")}
                   </div>
 
                   <div>
@@ -117061,7 +117066,7 @@ async function initSettingsUI() {
               <div class="clinicSettingsPanelHead">
                 <div>
                   <div class="clinicSettingsPanelIcon">
-                    🏥
+                    ${getStockIcon("medical")}
                   </div>
 
                   <div>
@@ -117105,11 +117110,11 @@ async function initSettingsUI() {
           : ""
       }
 
-      <section class="clinicSettingsPanel">
+      <section class="clinicSettingsPanel" id="clinicPersonalSettings">
         <div class="clinicSettingsPanelHead">
           <div>
             <div class="clinicSettingsPanelIcon">
-              👤
+              ${getStockIcon("grid")}
             </div>
 
             <div>
@@ -117221,6 +117226,7 @@ async function initSettingsUI() {
                 `
                 : ""
             }
+            ${ownerMode ? `<p>${ui("Вибір теми одразу змінює вигляд у цьому браузері. Збережіть тему, щоб застосувати її для клініки.")}</p>` : ""}
           </div>
         </div>
 
@@ -117262,9 +117268,8 @@ async function initSettingsUI() {
     mountCrmImportSettings(page);
   }
 
-  bindPersonalSettingsUI(
-    page
-  );
+  mountClinicSettingsNavigation(page);
+  bindPersonalSettingsUI(page);
 
   bindSettingsLogoutUI(
     page
@@ -117313,6 +117318,67 @@ async function initSettingsUI() {
   }
 }
 
+function mountClinicSettingsNavigation(page) {
+  const root = page.querySelector(".clinicSettingsPage");
+  const entries = [
+    ["clinicPersonalSettings", "grid", "Особисті налаштування"],
+    ["clinicOwnerSettings", "medical", "Моя клініка"],
+    ["ownerSubscriptionStatus", "wallet", "Підписка"],
+    ["crmImportPanel", "file", "Імпорт даних"],
+    ["platformClinicPanel", "partners", "Клініки платформи"],
+  ].map(([id, icon, label]) => ({
+    id, icon, label, panel: root.querySelector(`#${id}`),
+  })).filter(({ panel }) => panel);
+
+  if (entries.length < 2) return;
+
+  const nav = document.createElement("div");
+  nav.className = "clinicSettingsNav";
+  nav.setAttribute("role", "tablist");
+  nav.setAttribute("aria-label", getSettingsInterfaceText("Налаштування"));
+  nav.innerHTML = entries.map(({ id, icon, label }) => `
+    <button type="button" role="tab" id="${id}-tab" aria-controls="${id}">
+      ${getStockIcon(icon)}<span>${escapeHtml(getSettingsInterfaceText(label))}</span>
+    </button>`).join("");
+  root.querySelector(".clinicSettingsHero").after(nav);
+
+  const buttons = Array.from(nav.querySelectorAll("button"));
+  const select = (index) => {
+    page.dataset.settingsPanel = entries[index].id;
+    entries.forEach(({ panel }, position) => {
+      const active = position === index;
+      panel.hidden = !active;
+      buttons[position].setAttribute("aria-selected", String(active));
+      buttons[position].tabIndex = active ? 0 : -1;
+    });
+  };
+
+  entries.forEach(({ id, panel }, index) => {
+    panel.setAttribute("role", "tabpanel");
+    panel.setAttribute("aria-labelledby", `${id}-tab`);
+    buttons[index].addEventListener("click", () => select(index));
+  });
+
+  nav.addEventListener("keydown", (event) => {
+    const index = buttons.indexOf(event.target);
+    if (index < 0) return;
+    const nextByKey = {
+      ArrowRight: (index + 1) % buttons.length,
+      ArrowLeft: (index + buttons.length - 1) % buttons.length,
+      Home: 0,
+      End: buttons.length - 1,
+    };
+    const next = nextByKey[event.key];
+    if (!Number.isInteger(next)) return;
+    event.preventDefault();
+    select(next);
+    buttons[next].focus();
+  });
+
+  const saved = entries.findIndex(({ id }) => id === page.dataset.settingsPanel);
+  select(Math.max(0, saved));
+}
+
 function bindPersonalSettingsUI(page) {
   Object.assign(
     SETTINGS_INTERFACE_TEXT,
@@ -117351,10 +117417,8 @@ function bindPersonalSettingsUI(page) {
       const theme =
         button.dataset.themeSet;
 
-      button.classList.toggle(
-        "active",
-        theme === selectedTheme
-      );
+      button.classList.toggle("active", theme === selectedTheme);
+      button.setAttribute("aria-pressed", String(theme === selectedTheme));
 
       button.addEventListener(
         "click",
@@ -117374,14 +117438,12 @@ function bindPersonalSettingsUI(page) {
               "[data-theme-set]"
             )
             .forEach((item) => {
-              item.classList.remove(
-                "active"
-              );
+              item.classList.remove("active");
+              item.setAttribute("aria-pressed", "false");
             });
 
-          button.classList.add(
-            "active"
-          );
+          button.classList.add("active");
+          button.setAttribute("aria-pressed", "true");
         }
       );
     });

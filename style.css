@@ -78181,3 +78181,110 @@ html body[data-theme] .page[data-page="audit"] {
     html body[data-theme] .auditEventsPage .auditEventsTable td > * { min-width: 0; }
   }
 }
+
+@layer pugReadableInterface {
+  html body[data-theme] .clinicSettingsPage .clinicSettingsHero {
+    padding: 0 0 16px !important;
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    margin-bottom: 10px !important;
+  }
+
+  html body[data-theme] .clinicSettingsPage .clinicSettingsHero h1 {
+    font-size: clamp(26px, 3vw, 36px) !important;
+    line-height: 1.2 !important;
+  }
+
+  html body[data-theme] .clinicSettingsPage :is(.clinicSettingsPanel, .clinicSettingsUser, .ownerSubscriptionStatus) {
+    background: var(--ct-paper) !important;
+    box-shadow: none !important;
+  }
+
+  html body[data-theme] .clinicSettingsPage :is(.clinicSettingsPanel, .clinicSettingsUser) {
+    border-color: var(--ct-line) !important;
+    border-radius: 16px !important;
+  }
+
+  html body[data-theme] .clinicSettingsPage .clinicSettingsPanel::before { display: none !important; }
+  .clinicSettingsPage > [role="tabpanel"][hidden] { display: none !important; }
+
+  .clinicSettingsNav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    width: fit-content;
+    max-width: 100%;
+    padding: 5px;
+    margin-bottom: 16px !important;
+    border: 1px solid var(--ct-line);
+    border-radius: 13px;
+    background: var(--ct-paper);
+  }
+
+  html body[data-theme] .clinicSettingsPage .clinicSettingsNav button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 7px;
+    min-height: 40px;
+    padding: 8px 11px !important;
+    border: 1px solid transparent !important;
+    border-radius: 9px !important;
+    background: transparent !important;
+    color: var(--module-text-muted) !important;
+    box-shadow: none !important;
+    font-weight: 650;
+    cursor: pointer;
+  }
+
+  html body[data-theme] .clinicSettingsPage .clinicSettingsNav button[aria-selected="true"] {
+    border-color: var(--ct-line) !important;
+    background: var(--ct-accent-soft) !important;
+    color: var(--ct-accent) !important;
+  }
+
+  html body[data-theme] .clinicSettingsPage .clinicSettingsNav button:hover {
+    background: var(--ct-hover) !important;
+  }
+
+  .clinicSettingsPage :is(.clinicSettingsNav, .clinicSettingsPanelIcon, .ownerSubscriptionIcon) svg {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+  }
+
+  html body[data-theme] .clinicSettingsPage :is(.clinicProfileSaveButton, .clinicThemeSaveButton) {
+    background: var(--ct-button) !important;
+    border-color: var(--ct-button) !important;
+    color: var(--ct-on-button) !important;
+    box-shadow: none !important;
+  }
+
+  html body[data-theme] .clinicSettingsPage .clinicThemeChoice.active {
+    border-color: var(--ct-accent) !important;
+    background: var(--ct-accent-soft) !important;
+    box-shadow: none !important;
+  }
+
+  html body[data-theme] .clinicSettingsPage .clinicThemeChoice strong {
+    white-space: normal !important;
+    overflow-wrap: anywhere;
+    text-align: start;
+  }
+
+  html body[data-theme] .clinicSettingsPage :is(button, input, select, textarea):focus-visible {
+    outline: 2px solid var(--ct-accent) !important;
+    outline-offset: 2px;
+  }
+
+  @media (max-width: 560px) {
+    .clinicSettingsNav {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      width: 100%;
+    }
+
+    .clinicSettingsNav button span { overflow-wrap: anywhere; }
+  }
+}
