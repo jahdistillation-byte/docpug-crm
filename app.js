@@ -123914,7 +123914,12 @@ function mountCrmImportSettings(page) {
       #crmImportPanel .crmImportPagination{display:flex;align-items:center;gap:14px}
       @media(max-width:650px){#crmImportPanel .crmImportGrid{grid-template-columns:1fr}}
     </style>
-    <div class="clinicSettingsPanelHead"><div><h2>📥 ${e(t("title"))}</h2><p>${e(t("intro"))}</p></div></div>
+    <div class="clinicSettingsPanelHead">
+      <div>
+        <div class="clinicSettingsPanelIcon">${getStockIcon("file")}</div>
+        <div><h2>${e(t("title"))}</h2><p>${e(t("intro"))}</p></div>
+      </div>
+    </div>
     <div class="crmImportGrid">
       <label class="clinicSettingsField"><span>${e(t("file"))}</span><input class="clinicSettingsInput" type="file" accept=".csv,.xlsx" data-import-file><small>${e(t("limits"))}</small></label>
       <label class="clinicSettingsField"><span>${e(t("country"))}</span><select class="clinicSettingsInput" data-import-country><option value="">${e(t("international"))}</option>${["UA","DE","AT","GB","PL","CH","US"].map(code => {
