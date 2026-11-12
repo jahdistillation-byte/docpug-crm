@@ -14,7 +14,7 @@
   type="image/jpeg"
   fetchpriority="high"
 >
-<link rel="stylesheet" href="style.css?v=20261112-clinic-qa-v1">
+<link rel="stylesheet" href="style.css?v=20261112-subscription-banner-v2">
 <link rel="stylesheet" href="stock-catalog.css?v=20261106-8">
 <link rel="stylesheet" href="hospital-ward.css?v=20261107-4">
 <link rel="stylesheet" href="calendar-workspace.css?v=20261107-4">
@@ -250,8 +250,6 @@
 <div class="app-container" style="padding-bottom:120px;">
   <main class="main-content" style="max-width:1400px;margin:0 auto;">
 
-    <aside id="clinicSubscriptionBanner" class="clinicSubscriptionBanner" hidden></aside>
-
     <header class="header-panel" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
       <div class="top-logo" style="font-size:1.4rem;font-weight:700;color:#fff;">
         🐾 PUG<span style="color:var(--accent-color);">.CRM</span>
@@ -262,6 +260,8 @@
         <div style="font-size:.8rem;color:rgba(255,255,255,.5);" data-i18n="calendar.header.administrator">Адміністратор</div>
       </div>
     </header>
+
+    <aside id="clinicSubscriptionBanner" class="clinicSubscriptionBanner" hidden></aside>
 
     <div id="clientDirectory" hidden>
       <nav class="clientDirectoryModes" data-i18n-aria-label="nav.clients" aria-label="Клієнти">
@@ -3142,7 +3142,7 @@
 <script defer src="visit-catalog.js?v=20261108-1"></script>
 <script
   defer
-  src="app.js?v=20261112-clinic-qa-v1"
+  src="app.js?v=20261112-subscription-banner-v2"
 ></script>
 <div id="deleteModal" class="deleteModalOverlay" style="display:none;">
   <div class="deleteModal">

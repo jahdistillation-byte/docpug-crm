@@ -116275,7 +116275,8 @@ function loadClinicSubscription() {
 function renderClinicSubscriptionBanner(subscription) {
   const banner = document.getElementById("clinicSubscriptionBanner");
   if (!banner) return;
-  banner.hidden = subscription.status !== "expired";
+  const { status } = subscription;
+  banner.hidden = status !== "expired" && status !== "unconfigured";
   if (banner.hidden) {
     banner.replaceChildren();
     return;
@@ -116283,14 +116284,17 @@ function renderClinicSubscriptionBanner(subscription) {
 
   const ui = (source) => escapeHtml(getSettingsInterfaceText(source));
   const owner = isClinicOwner();
+  const description = owner
+    ? status === "expired"
+      ? "Зверніться до команди PUG, щоб продовжити підписку."
+      : "Щоб уточнити умови доступу, зверніться до команди PUG."
+    : "Зверніться до власника клініки щодо підписки.";
   banner.setAttribute("aria-label", getSettingsInterfaceText("Підписка"));
   banner.innerHTML = `
     ${getStockIcon("clock")}
     <div>
-      <strong>${escapeHtml(getSettingsSubscriptionTitle("expired"))}</strong>
-      <p>${ui(owner
-        ? "Зверніться до команди PUG, щоб продовжити підписку."
-        : "Зверніться до власника клініки щодо продовження підписки.")}</p>
+      <strong>${escapeHtml(getSettingsSubscriptionTitle(status))}</strong>
+      <p>${ui(description)}</p>
     </div>
     ${owner ? `<a href="#settings">${ui("Переглянути підписку")}</a>` : ""}
   `;
@@ -116418,7 +116422,8 @@ async function renderOwnerSubscriptionStatus(
 }
 Object.assign(SETTINGS_INTERFACE_TEXT, {
   "Зверніться до команди PUG, щоб продовжити підписку.": {"en": "Contact the PUG team to renew your subscription.", "de": "Wenden Sie sich zur Verlängerung an das PUG-Team.", "pl": "Skontaktuj się z zespołem PUG, aby odnowić subskrypcję."},
-  "Зверніться до власника клініки щодо продовження підписки.": {"en": "Contact your clinic owner about renewing the subscription.", "de": "Wenden Sie sich zur Verlängerung an den Klinikinhaber.", "pl": "Skontaktuj się z właścicielem kliniki w sprawie odnowienia subskrypcji."},
+  "Зверніться до власника клініки щодо підписки.": { en: "Contact your clinic owner about the subscription.", de: "Wenden Sie sich wegen des Abonnements an den Klinikinhaber.", pl: "Skontaktuj się z właścicielem kliniki w sprawie subskrypcji." },
+  "Щоб уточнити умови доступу, зверніться до команди PUG.": { en: "Contact the PUG team for access details.", de: "Fragen Sie das PUG-Team nach den Zugangsbedingungen.", pl: "Skontaktuj się z zespołem PUG, aby poznać warunki dostępu." },
   "Переглянути підписку": {"en": "View subscription", "de": "Abonnement ansehen", "pl": "Zobacz subskrypcję"},
   "Період підписки ще не встановлено. Щоб уточнити умови доступу, зверніться до команди PUG.": {"en": "The subscription period is not set. Contact the PUG team for access details.", "de": "Der Abonnementzeitraum ist noch nicht festgelegt. Fragen Sie das PUG-Team nach den Zugangsbedingungen.", "pl": "Okres subskrypcji nie został ustalony. Skontaktuj się z zespołem PUG, aby poznać warunki dostępu."},
   "Щоб додати співробітника, клініці потрібен налаштований тариф. Зверніться до команди PUG.": {"en": "Your clinic needs a configured plan to add staff. Contact the PUG team.", "de": "Zum Hinzufügen von Mitarbeitern benötigt die Klinik einen eingerichteten Tarif. Wenden Sie sich an das PUG-Team.", "pl": "Aby dodać pracownika, klinika potrzebuje skonfigurowanego planu. Skontaktuj się z zespołem PUG."},
