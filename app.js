@@ -24020,6 +24020,7 @@ function renderTeamProfileTab(
     );
 
   if (!root) return;
+  root.dataset.teamProfileTab = tab;
 
   if (tab === "overview") {
     renderTeamOverviewTab(
@@ -26506,185 +26507,83 @@ Object.assign(
 );
 
 
-function getTeamRevenueShareText(
-  percentage
-) {
-  const value =
-    Number(percentage || 0)
-      .toLocaleString(
-        getCalendarLocale()
-      );
+Object.assign(TEAM_INTERFACE_TEXT, {
+  "Розрахунок оплати": {"en": "Pay calculation", "de": "Vergütungsberechnung", "pl": "Wyliczenie wynagrodzenia"},
+  "Зміни за графіком": {"en": "Scheduled shifts", "de": "Geplante Schichten", "pl": "Zmiany w grafiku"},
+  "Оплата за зміни": {"en": "Shift pay", "de": "Schichtvergütung", "pl": "Wynagrodzenie za zmiany"},
+  "Відсоток за візити": {"en": "Visit commission", "de": "Provision für Besuche", "pl": "Prowizja za wizyty"},
+  "Орієнтовно до виплати": {"en": "Estimated payout", "de": "Voraussichtliche Auszahlung", "pl": "Szacowana wypłata"},
+  "Завантажуємо розрахунок…": {"en": "Loading pay calculation…", "de": "Vergütungsberechnung wird geladen…", "pl": "Wczytywanie wynagrodzenia…"},
+  "Не вдалося завантажити розрахунок. Відкрийте вкладку ще раз.": {"en": "Could not load the calculation. Reopen the tab to try again.", "de": "Die Berechnung konnte nicht geladen werden. Öffnen Sie den Tab erneut.", "pl": "Nie udało się wczytać wyliczenia. Otwórz kartę ponownie."},
+  "Усі активні зміни за графіком, включно із запланованими. Відсоток рахується від вартості послуг і матеріалів у візитах, незалежно від оплати.": {"en": "Includes all active shifts on the schedule, including upcoming shifts. Commission is based on visit services and materials regardless of payment status.", "de": "Alle aktiven Schichten im Dienstplan sind enthalten, auch bevorstehende. Die Provision basiert auf Leistungen und Materialien der Besuche unabhängig vom Zahlungsstatus.", "pl": "Uwzględnia wszystkie aktywne zmiany w grafiku, również nadchodzące. Prowizja obejmuje usługi i materiały z wizyt niezależnie od statusu płatności."},
+});
 
-  const language =
-    getInterfaceLanguage();
+async function renderTeamFinanceTab(root, state) {
+  const doc = state.doc;
+  const now = new Date();
+  const from = calendarISODate(new Date(now.getFullYear(), now.getMonth(), 1));
+  const to = calendarISODate(new Date(now.getFullYear(), now.getMonth() + 1, 0));
+  const ui = (source) => escapeHtml(getTeamInterfaceText(source));
+  const money = (value) => escapeHtml(getTeamMoneyText(value));
 
-  if (language === "en") {
-    return `${value}% of revenue`;
+  root.textContent = getTeamInterfaceText("Завантажуємо розрахунок…");
+
+  let scheduleRows, adjustments;
+  try {
+    [scheduleRows, adjustments] = await Promise.all([
+      loadStaffScheduleRangeApi(from, to, { throwOnError: true }),
+      loadStaffAdjustmentsApi(doc.id, from.slice(0, 7)),
+    ]);
+  } catch (error) {
+    console.warn("Staff compensation could not be loaded:", error);
+    if (root.dataset.teamProfileTab === "finance") {
+      root.innerHTML = `<p role="status" class="hint">${ui("Не вдалося завантажити розрахунок. Відкрийте вкладку ще раз.")}</p>`;
+    }
+    return;
   }
 
-  if (language === "de") {
-    return `${value}% vom Umsatz`;
-  }
+  if (root.dataset.teamProfileTab !== "finance") return;
 
-  if (language === "pl") {
-    return `${value}% przychodu`;
-  }
-
-  return `${value}% від виручки`;
-}
-
-
-async function renderTeamFinanceTab(
-  root,
-  state
-) {
-  const doc =
-    state.doc;
-
-  const visits =
-    state.dashboard
-      .live_month_visits ||
-    [];
-
-  const adjustments =
-    await loadStaffAdjustmentsApi(
-      doc.id
-    );
-
-  const revenue =
-    visits.reduce(
-      (sum, visit) =>
-        sum +
-        calcServicesTotal(
-          visit
-        ) +
-        calcStockTotal(
-          visit
-        ),
-      0
-    );
-
-  const shiftRate =
-    Number(
-      doc.shift_rate ||
-      0
-    );
-
-  const percentRate =
-    Number(
-      doc.percent_rate ||
-      0
-    );
-
-  const percentAmount =
-    Math.round(
-      revenue *
-      (
-        percentRate /
-        100
-      )
-    );
-
-  const bonuses =
-    adjustments
-      .filter(
-        (item) =>
-          item.type ===
-          "bonus"
-      )
-      .reduce(
-        (sum, item) =>
-          sum +
-          Number(
-            item.amount ||
-            0
-          ),
-        0
-      );
-
-  const penalties =
-    adjustments
-      .filter(
-        (item) =>
-          item.type ===
-          "penalty"
-      )
-      .reduce(
-        (sum, item) =>
-          sum +
-          Number(
-            item.amount ||
-            0
-          ),
-        0
-      );
-
-  const totalToPay =
-    Math.max(
-      0,
-      shiftRate +
-      percentAmount +
-      bonuses -
-      penalties
-    );
+  const shiftCount = new Set(scheduleRows
+    .filter((row) => row.is_active !== false && String(row.staff_id) === String(doc.id)
+      && row.work_date >= from && row.work_date <= to)
+    .map((row) => row.work_date)).size;
+  const revenue = (state.dashboard.live_month_visits || []).reduce(
+    (sum, visit) => sum + calcServicesTotal(visit) + calcStockTotal(visit),
+    0
+  );
+  const shiftRate = Number(doc.shift_rate || 0);
+  const shiftAmount = shiftRate * shiftCount;
+  const percentRate = Number(doc.percent_rate || 0);
+  const percentAmount = Math.round(revenue * percentRate) / 100;
+  const sumAdjustments = (type) => adjustments.reduce(
+    (sum, item) => sum + (item.type === type ? Number(item.amount || 0) : 0),
+    0
+  );
+  const bonuses = sumAdjustments("bonus");
+  const penalties = sumAdjustments("penalty");
+  const totalToPay = Math.max(0, Math.round((shiftAmount + percentAmount + bonuses - penalties) * 100) / 100);
+  const period = formatCalendarDate(from, { month: "long", year: "numeric" });
 
   root.innerHTML = `
     <section class="teamSubHero">
       <div>
-        <h2>
-          ${escapeHtml(
-            getTeamInterfaceText(
-              "💰 Фінанси"
-            )
-          )}
-        </h2>
-
-        <p>
-          ${escapeHtml(
-            getTeamInterfaceText(
-              "Нарахування, ставка, відсоток від виручки, бонуси та штрафи за цей місяць."
-            )
-          )}
-        </p>
+        <h2>${ui("Розрахунок оплати")}</h2>
+        <p>${escapeHtml(period)} · ${ui("Усі активні зміни за графіком, включно із запланованими. Відсоток рахується від вартості послуг і матеріалів у візитах, незалежно від оплати.")}</p>
       </div>
     </section>
 
     <section class="teamDashKpis">
-      ${renderTeamKpiCard(
-        "💵",
-        "Виручка",
-        getTeamMoneyText(
-          revenue
-        ),
-        0
-      )}
-
-      ${renderTeamKpiCard(
-        "🏦",
-        "Ставка",
-        getTeamMoneyText(
-          shiftRate
-        ),
-        0
-      )}
-
-      ${renderTeamKpiCard(
-        "📈",
-        "Відсоток",
-        `${percentRate.toLocaleString(
-          getCalendarLocale()
-        )}%`,
-        0
-      )}
-
-      ${renderTeamKpiCard(
-        "✅",
-        "До виплати",
-        getTeamMoneyText(
-          totalToPay
-        ),
-        0
-      )}
+      ${[
+        ["clock", "Зміни за графіком", shiftCount],
+        ["wallet", "Оплата за зміни", getTeamMoneyText(shiftAmount)],
+        ["trend", "Відсоток за візити", getTeamMoneyText(percentAmount)],
+        ["taskCheck", "Орієнтовно до виплати", getTeamMoneyText(totalToPay)],
+      ].map(([icon, label, value]) => `
+        <div class="teamKpiCard">
+          <div class="teamKpiIcon">${getStockIcon(icon)}</div>
+          <div><span>${ui(label)}</span><strong>${escapeHtml(String(value))}</strong></div>
+        </div>`).join("")}
     </section>
 
     <section class="teamVisitsLayout">
@@ -26836,7 +26735,7 @@ async function renderTeamFinanceTab(
           <h3>
             ${escapeHtml(
               getTeamInterfaceText(
-                "📌 Розрахунок"
+                "Розрахунок оплати"
               )
             )}
           </h3>
@@ -26862,39 +26761,13 @@ async function renderTeamFinanceTab(
           </p>
 
           <p>
-            <span>
-              ${escapeHtml(
-                getTeamInterfaceText(
-                  "Ставка"
-                )
-              )}
-            </span>
-
-            <b>
-              ${escapeHtml(
-                getTeamMoneyText(
-                  shiftRate
-                )
-              )}
-            </b>
+            <span>${ui("Оплата за зміни")}</span>
+            <b>${shiftCount} × ${money(shiftRate)} = ${money(shiftAmount)}</b>
           </p>
 
           <p>
-            <span>
-              ${escapeHtml(
-                getTeamRevenueShareText(
-                  percentRate
-                )
-              )}
-            </span>
-
-            <b>
-              ${escapeHtml(
-                getTeamMoneyText(
-                  percentAmount
-                )
-              )}
-            </b>
+            <span>${ui("Відсоток за візити")}</span>
+            <b>${money(revenue)} × ${escapeHtml(percentRate.toLocaleString(getCalendarLocale()))}% = ${money(percentAmount)}</b>
           </p>
 
           <p>
@@ -26943,7 +26816,7 @@ async function renderTeamFinanceTab(
             <span>
               ${escapeHtml(
                 getTeamInterfaceText(
-                  "До виплати"
+                  "Орієнтовно до виплати"
                 )
               )}
             </span>
@@ -30019,10 +29892,13 @@ async function renderTeamSettingsTab(
     accountResult
   );
 }
-async function loadStaffAdjustmentsApi(staffId) {
-  const res = await fetch(`/api/staff/${encodeURIComponent(staffId)}/adjustments`);
+async function loadStaffAdjustmentsApi(staffId, month) {
+  const res = await fetch(`/api/staff/${encodeURIComponent(staffId)}/adjustments?month=${encodeURIComponent(month)}`);
   const json = await res.json();
-  return json.ok ? (json.data || []) : [];
+  if (!res.ok || json?.ok !== true || !Array.isArray(json.data)) {
+    throw new Error(json?.error || "Could not load staff adjustments");
+  }
+  return json.data;
 }
 
 async function createStaffAdjustmentApi(staffId, payload) {
@@ -123106,7 +122982,8 @@ document.addEventListener('click', function(event) {
 
 async function loadStaffScheduleRangeApi(
   from,
-  to
+  to,
+  { throwOnError = false } = {}
 ) {
   const maxAttempts = 3;
 
@@ -123175,7 +123052,8 @@ async function loadStaffScheduleRangeApi(
 
       if (
         !response.ok ||
-        json?.ok !== true
+        json?.ok !== true ||
+        (throwOnError && !Array.isArray(json.data))
       ) {
         throw new Error(
           json?.error ||
@@ -123214,6 +123092,7 @@ async function loadStaffScheduleRangeApi(
     lastError
   );
 
+  if (throwOnError) throw lastError;
   return [];
 }
 async function loadStaffRatingApi() {
