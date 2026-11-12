@@ -78806,6 +78806,18 @@ async function createStaffApi(payload) {
     }
 
     if (!response.ok || json?.ok !== true) {
+  if (["SUBSCRIPTION_PLAN_NOT_CONFIGURED", "SUBSCRIPTION_PLAN_INVALID"].includes(json?.error)) {
+    const message = document.getElementById("staffSubscriptionError");
+    const text = getSettingsInterfaceText("Щоб додати співробітника, клініці потрібен налаштований тариф. Зверніться до команди PUG.");
+    if (message) {
+      message.textContent = text;
+      message.hidden = false;
+    } else {
+      showSettingsMessage(text);
+    }
+    return null;
+  }
+
   if (json?.error === "STAFF_LIMIT_REACHED") {
     const messages = {
       uk: "Досягнуто ліміту співробітників вашого тарифу. Щоб додати нового працівника, перейдіть на вищий тариф або деактивуйте одного з поточних співробітників.",
@@ -116240,6 +116252,56 @@ function getSettingsPaidUntilText(
 
   return `Доступ оплачено до ${dateText} включно.`;
 }
+let clinicSubscriptionRequest = null;
+
+function loadClinicSubscription() {
+  if (!clinicSubscriptionRequest) {
+    clinicSubscriptionRequest = fetch("/api/subscription", {
+      credentials: "include",
+      cache: "no-store",
+    }).then(async (response) => {
+      const payload = await response.json();
+      if (!response.ok || payload?.ok !== true || !payload.data) {
+        throw new Error("Не вдалося завантажити підписку.");
+      }
+      return payload.data;
+    }).finally(() => {
+      clinicSubscriptionRequest = null;
+    });
+  }
+  return clinicSubscriptionRequest;
+}
+
+function renderClinicSubscriptionBanner(subscription) {
+  const banner = document.getElementById("clinicSubscriptionBanner");
+  if (!banner) return;
+  banner.hidden = subscription.status !== "expired";
+  if (banner.hidden) {
+    banner.replaceChildren();
+    return;
+  }
+
+  const ui = (source) => escapeHtml(getSettingsInterfaceText(source));
+  const owner = isClinicOwner();
+  banner.setAttribute("aria-label", getSettingsInterfaceText("Підписка"));
+  banner.innerHTML = `
+    ${getStockIcon("clock")}
+    <div>
+      <strong>${escapeHtml(getSettingsSubscriptionTitle("expired"))}</strong>
+      <p>${ui(owner
+        ? "Зверніться до команди PUG, щоб продовжити підписку."
+        : "Зверніться до власника клініки щодо продовження підписки.")}</p>
+    </div>
+    ${owner ? `<a href="#settings">${ui("Переглянути підписку")}</a>` : ""}
+  `;
+  banner.querySelector("a")?.addEventListener("click", () => {
+    const settings = document.querySelector('.page[data-page="settings"]');
+    if (!settings) return;
+    settings.dataset.settingsPanel = "ownerSubscriptionStatus";
+    if (state.route === "settings") settings.querySelector("#ownerSubscriptionStatus-tab")?.click();
+  });
+}
+
 async function renderOwnerSubscriptionStatus(
   page
 ) {
@@ -116253,46 +116315,8 @@ async function renderOwnerSubscriptionStatus(
   }
 
   try {
-    const response =
-      await fetch(
-        "/api/subscription",
-        {
-          credentials:
-            "include",
-
-          cache:
-            "no-store",
-
-          headers: {
-            Accept:
-              "application/json",
-          },
-        }
-      );
-
-    let payload = null;
-
-    try {
-      payload =
-        await response.json();
-    } catch {
-      payload = null;
-    }
-
-    if (
-      !response.ok ||
-      payload?.ok !== true
-    ) {
-      throw new Error(
-        payload?.error ||
-        "Не вдалося завантажити підписку."
-      );
-    }
-
-
-    const subscription =
-      payload.data ||
-      {};
+    const subscription = await loadClinicSubscription();
+    renderClinicSubscriptionBanner(subscription);
 
     const status =
       subscription.status ||
@@ -116315,15 +116339,9 @@ async function renderOwnerSubscriptionStatus(
           )
         : null;
 
-    const daysRemaining =
-      subscription.days_remaining !=
-      null
-        ? Number(
-            subscription.days_remaining
-          ).toLocaleString(
-            getCalendarLocale()
-          )
-        : "—";
+    const daysRemaining = subscription.days_remaining != null && !["paused", "expired"].includes(status)
+      ? Number(subscription.days_remaining).toLocaleString(getCalendarLocale())
+      : null;
 
 
     container.className =
@@ -116353,17 +116371,18 @@ async function renderOwnerSubscriptionStatus(
 
         <p>
           ${escapeHtml(
-            lastDay
-              ? getSettingsPaidUntilText(
-                  lastDay
-                )
-              : getSettingsInterfaceText(
-                  "Власник платформи ще не вказав оплачений період. CRM продовжує працювати."
-                )
+            status === "expired"
+              ? getSettingsInterfaceText("Зверніться до команди PUG, щоб продовжити підписку.")
+              : status === "paused"
+                ? ""
+                : lastDay
+                  ? getSettingsPaidUntilText(lastDay)
+                  : getSettingsInterfaceText("Період підписки ще не встановлено. Щоб уточнити умови доступу, зверніться до команди PUG.")
           )}
         </p>
       </div>
 
+      ${daysRemaining !== null ? `
       <div class="ownerSubscriptionDays">
         <strong>
           ${escapeHtml(
@@ -116379,6 +116398,7 @@ async function renderOwnerSubscriptionStatus(
           )}
         </span>
       </div>
+      ` : ""}
     `;
   } catch (error) {
     console.error(
@@ -116397,6 +116417,11 @@ async function renderOwnerSubscriptionStatus(
   }
 }
 Object.assign(SETTINGS_INTERFACE_TEXT, {
+  "Зверніться до команди PUG, щоб продовжити підписку.": {"en": "Contact the PUG team to renew your subscription.", "de": "Wenden Sie sich zur Verlängerung an das PUG-Team.", "pl": "Skontaktuj się z zespołem PUG, aby odnowić subskrypcję."},
+  "Зверніться до власника клініки щодо продовження підписки.": {"en": "Contact your clinic owner about renewing the subscription.", "de": "Wenden Sie sich zur Verlängerung an den Klinikinhaber.", "pl": "Skontaktuj się z właścicielem kliniki w sprawie odnowienia subskrypcji."},
+  "Переглянути підписку": {"en": "View subscription", "de": "Abonnement ansehen", "pl": "Zobacz subskrypcję"},
+  "Період підписки ще не встановлено. Щоб уточнити умови доступу, зверніться до команди PUG.": {"en": "The subscription period is not set. Contact the PUG team for access details.", "de": "Der Abonnementzeitraum ist noch nicht festgelegt. Fragen Sie das PUG-Team nach den Zugangsbedingungen.", "pl": "Okres subskrypcji nie został ustalony. Skontaktuj się z zespołem PUG, aby poznać warunki dostępu."},
+  "Щоб додати співробітника, клініці потрібен налаштований тариф. Зверніться до команди PUG.": {"en": "Your clinic needs a configured plan to add staff. Contact the PUG team.", "de": "Zum Hinzufügen von Mitarbeitern benötigt die Klinik einen eingerichteten Tarif. Wenden Sie sich an das PUG-Team.", "pl": "Aby dodać pracownika, klinika potrzebuje skonfigurowanego planu. Skontaktuj się z zespołem PUG."},
   "Підписка": { en: "Subscription", de: "Abonnement", pl: "Subskrypcja" },
   "Імпорт даних": { en: "Data import", de: "Datenimport", pl: "Import danych" },
   "Клініки платформи": { en: "Platform clinics", de: "Plattformkliniken", pl: "Kliniki platformy" },
@@ -117221,6 +117246,7 @@ async function initSettingsUI() {
                     <span
                       id="clinicThemeSaveStatus"
                       role="status"
+                      role="status"
                     ></span>
                   </div>
                 `
@@ -117424,6 +117450,8 @@ function bindPersonalSettingsUI(page) {
         "click",
         () => {
           selectedTheme = theme;
+          const status = page.querySelector("#clinicThemeSaveStatus");
+          if (status) status.textContent = "";
 
           document.body.dataset.theme =
             theme;
@@ -120644,6 +120672,10 @@ async function init() {
 
   state.clinicProfile = null;
 
+  loadClinicSubscription().then(renderClinicSubscriptionBanner).catch((error) => {
+    console.warn("Clinic subscription status unavailable:", error);
+  });
+
 const startupRequests = [
   loadClinicProfileApi(),
 ];
@@ -121557,22 +121589,8 @@ function ensureStaffEmergencyContactFields() {
   }
 
 
-  const saveButton =
-    document.getElementById(
-      "staffSave"
-    );
-
-  const actions =
-    saveButton?.parentElement;
-
-  if (!actions) {
-    console.warn(
-      "Staff form actions not found"
-    );
-
-    return;
-  }
-
+  const fields = drawer.querySelector(".staffEditorBody");
+  if (!fields) return;
 
   const ui =
     (source) =>
@@ -121597,9 +121615,8 @@ function ensureStaffEmergencyContactFields() {
   block.innerHTML = `
     <div class="staffEmergencyContactHead">
       <strong>
-        ${ui(
-          "☎ Екстрений контакт"
-        )}
+        ${ownerCatalogIcon("phone")}
+        ${ui("☎ Екстрений контакт").replace(/^☎\s*/, "")}
       </strong>
 
       <span>
@@ -121657,10 +121674,7 @@ function ensureStaffEmergencyContactFields() {
   `;
 
 
-  actions.insertAdjacentElement(
-    "beforebegin",
-    block
-  );
+  fields.append(block);
 
   bindUaPhoneInput(
     document.getElementById(
@@ -121698,6 +121712,8 @@ async function openCreateStaffModal() {
   }
 
   ensureStaffEmergencyContactFields();
+  drawer.querySelector("#staffSubscriptionError").hidden = true;
+  drawer.querySelector(".staffEditorBody").scrollTop = 0;
 
   const values = {
     staffId: "",
@@ -121718,6 +121734,7 @@ async function openCreateStaffModal() {
     if (input) input.value = value;
   });
 
+  drawer.querySelector("#staffSave").textContent = getSettingsInterfaceText("Зберегти");
   const title = drawer.querySelector("h3");
 
   if (title) {
@@ -121762,6 +121779,8 @@ async function openEditStaffModal(staffRow) {
   }
 
   ensureStaffEmergencyContactFields();
+  drawer.querySelector("#staffSubscriptionError").hidden = true;
+  drawer.querySelector(".staffEditorBody").scrollTop = 0;
 
   const values = {
     staffId: staffRow.id || "",
@@ -121786,6 +121805,7 @@ async function openEditStaffModal(staffRow) {
     if (input) input.value = value;
   });
 
+  drawer.querySelector("#staffSave").textContent = getSettingsInterfaceText("Зберегти");
   const title = drawer.querySelector("h3");
 
   if (title) {
@@ -121833,10 +121853,10 @@ $("#staffSave")?.addEventListener("click", async () => {
       de: "Der Mitarbeiter konnte nicht gespeichert werden. Bitte versuchen Sie es erneut.",
       pl: "Nie udało się zapisać pracownika. Spróbuj ponownie.",
     },
-    "💾 Зберегти": {
-      en: "💾 Save",
-      de: "💾 Speichern",
-      pl: "💾 Zapisz",
+    "Зберегти": {
+      en: "Save",
+      de: "Speichern",
+      pl: "Zapisz",
     },
   });
 
@@ -121915,6 +121935,7 @@ $("#staffSave")?.addEventListener("click", async () => {
     return;
   }
 
+  document.getElementById("staffSubscriptionError").hidden = true;
   saveButton.disabled = true;
   saveButton.textContent = getTeamInterfaceText(
     "Зберігаємо…"
@@ -121937,7 +121958,7 @@ $("#staffSave")?.addEventListener("click", async () => {
   } finally {
     saveButton.disabled = false;
     saveButton.textContent = getTeamInterfaceText(
-      "💾 Зберегти"
+      "Зберегти"
     );
   }
 

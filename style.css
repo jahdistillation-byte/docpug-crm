@@ -78288,3 +78288,148 @@ html body[data-theme] .page[data-page="audit"] {
     .clinicSettingsNav button span { overflow-wrap: anywhere; }
   }
 }
+
+@layer pugReadableInterface {
+  html body[data-theme] #clinicThemeSaveStatus:not(:empty) {
+    color: var(--ct-text) !important;
+    display: inline-block;
+    padding: 5px 9px;
+    background: var(--ct-paper);
+    border: 1px solid var(--ct-line);
+    border-radius: 8px;
+    font-weight: 650;
+  }
+
+  .clinicSubscriptionBanner[hidden],
+  #staffDrawer .staffSubscriptionError[hidden] {
+    display: none !important;
+  }
+
+  .clinicSubscriptionBanner {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px 14px;
+    padding: 12px 16px;
+    margin-bottom: 16px;
+    border: 1px solid var(--ct-line);
+    border-inline-start: 3px solid var(--ct-warning);
+    border-radius: 12px;
+    background: var(--ct-paper);
+    color: var(--ct-text);
+    font-size: 14px;
+    line-height: 1.4;
+  }
+
+  .clinicSubscriptionBanner > svg {
+    width: 20px;
+    height: 20px;
+    flex: 0 0 20px;
+    color: var(--ct-warning);
+  }
+
+  .clinicSubscriptionBanner > div { flex: 1 1 220px; }
+  .clinicSubscriptionBanner p { margin: 2px 0 0; color: var(--ct-muted); }
+  .clinicSubscriptionBanner a {
+    color: var(--ct-accent);
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  html body[data-theme] #staffDrawer .modal-window.staffEditor {
+    display: flex !important;
+    flex-direction: column;
+    width: min(820px, calc(100vw - 32px)) !important;
+    max-width: none !important;
+    max-height: calc(100dvh - 32px) !important;
+    overflow: hidden !important;
+    padding: 0 !important;
+    border: 1px solid var(--ct-line) !important;
+    border-radius: 18px !important;
+    scrollbar-color: var(--ct-line) transparent;
+  }
+
+  .staffEditorHeader {
+    padding: 18px 24px;
+    border-bottom: 1px solid var(--ct-line);
+  }
+
+  html body[data-theme] #staffDrawer .staffEditorHeader h3 {
+    margin: 0 !important;
+    font-size: 22px !important;
+  }
+
+  .staffEditorBody {
+    min-height: 0;
+    overflow-y: auto;
+    padding: 18px 24px;
+  }
+
+  .staffEditorFields {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px 18px;
+  }
+
+  html body[data-theme] #staffDrawer .staffEditorFields :is(label, .staffEditorLabel) {
+    display: grid;
+    align-content: start;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 650;
+    color: var(--ct-text) !important;
+  }
+
+  #staffDrawer .staffEditorLabel { margin-bottom: 6px; }
+  #staffDrawer #staffColor {
+    width: 64px;
+    height: 44px;
+    padding: 3px;
+    background: var(--ct-soft);
+    border: 1px solid var(--ct-line);
+    border-radius: 8px;
+    cursor: pointer;
+  }
+
+  #staffDrawer .staffEditorFields textarea { min-height: 68px; }
+
+  html body[data-theme] #staffDrawer .staffEmergencyContactHead strong {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    color: var(--ct-text) !important;
+  }
+
+  #staffDrawer .staffEmergencyContactHead strong svg { width: 16px; height: 16px; }
+
+  html body[data-theme] #staffDrawer .modal-window .staffEditorActions:last-child {
+    position: static !important;
+    display: flex !important;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 8px;
+    margin: 0 !important;
+    padding: 12px 24px !important;
+    background: var(--ct-paper) !important;
+    border-top: 1px solid var(--ct-line) !important;
+  }
+
+  html body[data-theme] #staffDrawer .staffEditorActions button { width: auto !important; min-height: 42px; }
+  #staffDrawer .staffSubscriptionError {
+    flex: 1 1 100%;
+    margin: 0 0 4px;
+    padding: 8px 10px;
+    border-inline-start: 3px solid var(--ct-warning);
+    color: var(--ct-text);
+    background: var(--ct-soft);
+    border-radius: 6px;
+    font-size: 13px;
+  }
+
+  @media (max-width: 560px) {
+    .staffEditorFields { grid-template-columns: minmax(0, 1fr); }
+    .staffEditorBody, .staffEditorHeader { padding-inline: 14px; }
+    html body[data-theme] #staffDrawer .modal-window .staffEditorActions:last-child { padding-inline: 14px !important; }
+  }
+}
