@@ -77963,6 +77963,8 @@ html body[data-theme]:is(
     background: transparent !important;
     border: 0 !important;
     box-shadow: none !important;
+    overflow: visible !important;
+    border-radius: 0 !important;
   }
 
   html body[data-theme] .servicesPremiumHero h1 {
@@ -78086,5 +78088,96 @@ html body[data-theme]:is(
     }
     .servicesPremiumCardTop { justify-content: start; }
     .servicesPremiumCardFooter { justify-content: end; }
+  }
+}
+
+html body[data-theme] .page[data-page="audit"] {
+  --finance-surface-1: var(--ct-paper);
+  --finance-surface-2: var(--ct-paper);
+  --finance-surface-soft: var(--ct-soft);
+  --finance-surface-hover: var(--ct-hover);
+  --finance-input: var(--ct-paper);
+  --finance-text: var(--ct-text);
+  --finance-text-soft: var(--module-text-soft);
+  --finance-text-muted: var(--module-text-muted);
+  --finance-text-faint: var(--module-text-muted);
+  --finance-accent: var(--ct-button);
+  --finance-accent-2: var(--ct-accent);
+  --finance-accent-soft: var(--ct-accent-soft);
+  --finance-border: var(--ct-line);
+  --finance-border-strong: var(--ct-line);
+  --finance-color-scheme: var(--ct-scheme);
+}
+
+@layer pugReadableInterface {
+  html body[data-theme] .auditEventsPage .auditEventsHero {
+    padding: 0 0 18px !important;
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  html body[data-theme] .auditEventsHero h1 {
+    font-size: clamp(25px, 3vw, 34px) !important;
+    letter-spacing: -.025em;
+  }
+
+  html body[data-theme] .auditEventsPage .auditOwnerBadge {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    border: 1px solid var(--ct-line);
+    border-radius: 10px;
+    color: var(--ct-accent) !important;
+  }
+
+  :is(.auditOwnerBadge, .auditEventsDenied) svg {
+    width: 16px;
+    height: 16px;
+    vertical-align: middle;
+  }
+
+  html body[data-theme] .auditEventsPage .auditEventsPanel {
+    background: var(--ct-paper) !important;
+    border: 1px solid var(--ct-line) !important;
+    border-radius: 16px;
+    box-shadow: none !important;
+  }
+
+  html body[data-theme] .auditEventsPage :is(.auditEventsFilters, .auditEventsTable thead) {
+    background: var(--ct-soft) !important;
+  }
+
+  html body[data-theme] .auditEventsPage .auditEventsFilters label { min-width: 0; }
+  html body[data-theme] .auditEventsPage .auditEventsFilters :is(input, select) { min-width: 0; }
+
+  html body[data-theme] .auditEventsPage .auditEventsFilterActions button[type="submit"] {
+    background: var(--ct-button) !important;
+    border-color: var(--ct-button) !important;
+    color: var(--ct-on-button) !important;
+    box-shadow: none !important;
+  }
+
+  html body[data-theme] .auditEventsPage :is(input, select, button, summary):focus-visible {
+    outline: 2px solid var(--ct-accent) !important;
+    outline-offset: 2px;
+  }
+
+  html body[data-theme] .auditEventsPage .auditEventsTable td small {
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  html body[data-theme] .auditEventsPage .auditEventDetails > div {
+    min-width: 0 !important;
+    max-width: 420px !important;
+    overflow-wrap: anywhere;
+    background: var(--ct-soft) !important;
+    box-shadow: none !important;
+  }
+
+  @media (max-width: 720px) {
+    html body[data-theme] .auditEventsPage .auditEventsTable td::before { color: var(--module-text-muted); }
+    html body[data-theme] .auditEventsPage .auditEventsTable td > * { min-width: 0; }
   }
 }

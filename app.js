@@ -113642,10 +113642,10 @@ Object.assign(
       pl: "Sprawdzaj, kto i kiedy wykonywał ważne działania w CRM.",
     },
 
-    "🛡️ Тільки власник": {
-      en: "🛡️ Owner only",
-      de: "🛡️ Nur Inhaber",
-      pl: "🛡️ Tylko właściciel",
+    "Тільки власник": {
+      en: "Owner only",
+      de: "Nur Inhaber",
+      pl: "Tylko właściciel",
     },
 
     "Усі дії": {
@@ -113786,7 +113786,7 @@ async function renderAuditTab() {
   if (!isOwner()) {
     page.innerHTML = `
       <div class="auditEventsDenied">
-        <span>🔒</span>
+        <span>${getStockIcon("shield")}</span>
 
         <h2>
           ${escapeHtml(
@@ -113842,9 +113842,10 @@ async function renderAuditTab() {
         </div>
 
         <div class="auditOwnerBadge">
+          ${getStockIcon("shield")}
           ${escapeHtml(
             getAuditInterfaceText(
-              "🛡️ Тільки власник"
+              "Тільки власник"
             )
           )}
         </div>
