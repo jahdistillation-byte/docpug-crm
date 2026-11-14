@@ -6908,7 +6908,7 @@ def load_monobank_connection_credentials(current_org):
 def checkbox_connected_client(org_id):
     connection = load_payment_provider_connection(org_id, "checkbox")
     if not connection or connection["status"] != "connected":
-        raise CheckboxError("Спочатку підключіть тестову касу Checkbox.")
+        raise CheckboxError("Спочатку підключіть касу Checkbox.")
     credentials = json.loads(load_payment_provider_secret(org_id, "checkbox"))
     client = CheckboxTestClient(credentials["license_key"], credentials["pin_code"])
     register = client.connect()
@@ -6930,11 +6930,11 @@ def api_checkbox_connection():
                        "register_name": row.get("merchant_name") if row else None})
         data = request.get_json(silent=True)
         if not isinstance(data, dict):
-            return fail("Вкажіть дані тестової каси.", 400)
+            return fail("Вкажіть дані каси Checkbox.", 400)
         credentials = {key: str(data.get(key) or "").strip() for key in ("license_key", "pin_code")}
         client = CheckboxTestClient(**credentials)
         register = client.connect()
-        name = register.get("fiscal_number") or register.get("title") or "Тестова каса"
+        name = register.get("fiscal_number") or register.get("title") or "Checkbox"
         supabase.rpc("save_checkbox_test_connection", {
             "p_org_id": org_id, "p_user_id": user["id"],
             "p_credentials": json.dumps(credentials), "p_register_id": register["id"],
@@ -6966,7 +6966,7 @@ def api_checkbox_shift():
     except CheckboxError as error:
         return fail(str(error), error.status)
     except Exception:
-        return fail("Не вдалося перевірити тестову зміну Checkbox.", 503)
+        return fail("Не вдалося перевірити зміну Checkbox.", 503)
 
 
 def checkbox_visit_receipts(org_id, visit_id):
@@ -6994,11 +6994,11 @@ def checkbox_visit_payload(org_id, visit_id, transaction, transactions, receipts
                          row["transaction_id"] == original_id and row["kind"] == "sell"
                          and row["status"] == "DONE"), None)
         if not original:
-            raise CheckboxError("Спочатку потрібен підтверджений тестовий чек оплати.")
+            raise CheckboxError("Спочатку потрібен підтверджений чек оплати.")
         source = original["payload"]
         paid = integer_units(transaction["amount"], 100, "Некоректна сума повернення.")
         if paid != source["payments"][0]["value"]:
-            raise CheckboxError("Тестовий чек повернення підтримує повне повернення оплати.")
+            raise CheckboxError("Чек можна сформувати лише для повного повернення оплати.")
         if any(row["kind"] == "return" and row["payload"].get("related_receipt_id") ==
                original["receipt_id"] for row in receipts):
             raise CheckboxError("Для цієї оплати вже створено повернення Checkbox.")
@@ -7009,11 +7009,11 @@ def checkbox_visit_payload(org_id, visit_id, transaction, transactions, receipts
         }, original["register_id"]
 
     if transaction["transaction_type"] != "payment":
-        raise CheckboxError("Ця операція не підтримує тестовий чек.")
+        raise CheckboxError("Для цієї операції чек недоступний.")
     settled = [row for row in transactions if row["status"] == "completed"
                and row["transaction_type"] in {"payment", "refund"}]
     if len(settled) != 1 or settled[0]["id"] != transaction["id"]:
-        raise CheckboxError("Тестовий чек доступний для одного повного платежу за візит.")
+        raise CheckboxError("Чек доступний для одного повного платежу за візит.")
     visit = supabase.table("visits").select("discount_amount").eq("org_id", org_id).eq(
         "id", visit_id
     ).limit(1).execute().data
@@ -7071,7 +7071,7 @@ def api_visit_checkbox_receipts(visit_id):
         client = checkbox_connected_client(org_id)
         register_id = str(client.register["id"])
         if receipt and receipt["register_id"] != register_id:
-            raise CheckboxError("Підключіть тестову касу, на якій сформовано цей чек.")
+            raise CheckboxError("Підключіть касу, на якій сформовано цей чек.")
         if not receipt:
             kind, payload, original_register = checkbox_visit_payload(
                 org_id, visit_id, transaction, transactions, receipts
@@ -7086,7 +7086,7 @@ def api_visit_checkbox_receipts(visit_id):
                 checkbox_visit_payload(org_id, visit_id, transaction, transactions, receipts)
             shift = client.shift()
             if not shift or shift["status"] != "OPENED":
-                raise CheckboxError("Відкрийте тестову зміну у фінансових інтеграціях.")
+                raise CheckboxError("Відкрийте зміну у фінансових інтеграціях.")
             if not receipt:
                 reserved = {
                     "org_id": org_id, "visit_id": visit_id, "transaction_id": transaction_id,
@@ -7099,7 +7099,7 @@ def api_visit_checkbox_receipts(visit_id):
                 receipt = next((row for row in checkbox_visit_receipts(org_id, visit_id)
                                 if row["transaction_id"] == transaction_id), None)
                 if not receipt or receipt["register_id"] != register_id:
-                    raise CheckboxError("Не вдалося зарезервувати чек на поточній тестовій касі.", 503)
+                    raise CheckboxError("Не вдалося зарезервувати чек на поточній касі.", 503)
             # Always reuse the persisted provider UUID, including after a network timeout.
             existing = client.request("POST", "receipts/sell", {
                 **receipt["payload"], "id": receipt["receipt_id"]
@@ -7127,7 +7127,7 @@ def api_visit_checkbox_receipts(visit_id):
     except CheckboxError as error:
         return fail(str(error), error.status)
     except Exception:
-        return fail("Не вдалося обробити тестовий чек Checkbox. Перевірте статус і повторіть.", 503)
+        return fail("Не вдалося обробити чек Checkbox. Перевірте статус і повторіть.", 503)
 
 
 @app.get("/api/visits/<uuid:visit_id>/checkbox/<uuid:transaction_id>/pdf")
@@ -7143,7 +7143,7 @@ def api_visit_checkbox_receipt_pdf(visit_id, transaction_id):
             return fail("Підтверджений чек не знайдено.", 404)
         client = checkbox_connected_client(org_id)
         if str(client.register["id"]) != receipt["register_id"]:
-            raise CheckboxError("Підключіть тестову касу, на якій сформовано цей чек.")
+            raise CheckboxError("Підключіть касу, на якій сформовано цей чек.")
         pdf = client.request("GET", f"receipts/{receipt['receipt_id']}/pdf", pdf=True)
         return app.response_class(pdf, mimetype="application/pdf", headers={
             "Content-Disposition": f'inline; filename="checkbox-test-{transaction_id}.pdf"',

@@ -14063,7 +14063,7 @@ function mountCheckboxSettings(page) {
   const controls = card.querySelector("[data-checkbox-controls]");
   const status = card.querySelector("[data-checkbox-message]");
   const shiftLabels = {
-    OPENED: "Тестова зміна відкрита", CLOSED: "Тестова зміна закрита",
+    OPENED: "Зміна відкрита", CLOSED: "Зміна закрита",
     OPENING: "Зміна відкривається", CREATED: "Зміна відкривається", CLOSING: "Зміна закривається",
   };
   let connected = false;
@@ -14086,13 +14086,17 @@ function mountCheckboxSettings(page) {
   };
   const showConnection = data => {
     connected = data.connected === true;
-    summary.textContent = connected ? `Тестова каса · ${data.register_name || "Checkbox"}` : "Тестову касу ще не підключено";
+    summary.textContent = connected ? "Підключено" : "Не підключено";
+    const register = card.querySelector("[data-checkbox-register]");
+    register.textContent = connected ? data.register_name || "" : "";
+    register.hidden = !register.textContent;
+    summary.parentElement.classList.toggle("is-ok", connected);
     form.hidden = connected;
     controls.hidden = !connected;
   };
   const refreshShift = async action => {
     const shift = await requestCheckboxApi(base + "/shift", action ? { action } : undefined);
-    status.textContent = shiftLabels[shift.status] || "Перевірте стан тестової зміни.";
+    status.textContent = shiftLabels[shift.status] || "Перевірте стан зміни.";
     controls.querySelector('[data-checkbox-shift="open"]').hidden = shift.status !== "CLOSED";
     controls.querySelector('[data-checkbox-shift="close"]').hidden = shift.status !== "OPENED";
   };
@@ -14130,12 +14134,12 @@ async function downloadCheckboxReceiptPdf(visitId, transactionId) {
   });
   if (!response.ok) {
     const result = await response.json().catch(() => null);
-    throw new Error(result?.error || "Не вдалося завантажити PDF тестового чека.");
+    throw new Error(result?.error || "Не вдалося завантажити PDF чека.");
   }
   const url = URL.createObjectURL(await response.blob());
   const link = document.createElement("a");
   link.href = url;
-  link.download = `checkbox-test-${transaction}.pdf`;
+  link.download = `checkbox-receipt-${transaction}.pdf`;
   link.click();
   setTimeout(() => URL.revokeObjectURL(url), 10000);
 }
@@ -14148,12 +14152,12 @@ function renderVisitCheckboxSection(data) {
       const refund = item.transaction_type === "refund";
       return `<div class="checkboxReceiptRow">
         <span>${refund ? "Повернення" : "Оплата"} · ${e(formatVisitFinanceMoney(item.amount, "UAH"))}</span>
-        <button type="button" data-checkbox-receipt="${e(item.id)}">${refund ? "Тестовий чек повернення" : "Створити тестовий чек"}</button>
+        <button type="button" data-checkbox-receipt="${e(item.id)}">${refund ? "Чек повернення" : "Створити чек оплати"}</button>
       </div>`;
     }),
     ...(data.receipts || []).map(item => {
       const id = e(item.transaction_id);
-      const label = item.kind === "return" ? "Тестовий чек повернення" : "Тестовий чек оплати";
+      const label = item.kind === "return" ? "Чек повернення" : "Чек оплати";
       const result = { DONE: item.fiscal_code, PENDING: "Очікує підтвердження", ERROR: "Checkbox відхилив чек" };
       return `<div class="checkboxReceiptRow"><span>${label} · ${e(result[item.status])}</span>
         ${item.status === "DONE" ? `<button type="button" data-checkbox-pdf="${id}">PDF чека</button>` : ""}
@@ -14163,8 +14167,9 @@ function renderVisitCheckboxSection(data) {
     }),
   ];
   return `<section class="visitPaymentHistory checkboxVisitReceipts">
-    <div class="visitPaymentHistoryHead"><div><span>CHECKBOX · ТЕСТ</span><strong>Чеки візиту</strong></div></div>
-    ${rows.join("") || "<p>Тестовий чек доступний після одного повного платежу готівкою або карткою.</p>"}
+    <div class="visitPaymentHistoryHead"><div><span>CHECKBOX</span><strong>Чеки візиту</strong></div></div>
+    <p>Навчальний режим. Чеки не реєструються в ДПС.</p>
+    ${rows.join("") || "<p>Чек оплати доступний після одного повного платежу готівкою або карткою.</p>"}
     <p class="checkboxReceiptNotice" role="status"></p>
   </section>`;
 }
@@ -46796,23 +46801,25 @@ async function renderFinanceIntegrationsTab(page) {
         <section class="financeIntegrationCard" id="financeCheckboxCard">
           <div class="financeIntegrationBrand">
             <div class="financeIntegrationLogo">✓</div>
-            <div><span>ПРОГРАМНА КАСА · ТЕСТ</span><h2>Checkbox</h2>
-              <p>Тестові чеки оплати та повернення з каси візиту. Для перевірки використайте тестовий візит.</p></div>
+            <div><span>ПРОГРАМНА КАСА</span><h2>Checkbox</h2>
+              <p>Чеки оплати та повернення з каси візиту.</p></div>
           </div>
-          <p data-checkbox-summary>Перевіряємо підключення…</p>
+          <div class="financeIntegrationStatus" role="status"><i></i><span data-checkbox-summary>Перевіряємо підключення…</span></div>
+          <p class="financeCheckboxMode">Навчальний режим. Чеки не реєструються в ДПС.</p>
+          <p class="financeCheckboxRegister" data-checkbox-register hidden></p>
           <form class="financeIntegrationForm" hidden>
-            <label><span>Ліцензійний ключ тестової каси</span>
+            <label><span>Ліцензійний ключ каси</span>
               <input type="password" name="license_key" autocomplete="new-password" maxlength="128" required>
             </label>
-            <label><span>PIN тестового касира</span>
+            <label><span>PIN касира</span>
               <input type="password" name="pin_code" inputmode="numeric" autocomplete="new-password" maxlength="32" required>
             </label>
-            <div class="financeIntegrationActions"><button type="submit">Підключити тестову касу</button></div>
+            <div class="financeIntegrationActions"><button type="submit">Підключити Checkbox</button></div>
           </form>
           <div class="financeIntegrationActions" data-checkbox-controls hidden>
             <button type="button" class="secondary" data-checkbox-shift="check">Перевірити зміну</button>
-            <button type="button" class="secondary" data-checkbox-shift="open" hidden>Відкрити тестову зміну</button>
-            <button type="button" class="secondary" data-checkbox-shift="close" hidden>Закрити тестову зміну</button>
+            <button type="button" class="secondary" data-checkbox-shift="open" hidden>Відкрити зміну</button>
+            <button type="button" class="secondary" data-checkbox-shift="close" hidden>Закрити зміну</button>
             <button type="button" class="secondary" data-checkbox-change>Змінити підключення</button>
           </div>
           <p data-checkbox-message role="status"></p>
@@ -104158,121 +104165,157 @@ function getCalendarBreedLabel(value) {
   return CALENDAR_BREED_NAMES[value]?.[index] || value;
 }
 
+const CALENDAR_BREED_FIELDS = {
+  dog: {
+    choices: DOG_BREEDS,
+    label: "calendar.detail.dog.breed",
+    placeholder: "calendar.detail.start.typing.a.dog.breed"
+  },
+  cat: {
+    choices: CAT_BREEDS,
+    label: "calendar.detail.cat.breed",
+    placeholder: "calendar.detail.start.typing.a.cat.breed"
+  },
+  other: {
+    choices: OTHER_SPECIES_LIST,
+    label: "calendar.detail.animal.species",
+    placeholder: "calendar.detail.select.or.start.typing.an.animal.species"
+  }
+};
+
+function normalizeBreedSearch(value) {
+  return String(value || "")
+    .trim()
+    .toLowerCase()
+    .replaceAll("ё", "е")
+    .replaceAll("’", "'")
+    .replaceAll("`", "'");
+}
+
 function getCalendarBreedValue(value) {
   const entered = String(value || "").trim();
   const species = document.getElementById("visitNewPetSpecies")?.value;
-  const choices = species === "dog" ? DOG_BREEDS : species === "cat" ? CAT_BREEDS : OTHER_SPECIES_LIST;
+  const choices = CALENDAR_BREED_FIELDS[species]?.choices || [];
   return choices.find((item) => getCalendarBreedLabel(item) === entered) || entered;
 }
 
 function initVisitNewPatientBreedPicker() {
-  const speciesSelect =
-    document.querySelector(
-      "#visitNewPetSpecies"
-    );
+  const speciesSelect = document.getElementById("visitNewPetSpecies");
+  const input = document.getElementById("visitNewPetBreed");
+  const label = document.getElementById("visitNewPetBreedLabel");
+  const menu = document.getElementById("visitNewPetBreedMenu");
+  const list = document.getElementById("visitNewPetBreedList");
+  const empty = menu?.querySelector(".pugVisitBreedEmpty");
+  if (!speciesSelect || !input || !label || !menu || !list || !empty) return;
 
-  const breedInput =
-    document.querySelector(
-      "#visitNewPetBreed"
-    );
+  let activeOption = null;
 
-  const breedList =
-    document.querySelector(
-      "#visitNewPetBreedList"
-    );
+  function setActiveOption(option) {
+    activeOption?.setAttribute("aria-selected", "false");
+    activeOption = option;
 
-  const breedLabel =
-    document.querySelector(
-      "#visitNewPetBreedLabel"
-    );
-
-  if (
-    !speciesSelect ||
-    !breedInput ||
-    !breedList
-  ) {
-    return;
-  }
-
-  const renderBreedOptions = () => {
-    const species =
-      String(
-        speciesSelect.value || ""
-      ).trim();
-
-    let breeds = [];
-
-    breedInput.value = "";
-    breedList.innerHTML = "";
-
-    if (species === "dog") {
-      breeds = DOG_BREEDS;
-
-      breedInput.disabled = false;
-
-      breedInput.placeholder =
-        translateInterfaceText("calendar.detail.start.typing.a.dog.breed");
-
-      if (breedLabel) {
-        breedLabel.textContent =
-          translateInterfaceText("calendar.detail.dog.breed");
-      }
-    } else if (species === "cat") {
-      breeds = CAT_BREEDS;
-
-      breedInput.disabled = false;
-
-      breedInput.placeholder =
-        translateInterfaceText("calendar.detail.start.typing.a.cat.breed");
-
-      if (breedLabel) {
-        breedLabel.textContent =
-          translateInterfaceText("calendar.detail.cat.breed");
-      }
-    } else if (species === "other") {
-  breeds =
-    OTHER_SPECIES_LIST;
-
-  breedInput.disabled =
-    false;
-
-  breedInput.placeholder =
-    translateInterfaceText("calendar.detail.select.or.start.typing.an.animal.species");
-
-  if (breedLabel) {
-    breedLabel.textContent =
-      translateInterfaceText("calendar.detail.animal.species");
-  }
-} else {
-      breedInput.disabled = true;
-
-      breedInput.placeholder =
-        translateInterfaceText("calendar.detail.select.a.species.first");
-
-      if (breedLabel) {
-        breedLabel.textContent =
-          translateInterfaceText("calendar.detail.breed");
-      }
+    if (option) {
+      option.setAttribute("aria-selected", "true");
+      input.setAttribute("aria-activedescendant", option.id);
+      option.scrollIntoView({ block: "nearest" });
+    } else {
+      input.removeAttribute("aria-activedescendant");
     }
+  }
 
-    breedList.innerHTML =
-      breeds
-        .map(
-          (breed) => `
-            <option
-              value="${escapeHtml(getCalendarBreedLabel(breed))}"
-            ></option>
-          `
-        )
-        .join("");
-  };
+  function closeMenu() {
+    menu.hidden = true;
+    input.setAttribute("aria-expanded", "false");
+    setActiveOption(null);
+    empty.textContent = "";
+  }
 
-  speciesSelect.addEventListener(
-    "change",
-    renderBreedOptions
-  );
+  function showMenu() {
+    const field = CALENDAR_BREED_FIELDS[speciesSelect.value];
+    if (!field || input.disabled) return;
 
-  renderBreedOptions();
+    const query = normalizeBreedSearch(input.value);
+    const options = field.choices.flatMap((breed, index) => {
+      const name = getCalendarBreedLabel(breed);
+      if (!normalizeBreedSearch(name).includes(query) &&
+          !normalizeBreedSearch(breed).includes(query)) return [];
+
+      const option = document.createElement("li");
+      option.id = "visitNewPetBreedOption-" + index;
+      option.setAttribute("role", "option");
+      option.setAttribute("aria-selected", "false");
+      option.textContent = name;
+      return [option];
+    });
+
+    setActiveOption(null);
+    list.replaceChildren(...options);
+    list.scrollTop = 0;
+    menu.hidden = false;
+    input.setAttribute("aria-expanded", "true");
+    empty.textContent = options.length ? "" : [
+      translateInterfaceText("calendar.detail.nothing.found"),
+      translateInterfaceText("patients.form.manualValueHint")
+    ].join(". ");
+  }
+
+  function selectOption(option) {
+    input.value = option.textContent;
+    closeMenu();
+    input.dispatchEvent(new Event("change", { bubbles: true }));
+  }
+
+  function configureField() {
+    const field = CALENDAR_BREED_FIELDS[speciesSelect.value];
+    const labelKey = field?.label || "calendar.detail.breed";
+    const placeholderKey = field?.placeholder || "calendar.detail.select.a.species.first";
+    input.value = "";
+    input.disabled = !field;
+    label.dataset.i18n = labelKey;
+    label.textContent = translateInterfaceText(labelKey);
+    input.dataset.i18nPlaceholder = placeholderKey;
+    input.placeholder = translateInterfaceText(placeholderKey);
+    closeMenu();
+  }
+
+  speciesSelect.addEventListener("change", configureField);
+  input.addEventListener("focus", showMenu);
+  input.addEventListener("click", () => {
+    if (menu.hidden) showMenu();
+  });
+  input.addEventListener("input", showMenu);
+  input.addEventListener("blur", closeMenu);
+  input.addEventListener("keydown", (event) => {
+    if (event.isComposing) return;
+
+    if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+      event.preventDefault();
+      if (menu.hidden) showMenu();
+      const next = event.key === "ArrowDown"
+        ? activeOption?.nextElementSibling || list.firstElementChild
+        : activeOption?.previousElementSibling || list.lastElementChild;
+      setActiveOption(next);
+    } else if (!menu.hidden && event.key === "Enter") {
+      event.preventDefault();
+      if (activeOption) selectOption(activeOption);
+      else closeMenu();
+    } else if (!menu.hidden && event.key === "Escape") {
+      event.preventDefault();
+      event.stopPropagation();
+      closeMenu();
+    }
+  });
+
+  // Keep the input focused while a pointer chooses a suggestion.
+  list.addEventListener("mousedown", (event) => {
+    if (event.target.closest('[role="option"]')) event.preventDefault();
+  });
+  list.addEventListener("click", (event) => {
+    const option = event.target.closest('[role="option"]');
+    if (option) selectOption(option);
+  });
+
+  configureField();
 }
 
 initVisitNewPatientBreedPicker();
@@ -105300,16 +105343,6 @@ const clearError = () => {
 const showError = (message) => {
   errorBox.textContent = message;
 };
-
-const normalizeBreedSearch =
-  (value) => {
-    return String(value || "")
-      .trim()
-      .toLowerCase()
-      .replaceAll("ё", "е")
-      .replaceAll("’", "'")
-      .replaceAll("`", "'");
-  };
 
 const getOtherSpeciesGroupLabel =
   (group) => {
@@ -106849,6 +106882,7 @@ function closeVisitModal() {
     activeElement.blur();
   }
 
+  clearVisitReasonError();
   modal.classList.remove("open");
 
   modal.setAttribute(
@@ -106931,6 +106965,7 @@ function closeVisitModal() {
       "SELECT"
     ) {
       element.selectedIndex = 0;
+      element.dispatchEvent(new Event("change"));
     } else {
       element.value = "";
     }
@@ -107587,8 +107622,8 @@ const petName =
             $("#visitNewPetSpecies");
 
           if (speciesInput) {
-            speciesInput.value =
-              "";
+            speciesInput.value = "";
+            speciesInput.dispatchEvent(new Event("change"));
           }
 
           alert(
@@ -108702,6 +108737,7 @@ document.addEventListener(
 
     if (
       event.key !== "Escape" ||
+      event.target.matches?.('#visitNewPetBreed[aria-expanded="true"]') ||
       !modal?.classList.contains(
         "open"
       )
@@ -108717,12 +108753,36 @@ document.addEventListener(
   true
 );
 
+function clearVisitReasonError() {
+  $("#visitNote")?.removeAttribute("aria-invalid");
+  const message = $("#visitNoteError");
+  if (message) {
+    message.hidden = true;
+    message.textContent = "";
+  }
+}
+
+$("#visitNote")?.addEventListener("input", clearVisitReasonError);
+
 // Сохранение приёма (Создание или Редактирование) с проверкой коллизий
 $("#visitSave")?.addEventListener("click", async () => {
   try {
     const modal = $("#visitModal");
     const editVisitId = modal?.dataset?.visitId || "";
 
+    const reason = $("#visitNote");
+    const notePlain = (reason?.value || "").trim();
+    if (!notePlain) {
+      const message = $("#visitNoteError");
+      message.hidden = false;
+      message.textContent = translateInterfaceText("calendar.detail.enter.the.reason.for.the.appointment");
+      reason.setAttribute("aria-invalid", "true");
+      reason.focus({ preventScroll: true });
+      message.scrollIntoView({ block: "nearest" });
+      return;
+    }
+
+    clearVisitReasonError();
     let pet = state.selectedPet;
     const selectedPatientId = ($("#visitPatientSelect")?.value || "").trim();
 
@@ -108912,12 +108972,6 @@ telegram:
     todayISO()
   ).trim();
 
-const notePlain =
-  (
-    $("#visitNote")?.value ||
-    ""
-  ).trim();
-
 const startTime =
   (
     $("#visitStartTime")
@@ -108969,11 +109023,6 @@ if (
   });
 
   return;
-}
-if (!notePlain) {
-  return alert(
-    translateInterfaceText("calendar.detail.enter.the.reason.for.the.appointment")
-  );
 }
     if (!staffId) return alert(translateInterfaceText("calendar.detail.select.a.veterinarian"));
     if (!startTime) return alert(translateInterfaceText("calendar.detail.select.a.start.time.2"));

@@ -23,9 +23,9 @@ class CheckboxError(Exception):
 class CheckboxTestClient:
     def __init__(self, license_key, pin_code):
         if not license_key.lower().startswith("test") or len(license_key) > 128:
-            raise CheckboxError("Потрібен ліцензійний ключ тестової каси Checkbox.", 400)
+            raise CheckboxError("Для навчального режиму потрібен відповідний ліцензійний ключ Checkbox.", 400)
         if not pin_code.isascii() or not pin_code.isdigit() or len(pin_code) > 32:
-            raise CheckboxError("Вкажіть PIN тестового касира Checkbox.", 400)
+            raise CheckboxError("Вкажіть PIN касира Checkbox.", 400)
         self.license_key = license_key
         self.pin_code = pin_code
         self.token = None
@@ -63,8 +63,8 @@ class CheckboxTestClient:
                 return None
             if error.code in (401, 403):
                 messages = {
-                    "cash-registers/info": "Checkbox відхилив перевірку ліцензії тестової каси.",
-                    "cashier/signinPinCode": "Checkbox відхилив вхід тестового касира. Перевірте ключ ліцензії та PIN.",
+                    "cash-registers/info": "Checkbox відхилив перевірку ліцензії каси.",
+                    "cashier/signinPinCode": "Checkbox відхилив вхід касира. Перевірте ключ ліцензії та PIN.",
                 }
                 raise CheckboxError(messages.get(path, "Checkbox відхилив доступ до цієї операції.")) from None
             if error.code < 500:
@@ -111,7 +111,7 @@ def integer_units(value, scale, message):
 
 def sale_payload(lines, amount, discount, method):
     if method not in {"cash", "card", "terminal"}:
-        raise CheckboxError("Тестовий чек доступний для готівки або картки.")
+        raise CheckboxError("Чек доступний для оплати готівкою або карткою.")
     goods = []
     total = 0
     for code, row in lines:
@@ -125,7 +125,7 @@ def sale_payload(lines, amount, discount, method):
     paid = integer_units(amount, 100, "Сума оплати має бути в копійках.")
     discount = integer_units(discount or 0, 100, "Знижка має бути в копійках.")
     if not goods or not paid or total - discount != paid:
-        raise CheckboxError("Тестовий чек потребує повної оплати, що збігається з позиціями візиту.")
+        raise CheckboxError("Для чека потрібна повна оплата, що збігається із сумою позицій візиту.")
     payload = {
         "goods": goods,
         "payments": [{"type": "CASH" if method == "cash" else "CASHLESS", "value": paid}],

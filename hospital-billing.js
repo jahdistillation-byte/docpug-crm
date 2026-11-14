@@ -3,7 +3,11 @@ function hospitalBillingText(text) {
   const map={
     "Рахунок":["Bill","Rechnung","Rachunek"],"Послуги та матеріали":["Services and materials","Leistungen und Materialien","Usługi i materiały"],
     "Додати позицію":["Add item","Position hinzufügen","Dodaj pozycję"],"Послуги":["Services","Leistungen","Usługi"],"Матеріали":["Materials","Materialien","Materiały"],
-    "Пошук у каталозі…":["Search catalogue…","Katalog durchsuchen…","Szukaj w katalogu…"],"Оберіть позицію":["Choose item","Position wählen","Wybierz pozycję"],
+    "Оберіть позицію":["Choose item","Position wählen","Wybierz pozycję"],
+    "Нічого не знайдено":["No results","Keine Ergebnisse","Brak wyników"],
+    "Залишок":["Stock","Bestand","Stan"],
+    "Пошук послуги…":["Search services…","Leistungen suchen…","Szukaj usługi…"],
+    "Пошук препарату або матеріалу…":["Search medicines or materials…","Medikamente oder Materialien suchen…","Szukaj leku lub materiału…"],
     "Планова вартість":["Estimated cost","Geplante Kosten","Planowany koszt"],"Нараховано":["Charged","Berechnet","Naliczono"],
     "Фактична кількість":["Actual quantity","Tatsächliche Menge","Rzeczywista ilość"],"Підтвердити виконання":["Confirm completion","Durchführung bestätigen","Potwierdź wykonanie"],
     "Нарахувань ще немає":["No charges yet","Noch keine Berechnungen","Brak naliczeń"],"Сума з’явиться після виконання призначень.":["Charges appear after treatments are completed.","Beträge erscheinen nach Durchführung der Maßnahmen.","Kwoty pojawią się po wykonaniu zleceń."],
@@ -134,17 +138,143 @@ async function openHospitalBillingWorkspace(hospitalization) {
     });
     body().querySelector('[data-billing-tab][aria-selected=true]')?.focus({preventScroll:true});
   }
-  function createForm(){const now=new Date(),local=new Date(now-now.getTimezoneOffset()*60000).toISOString().slice(0,16);return `<aside class="hospitalTaskCreateCard"><h3>${t('Нове призначення')}</h3><form id="hospitalTaskCreateForm"><label class="hospitalTaskField"><span>${t('Тип')}</span><select name="type" class="hospitalTaskInput">${[['medication','Препарат'],['infusion','Інфузія'],['feeding','Годування'],['measurement','Вимірювання'],['procedure','Процедура'],['examination','Огляд'],['other','Інше']].map(([key,label])=>`<option value="${key}">${t(label)}</option>`).join('')}</select></label><label class="hospitalTaskField"><span>${t('Назва')}</span><input name="title" class="hospitalTaskInput" maxlength="300" required></label><label class="hospitalTaskField"><span>${t('Дата і час')}</span><input name="scheduled" type="datetime-local" class="hospitalTaskInput" value="${local}" required></label><label class="hospitalTaskField"><span>${t('Інструкція')}</span><textarea name="instructions" class="hospitalTaskTextarea" rows="3" maxlength="5000"></textarea></label><fieldset class="hospitalBillingPicker"><legend>${t('Послуги та матеріали')}</legend><div class="hospitalBillingKind"><button type="button" data-picker-kind="service" aria-pressed="true">${t('Послуги')}</button><button type="button" data-picker-kind="stock" aria-pressed="false">${t('Матеріали')}</button></div><input type="search" class="hospitalTaskInput" data-picker-search aria-label="${t('Пошук у каталозі…')}" placeholder="${t('Пошук у каталозі…')}"><select class="hospitalTaskInput" data-picker-select aria-label="${t('Оберіть позицію')}"></select><button type="button" class="hospitalWardSecondary" data-picker-add>${icon('plus')}${t('Додати позицію')}</button></fieldset><div class="hospitalBillingSelected"></div><div class="hospitalBillingEstimate"><span>${t('Планова вартість')}</span><strong data-plan-total></strong></div><p class="hospitalBillingHelp">${t('Матеріали ще не списуються. Вартість буде нарахована після виконання.')}</p><p class="hospitalBillingValidation" role="alert" hidden></p><button type="submit" class="hospitalTaskCreateButton">${t('Додати призначення')}</button></form></aside>`;}
+  function createForm(){const now=new Date(),local=new Date(now-now.getTimezoneOffset()*60000).toISOString().slice(0,16);return `<aside class="hospitalTaskCreateCard"><h3>${t('Нове призначення')}</h3><form id="hospitalTaskCreateForm"><label class="hospitalTaskField"><span>${t('Тип')}</span><select name="type" class="hospitalTaskInput">${[['medication','Препарат'],['infusion','Інфузія'],['feeding','Годування'],['measurement','Вимірювання'],['procedure','Процедура'],['examination','Огляд'],['other','Інше']].map(([key,label])=>`<option value="${key}">${t(label)}</option>`).join('')}</select></label><label class="hospitalTaskField"><span>${t('Назва')}</span><input name="title" class="hospitalTaskInput" maxlength="300" required></label><label class="hospitalTaskField"><span>${t('Дата і час')}</span><input name="scheduled" type="datetime-local" class="hospitalTaskInput" value="${local}" required></label><label class="hospitalTaskField"><span>${t('Інструкція')}</span><textarea name="instructions" class="hospitalTaskTextarea" rows="3" maxlength="5000"></textarea></label><fieldset class="hospitalBillingPicker"><legend>${t('Послуги та матеріали')}</legend><div class="hospitalBillingKind"><button type="button" data-picker-kind="service" aria-pressed="true">${t('Послуги')}</button><button type="button" data-picker-kind="stock" aria-pressed="false">${t('Матеріали')}</button></div><div class="hospitalBillingSearch"><span class="hospitalBillingSearchIcon" aria-hidden="true">${icon('search')}</span><input type="search" class="hospitalTaskInput" data-picker-search role="combobox" aria-autocomplete="list" aria-controls="hospitalCatalogResults" aria-expanded="false" autocomplete="off" spellcheck="false"></div>
+      <div class="hospitalCatalogMenu" data-picker-menu hidden>
+        <div id="hospitalCatalogResults" class="hospitalCatalogResults" role="listbox" aria-label="${t('Оберіть позицію')}"></div>
+        <p class="hospitalCatalogEmpty" role="status" hidden>${t('Нічого не знайдено')}</p>
+      </div>
+      <button type="button" class="hospitalWardSecondary" data-picker-add disabled>${icon('plus')}${t('Додати позицію')}</button></fieldset><div class="hospitalBillingSelected"></div><div class="hospitalBillingEstimate"><span>${t('Планова вартість')}</span><strong data-plan-total></strong></div><p class="hospitalBillingHelp">${t('Матеріали ще не списуються. Вартість буде нарахована після виконання.')}</p><p class="hospitalBillingValidation" role="alert" hidden></p><button type="submit" class="hospitalTaskCreateButton">${t('Додати призначення')}</button></form></aside>`;}
   function bindCreateForm(){
     const form=body().querySelector('#hospitalTaskCreateForm');if(!form)return;let kind='service';
     for(const [name,value] of Object.entries(draft))form.elements.namedItem(name).value=value;
-    const select=form.querySelector('[data-picker-select]'),search=form.querySelector('[data-picker-search]');
-    const choices=()=>{const rows=(kind==='service'?catalog.services:catalog.stock).filter(x=>x.name.toLocaleLowerCase().includes(search.value.toLocaleLowerCase()));select.innerHTML=`<option value="">${t('Оберіть позицію')}</option>`+rows.map(x=>`<option value="${e(x.id)}">${e(x.name)} · ${e(hospitalBillingMoney(hospitalBillingPrice(x.price),catalog.currency))}${kind==='stock'?' / '+e(x.unit)+' · '+e(x.qty)+' '+e(x.unit):''}</option>`).join('');};
+    const search = form.querySelector('[data-picker-search]');
+    const menu = form.querySelector('[data-picker-menu]');
+    const results = menu.querySelector('[role="listbox"]');
+    const empty = menu.querySelector('[role="status"]');
+    const addButton = form.querySelector('[data-picker-add]');
+    const kindButtons = form.querySelectorAll('[data-picker-kind]');
+    let choice = null;
+    let rows = [];
+    let activeIndex = -1;
+
+    function updateSearchLabel() {
+      const label = hospitalBillingText(kind === 'service' ? 'Пошук послуги…' : 'Пошук препарату або матеріалу…');
+      search.placeholder = label;
+      search.setAttribute('aria-label', label);
+    }
+
+    function highlight(index) {
+      results.children[activeIndex]?.setAttribute('aria-selected', 'false');
+      activeIndex = index;
+      const option = results.children[index];
+      if (option) {
+        option.setAttribute('aria-selected', 'true');
+        search.setAttribute('aria-activedescendant', option.id);
+        option.scrollIntoView({block:'nearest'});
+      } else {
+        search.removeAttribute('aria-activedescendant');
+      }
+    }
+
+    function closeChoices() {
+      highlight(-1);
+      menu.hidden = true;
+      search.setAttribute('aria-expanded', 'false');
+    }
+
+    function showChoices() {
+      highlight(-1);
+      const catalogRows = kind === 'service' ? catalog.services : catalog.stock;
+      rows = window.pugVisitCatalogSearch(catalogRows, search.value, kind)
+        .filter(row => !selected.some(item => item.catalog_id === row.id && item.kind === kind));
+      results.innerHTML = rows.map((row, index) => {
+        const price = hospitalBillingMoney(hospitalBillingPrice(row.price), catalog.currency);
+        const unit = kind === 'stock' ? ' / ' + e(row.unit) : '';
+        const balance = kind === 'stock'
+          ? `<small>${t('Залишок')} · ${e(row.qty)} ${e(row.unit)}</small>`
+          : '';
+        return `<div class="hospitalCatalogOption" id="hospitalCatalogOption-${index}"
+          role="option" aria-selected="false" data-catalog-index="${index}">
+          <span><strong>${e(row.name)}</strong>${balance}</span>
+          <span class="hospitalCatalogPrice">${e(price)}${unit}</span>
+        </div>`;
+      }).join('');
+      empty.hidden = rows.length > 0;
+      menu.hidden = false;
+      results.scrollTop = 0;
+      search.setAttribute('aria-expanded', 'true');
+    }
+
+    function clearChoice() {
+      choice = null;
+      addButton.disabled = true;
+    }
+
+    function chooseRow(index) {
+      const row = rows[index];
+      if (!row) return;
+      choice = row;
+      search.value = row.name;
+      addButton.disabled = selected.length >= 50;
+      closeChoices();
+    }
+
+    kindButtons.forEach(button => button.addEventListener('click', () => {
+      if (kind === button.dataset.pickerKind) return;
+      kind = button.dataset.pickerKind;
+      kindButtons.forEach(item => item.setAttribute('aria-pressed', String(item === button)));
+      search.value = '';
+      clearChoice();
+      updateSearchLabel();
+      if (document.activeElement === search) showChoices();
+      else search.focus();
+    }));
+    search.addEventListener('focus', showChoices);
+    search.addEventListener('click', () => { if (menu.hidden) showChoices(); });
+    search.addEventListener('input', () => { clearChoice(); showChoices(); });
+    search.addEventListener('blur', closeChoices);
+    search.addEventListener('keydown', event => {
+      if (event.isComposing) return;
+      if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+        event.preventDefault();
+        if (menu.hidden) showChoices();
+        if (!rows.length) return;
+        const direction = event.key === 'ArrowDown' ? 1 : -1;
+        const start = activeIndex === -1 && direction === -1 ? 0 : activeIndex;
+        highlight((start + direction + rows.length) % rows.length);
+      } else if (event.key === 'Enter' && !menu.hidden) {
+        event.preventDefault();
+        chooseRow(activeIndex === -1 && rows.length === 1 ? 0 : activeIndex);
+      } else if (event.key === 'Escape' && !menu.hidden) {
+        event.preventDefault();
+        event.stopPropagation();
+        closeChoices();
+      }
+    });
+    results.addEventListener('mousedown', event => {
+      if (event.target.closest('[data-catalog-index]')) event.preventDefault();
+    });
+    results.addEventListener('click', event => {
+      const option = event.target.closest('[data-catalog-index]');
+      if (option) chooseRow(Number(option.dataset.catalogIndex));
+    });
+    updateSearchLabel();
     const estimate=()=>{try{let total=0n;for(const item of selected){const input=form.querySelector(`[data-selected-quantity="${CSS.escape(item.id)}"]`);item.quantity=hospitalBillingNumber(input.value).text;if(item.kind==='service'&&hospitalBillingNumber(item.quantity).units%1000000n)throw Error();total+=hospitalBillingAmount(item,item.quantity);}form.querySelector('[data-plan-total]').textContent=hospitalBillingMoney(total,catalog.currency);form.querySelector('[type=submit]').disabled=false;}catch{form.querySelector('[data-plan-total]').textContent='—';form.querySelector('[type=submit]').disabled=true;}};
     const selectedRows=()=>{form.querySelector('.hospitalBillingSelected').innerHTML=selected.map(x=>`<div class="hospitalBillingSelectedItem"><label><strong>${e(x.name)}</strong><span>${t('Кількість')} · ${e(x.unit)}</span><input class="hospitalTaskInput" type="text" inputmode="decimal" data-selected-quantity="${e(x.id)}" value="${e(x.quantity)}"></label><button type="button" class="hospitalTaskDeleteButton" data-remove-item="${e(x.id)}" aria-label="${t('Видалити')} · ${e(x.name)}">${icon('close')}</button></div>`).join('');form.querySelectorAll('[data-selected-quantity]').forEach(input=>input.addEventListener('input',estimate));form.querySelectorAll('[data-remove-item]').forEach(b=>b.addEventListener('click',()=>{selected=selected.filter(x=>x.id!==b.dataset.removeItem);selectedRows();}));estimate();};
-    form.querySelectorAll('[data-picker-kind]').forEach(b=>b.addEventListener('click',()=>{kind=b.dataset.pickerKind;form.querySelectorAll('[data-picker-kind]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));search.value='';choices();}));search.addEventListener('input',choices);
-    form.querySelector('[data-picker-add]').addEventListener('click',()=>{const row=(kind==='service'?catalog.services:catalog.stock).find(x=>x.id===select.value);if(!row||selected.some(x=>x.catalog_id===row.id&&x.kind===kind)||selected.length>=50)return;selected.push({...row,id:stockPaymentRequestKey(),catalog_id:row.id,kind,quantity:'1',unit:kind==='stock'?row.unit:hospitalBillingText('Послуги')});if(!form.elements.title.value)form.elements.title.value=row.name;selectedRows();});
-    form.addEventListener('submit',async event=>{event.preventDefault();estimate();if(form.querySelector('[type=submit]').disabled)return;const payload={task_type:form.elements.type.value,title:form.elements.title.value.trim(),instructions:form.elements.instructions.value.trim(),scheduled_at:new Date(form.elements.scheduled.value).toISOString(),currency:catalog.currency,items:selected.map(x=>({kind:x.kind,catalog_id:x.catalog_id,quantity:x.quantity,expected_price:hospitalBillingNumber(x.price,2,true,1000000000n).text}))};await submit(`/api/hospitalizations/${encodeURIComponent(hospitalization.id)}/tasks`,payload);});choices();selectedRows();
+    addButton.addEventListener('click', () => {
+      if (!choice || selected.length >= 50) return;
+      selected.push({
+        ...choice, id: stockPaymentRequestKey(), catalog_id: choice.id, kind, quantity: '1',
+        unit: kind === 'stock' ? choice.unit : hospitalBillingText('Послуги')
+      });
+      if (!form.elements.title.value) form.elements.title.value = choice.name;
+      search.value = '';
+      clearChoice();
+      selectedRows();
+      if (document.activeElement === search) showChoices();
+      else search.focus();
+    });
+    form.addEventListener('submit',async event=>{event.preventDefault();estimate();if(form.querySelector('[type=submit]').disabled)return;const payload={task_type:form.elements.type.value,title:form.elements.title.value.trim(),instructions:form.elements.instructions.value.trim(),scheduled_at:new Date(form.elements.scheduled.value).toISOString(),currency:catalog.currency,items:selected.map(x=>({kind:x.kind,catalog_id:x.catalog_id,quantity:x.quantity,expected_price:hospitalBillingNumber(x.price,2,true,1000000000n).text}))};await submit(`/api/hospitalizations/${encodeURIComponent(hospitalization.id)}/tasks`,payload);});selectedRows();
   }
   function completionForm(task){
     body().innerHTML=`<div class="hospitalBillingCompletion"><button class="hospitalWardSecondary" type="button" data-complete-back>${icon('chevron')}${t('Призначення')}</button><h3>${e(task.title)}</h3>${task.instructions?`<p>${e(task.instructions)}</p>`:''}<form><div class="hospitalBillingItems">${itemRows(task.items,true)}</div>${task.items.length?`<p class="hospitalBillingHelp">${t('Вкажіть використану кількість у складських одиницях. Нуль — не використано.')}</p>`:''}<label class="hospitalTaskField"><span>${t('Хто виконав')}</span><select name="staff" class="hospitalTaskInput" required><option value="">${t('Оберіть працівника')}</option>${staff.map(x=>`<option value="${e(x.id)}">${e(x.name)}</option>`).join('')}</select></label><label class="hospitalTaskField"><span>${t(task.task_type==='measurement'?'Результат вимірювання':'Примітка')}</span><textarea name="note" class="hospitalTaskTextarea" maxlength="5000" rows="3" ${task.task_type==='measurement'?'required':''}></textarea></label><div class="hospitalBillingEstimate"><span>${t('Нараховано')}</span><strong data-actual-total></strong></div><p class="hospitalBillingValidation" role="alert" hidden>${t('Перевірте кількість позицій.')}</p><button class="hospitalTaskCreateButton" type="submit">${t('Підтвердити виконання')}</button></form></div>`;

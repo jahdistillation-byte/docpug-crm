@@ -215,3 +215,95 @@ html body #visitModal.modal.pugVisitOverlay.pugBookingWorkspace .pcPatientSearch
 html body #visitModal.modal.pugVisitOverlay.pugBookingWorkspace .pcPatientSearchText strong{color:var(--pc-text)!important;font-size:15px!important;font-weight:650!important;line-height:1.4!important;overflow-wrap:anywhere}
 html body #visitModal.modal.pugVisitOverlay.pugBookingWorkspace .pcPatientSearchText span{font-size:12px!important;line-height:1.5!important;margin-top:3px!important;overflow-wrap:anywhere}
 html body #visitModal.modal.pugVisitOverlay.pugBookingWorkspace .patientSearchItem:hover{background:#e4eff7!important;border-color:#acc6d9!important;box-shadow:0 3px 10px rgba(43,83,113,.06)!important;transform:none!important}
+/* Keep suggestions inside the booking form's scroll area. */
+#visitModal .pugVisitBreedControl {
+  position: relative;
+}
+
+html body #visitModal.modal.pugVisitOverlay.pugBookingWorkspace #visitNewPetBreed {
+  padding-inline-end: 36px !important;
+}
+
+#visitModal .pugVisitBreedChevron {
+  position: absolute;
+  inset-inline-end: 16px;
+  top: calc(50% - 5px);
+  width: 8px;
+  height: 8px;
+  border: solid currentColor;
+  border-width: 0 1.5px 1.5px 0;
+  color: var(--pc-muted);
+  pointer-events: none;
+  transform: rotate(45deg);
+}
+
+#visitModal input[aria-expanded="true"] + .pugVisitBreedChevron {
+  transform: rotate(225deg) translate(-2px, -2px);
+}
+
+#visitModal input:disabled + .pugVisitBreedChevron {
+  opacity: .45;
+}
+
+#visitModal .pugVisitBreedMenu {
+  min-width: 0;
+  border: 1px solid var(--pc-line);
+  border-radius: 12px;
+  background: var(--pc-paper);
+  box-shadow: 0 8px 20px rgba(10, 16, 30, .12);
+}
+
+#visitModal .pugVisitBreedMenu[hidden],
+#visitModal .pugVisitBreedList:empty,
+#visitModal .pugVisitBreedEmpty:empty {
+  display: none;
+}
+
+#visitModal .pugVisitBreedList {
+  max-height: min(220px, 30dvh);
+  margin: 0;
+  padding: 4px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  list-style: none;
+  scrollbar-color: var(--pc-muted) transparent;
+  scrollbar-width: thin;
+}
+
+#visitModal .pugVisitBreedList [role="option"] {
+  min-height: 36px;
+  padding: 8px 11px;
+  border-radius: 8px;
+  color: var(--pc-text);
+  font-size: 14px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+}
+
+#visitModal .pugVisitBreedList [role="option"]:is(:hover, [aria-selected="true"]) {
+  background: var(--pc-soft);
+  color: var(--pc-accent);
+}
+
+#visitModal .pugVisitBreedEmpty {
+  padding: 12px;
+  color: var(--pc-muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+html body #visitModal.modal.pugVisitOverlay.pugBookingWorkspace #visitNote[aria-invalid="true"] {
+  border-color: var(--booking-error, #f2a4ae) !important;
+}
+
+#visitModal .pugVisitFieldError {
+  margin: 6px 0 0;
+  color: var(--booking-error, #f2a4ae);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+body[data-theme="white"] #visitModal {
+  --booking-error: #a53649;
+}

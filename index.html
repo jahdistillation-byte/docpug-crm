@@ -14,10 +14,10 @@
   type="image/jpeg"
   fetchpriority="high"
 >
-<link rel="stylesheet" href="style.css?v=20261112-staff-editor-v3">
+<link rel="stylesheet" href="style.css?v=20261114-visit-cash">
 <link rel="stylesheet" href="stock-catalog.css?v=20261106-8">
-<link rel="stylesheet" href="hospital-ward.css?v=20261107-4">
-<link rel="stylesheet" href="calendar-workspace.css?v=20261107-4">
+<link rel="stylesheet" href="hospital-ward.css?v=20261114-catalog">
+<link rel="stylesheet" href="calendar-workspace.css?v=20261114-booking">
 <link rel="stylesheet" href="calendar-themes.css?v=20261107-1">
 <link rel="stylesheet" href="owners-workspace.css?v=20261112-shared-bg-v1">
 <link rel="stylesheet" href="owner-profile-workspace.css?v=20261108-1">
@@ -1993,21 +1993,29 @@
               </select>
             </label>
 
-            <label class="pugVisitField">
-  <span id="visitNewPetBreedLabel" data-i18n="calendar.detail.breed">Порода</span>
-
-  <input
-    class="pugVisitInput"
-    id="visitNewPetBreed"
-    type="text"
-    list="visitNewPetBreedList"
-    placeholder="Спочатку оберіть вид"
-    autocomplete="off"
-    disabled
-   data-i18n-placeholder="calendar.detail.select.a.species.first">
-
-  <datalist id="visitNewPetBreedList"></datalist>
-</label>
+            <div class="pugVisitField">
+              <span id="visitNewPetBreedLabel" data-i18n="calendar.detail.breed">Порода</span>
+              <div class="pugVisitBreedControl">
+                <input
+                  class="pugVisitInput"
+                  id="visitNewPetBreed"
+                  type="text"
+                  role="combobox"
+                  aria-labelledby="visitNewPetBreedLabel"
+                  aria-autocomplete="list"
+                  aria-controls="visitNewPetBreedList"
+                  aria-expanded="false"
+                  placeholder="Спочатку оберіть вид"
+                  data-i18n-placeholder="calendar.detail.select.a.species.first"
+                  autocomplete="off"
+                  disabled>
+                <span class="pugVisitBreedChevron" aria-hidden="true"></span>
+              </div>
+              <div class="pugVisitBreedMenu" id="visitNewPetBreedMenu" hidden>
+                <ul id="visitNewPetBreedList" class="pugVisitBreedList" role="listbox" aria-labelledby="visitNewPetBreedLabel"></ul>
+                <div class="pugVisitBreedEmpty" role="status"></div>
+              </div>
+            </div>
 
 
 <label class="pugVisitField">
@@ -2475,10 +2483,13 @@
           pugVisitTextarea
         "
         id="visitNote"
+        aria-required="true"
+        aria-describedby="visitNoteError"
         rows="4"
         placeholder="Наприклад: блювання зранку, повторний огляд, вакцинація..."
        data-i18n-placeholder="calendar.detail.for.example.vomiting.this.morning.follow.up.examination.vaccination"></textarea>
     </label>
+    <p id="visitNoteError" class="pugVisitFieldError" role="alert" hidden></p>
   </div>
 </div>
 
@@ -3138,7 +3149,7 @@
 ></script>
 <script
   defer
-  src="hospital-billing.js?v=20261107-3"
+  src="hospital-billing.js?v=20261114-catalog"
 ></script>
 <script
   defer
@@ -3153,7 +3164,7 @@
 <script defer src="visit-catalog.js?v=20261108-1"></script>
 <script
   defer
-  src="app.js?v=20261112-staff-pay-v1"
+  src="app.js?v=20261114-visit-polish"
 ></script>
 <div id="deleteModal" class="deleteModalOverlay" style="display:none;">
   <div class="deleteModal">

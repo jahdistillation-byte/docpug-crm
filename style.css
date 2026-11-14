@@ -76981,7 +76981,6 @@ html body[data-theme] .page[data-page="patient"] #patientCardRoot .premiumLabsPa
 }
 
 #financeCheckboxCard [hidden] { display: none !important; }
-#financeCheckboxCard [data-checkbox-summary],
 #financeCheckboxCard [data-checkbox-message] { color: var(--ct-muted); }
 #financeCheckboxCard [data-checkbox-message]:empty,
 .checkboxReceiptNotice:empty { display: none; }
@@ -77182,7 +77181,7 @@ html body[data-theme] .page[data-page="patient"] #patientCardRoot .premiumLabsPa
   }
 
   html body[data-theme] .page[data-page="finance"] #financeCheckboxCard :is(
-    [data-checkbox-summary], [data-checkbox-message]
+    [data-checkbox-message], [data-checkbox-register]
   ) { color: var(--finance-readable-muted) !important; }
 
   html body[data-theme] .page[data-page="finance"] .financeIntegrationHelpLink { color: var(--ct-accent) !important; }
@@ -78481,4 +78480,28 @@ html body[data-theme] .page[data-page="audit"] {
     html body[data-theme] #staffDrawer :is(.staffEditorBody, .staffEditorHeader) { padding-inline: 14px !important; }
     html body[data-theme] #staffDrawer .modal-window .staffEditorActions:last-child { padding-inline: 14px !important; }
   }
+}
+
+html body #visitPaymentModal .visitPaymentHistoryAmount strong {
+  color: var(--pay-text) !important;
+  font-variant-numeric: tabular-nums;
+}
+
+html body #visitPaymentModal :is(.visitPaymentSuccess > div, .visitPaymentStatus.is-paid) {
+  color: var(--ct-positive, #9bc7b1) !important;
+  background: color-mix(in srgb, var(--ct-positive, #9bc7b1) 12%, var(--pay-card)) !important;
+  border-color: color-mix(in srgb, var(--ct-positive, #9bc7b1) 25%, var(--pay-border)) !important;
+}
+
+html body #visitPaymentModal .visitPaymentSuccess > span {
+  color: var(--pay-muted) !important;
+  font-size: 12px;
+}
+
+#financeCheckboxCard :is(.financeCheckboxMode, .financeCheckboxRegister) {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: var(--ct-muted);
+  font-size: 13px;
+  overflow-wrap: anywhere;
 }
