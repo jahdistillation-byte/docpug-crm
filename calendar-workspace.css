@@ -307,3 +307,59 @@ html body #visitModal.modal.pugVisitOverlay.pugBookingWorkspace #visitNote[aria-
 body[data-theme="white"] #visitModal {
   --booking-error: #a53649;
 }
+
+#visitModal #visitNewOwnerFields {
+  display: grid;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+#visitModal #visitNewOwnerFields[hidden],
+#visitModal #visitExistingOwnerSearch[hidden],
+#visitModal .pugBookingOwnerSelected[hidden],
+#visitModal .pugBookingOwnerResults:empty {
+  display: none !important;
+}
+
+#visitModal :is(.pugBookingOwnerResults, .pugBookingOwnerSelected) {
+  padding: 6px;
+  border: 1px solid var(--pc-line);
+  border-radius: 10px;
+  background: var(--pc-paper);
+  color: var(--pc-text);
+}
+
+#visitModal .pugBookingOwnerResults {
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+#visitModal .pugBookingOwnerResults p {
+  margin: 6px;
+  color: var(--pc-muted);
+}
+
+#visitModal .pugBookingOwnerOption {
+  width: 100%;
+  padding: 9px 10px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--pc-text);
+  text-align: start;
+  overflow-wrap: anywhere;
+}
+
+#visitModal .pugBookingOwnerOption:is(:hover, :focus-visible) {
+  background: var(--pc-soft);
+}
+
+#visitModal .pugBookingOwnerSelected {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 10px;
+  overflow-wrap: anywhere;
+}

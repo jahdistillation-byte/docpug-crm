@@ -106866,6 +106866,87 @@ function initVisitsTabUI() {
     };
 }
 
+let bookingExistingOwner = null;
+
+function resetBookingOwner() {
+  bookingExistingOwner = null;
+  const search = $("#visitExistingOwnerSearch");
+  search.value = "";
+  search.hidden = false;
+  $("#visitExistingOwnerResults").replaceChildren();
+  $("#visitExistingOwnerSelected").hidden = true;
+  $("#visitNewOwnerFields").hidden = false;
+}
+
+function initBookingOwnerSearch() {
+  const search = $("#visitExistingOwnerSearch");
+  if (!search) return;
+  const results = $("#visitExistingOwnerResults");
+  const status = document.createElement("p");
+  status.setAttribute("role", "status");
+  let request = 0;
+
+  async function updateResults() {
+    const current = ++request;
+    const query = search.value.trim();
+    results.replaceChildren();
+    if (query.length < 2 || bookingExistingOwner) return;
+
+    const owners = state.owners?.length ? state.owners : await loadOwners();
+    if (current !== request || search.value.trim() !== query || bookingExistingOwner || !search.getClientRects().length) return;
+    const matches = (owners || state.owners || []).filter(owner =>
+      owner.id && matchesClientSearch(query, [owner.name], owner.phone)
+    ).slice(0, 12);
+
+    if (!matches.length) {
+      status.textContent = translateInterfaceText("calendar.detail.nothing.found");
+      results.append(status);
+      return;
+    }
+
+    for (const owner of matches) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "pugBookingOwnerOption";
+      button.textContent = [owner.name, owner.phone].filter(Boolean).join(" · ");
+      button.addEventListener("click", () => {
+        bookingExistingOwner = owner;
+        $("#visitExistingOwnerName").textContent = button.textContent;
+        $("#visitExistingOwnerSelected").hidden = false;
+        $("#visitNewOwnerFields").hidden = true;
+        search.hidden = true;
+        results.replaceChildren();
+        $("#visitNewPetName").focus();
+      });
+      results.append(button);
+    }
+  }
+
+  search.addEventListener("input", updateResults);
+  search.addEventListener("focus", updateResults);
+  $("#visitExistingOwnerClear").addEventListener("click", () => {
+    resetBookingOwner();
+    search.focus();
+  });
+}
+
+for (const [language, labels] of Object.entries({
+  uk: ["Власник уже є в базі?", "Пошук за ПІБ або телефоном", "Змінити власника"],
+  en: ["Owner already registered?", "Search by name or phone", "Change owner"],
+  de: ["Tierhalter bereits registriert?", "Nach Name oder Telefonnummer suchen", "Tierhalter ändern"],
+  pl: ["Właściciel jest już w bazie?", "Szukaj według nazwiska lub telefonu", "Zmień właściciela"]
+})) {
+  const [existing, search, change] = labels;
+  Object.assign(APP_TRANSLATIONS[language], {
+    "booking.owner.existing": existing,
+    "booking.owner.search": search,
+    "booking.owner.change": change
+  });
+}
+applyInterfaceTranslations($("#visitNewPatientBox") || document);
+
+initBookingOwnerSearch();
+
 function closeVisitModal() {
     document.getElementById("visitPatientCreatedNotice")?.remove();
   const modal = $("#visitModal");
@@ -106883,6 +106964,7 @@ function closeVisitModal() {
   }
 
   clearVisitReasonError();
+  resetBookingOwner();
   modal.classList.remove("open");
 
   modal.setAttribute(
@@ -107398,7 +107480,7 @@ const petName =
               ?.value || ""
           ).trim();
 
-        if (!ownerName) {
+        if (!bookingExistingOwner && !ownerName) {
           alert(
             translateInterfaceText("calendar.detail.enter.the.owner.s.full.name")
           );
@@ -107409,7 +107491,7 @@ const petName =
           return;
         }
 
-        if (!ownerPhone) {
+        if (!bookingExistingOwner && !ownerPhone) {
           alert(
             translateInterfaceText("calendar.detail.enter.the.owner.s.phone.number")
           );
@@ -107421,7 +107503,7 @@ const petName =
         }
 
         if (
-          !isValidUaPhone(
+          !bookingExistingOwner && !isValidUaPhone(
             ownerPhone
           )
         ) {
@@ -107470,7 +107552,7 @@ const petName =
 
         try {
           const owner =
-            await createOwner({
+            bookingExistingOwner || await createOwner({
               name:
                 ownerName,
 
@@ -107586,6 +107668,7 @@ const petName =
               `${escapeHtml(translateInterfaceText("calendar.detail.patient.2"))} ${patient.name}`;
           }
 
+          resetBookingOwner();
           await loadOwners();
           await loadPatientsApi();
 
@@ -108568,6 +108651,8 @@ function getVisitModalState() {
           "none"
       ),
 
+    existingOwnerId: bookingExistingOwner?.id || "",
+
     ownerName:
       String(
         $("#visitNewOwnerName")
@@ -108876,20 +108961,20 @@ const neutered =
     ? null
     : neuteredRaw === "true";
 
-      if (!ownerName) {
+      if (!bookingExistingOwner && !ownerName) {
   return alert(
     translateInterfaceText("calendar.detail.enter.the.owner.s.name")
   );
 }
 
-if (!ownerPhone) {
+if (!bookingExistingOwner && !ownerPhone) {
   return alert(
     translateInterfaceText("calendar.detail.enter.the.owner.s.phone.number.2")
   );
 }
 
 if (
-  !isValidUaPhone(
+  !bookingExistingOwner && !isValidUaPhone(
     ownerPhone
   )
 ) {
@@ -108904,8 +108989,13 @@ if (!petName) {
   );
 }
 
+if (!species) {
+  $("#visitNewPetSpecies")?.focus();
+  return alert(translateInterfaceText("calendar.detail.select.the.animal.species"));
+}
+
       const owner =
-  await createOwner({
+  bookingExistingOwner || await createOwner({
     name:
       ownerName,
 
@@ -122393,7 +122483,7 @@ const neutered =
   neuteredRaw === ""
     ? null
     : neuteredRaw === "true";
-      if (!ownerName) {
+      if (!bookingExistingOwner && !ownerName) {
         alert(
           translateInterfaceText("calendar.detail.enter.the.owner.s.full.name")
         );
@@ -122404,7 +122494,7 @@ const neutered =
         return;
       }
 
-      if (!ownerPhone) {
+      if (!bookingExistingOwner && !ownerPhone) {
         alert(
           translateInterfaceText("calendar.detail.enter.the.owner.s.phone.number")
         );
@@ -122416,7 +122506,7 @@ const neutered =
       }
 
       if (
-        typeof isValidUaPhone ===
+        !bookingExistingOwner && typeof isValidUaPhone ===
           "function" &&
         !isValidUaPhone(
           ownerPhone
@@ -122701,7 +122791,7 @@ if (
 
       try {
         const owner =
-          await createOwner({
+          bookingExistingOwner || await createOwner({
             name:
               ownerName,
 
@@ -122849,7 +122939,8 @@ if (
             "none";
         }
 
-        await loadOwners();
+        resetBookingOwner();
+          await loadOwners();
         await loadPatientsApi();
 
         document.getElementById("visitPatientCreatedNotice")?.remove();

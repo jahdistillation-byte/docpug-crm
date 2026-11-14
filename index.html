@@ -17,7 +17,7 @@
 <link rel="stylesheet" href="style.css?v=20261114-visit-cash">
 <link rel="stylesheet" href="stock-catalog.css?v=20261106-8">
 <link rel="stylesheet" href="hospital-ward.css?v=20261114-catalog">
-<link rel="stylesheet" href="calendar-workspace.css?v=20261114-booking">
+<link rel="stylesheet" href="calendar-workspace.css?v=20261114-existing-owner">
 <link rel="stylesheet" href="calendar-themes.css?v=20261107-1">
 <link rel="stylesheet" href="owners-workspace.css?v=20261112-shared-bg-v1">
 <link rel="stylesheet" href="owner-profile-workspace.css?v=20261108-1">
@@ -1925,6 +1925,17 @@
           <div class="pugQuickGroup">
             <div class="pugQuickGroupTitle" data-i18n="calendar.detail.owner">👤 Власник</div>
 
+            <div class="pugVisitField">
+              <label for="visitExistingOwnerSearch" data-i18n="booking.owner.existing">Власник уже є в базі?</label>
+              <input class="pugVisitInput" id="visitExistingOwnerSearch" type="search" autocomplete="off"
+                placeholder="Пошук за ПІБ або телефоном" data-i18n-placeholder="booking.owner.search">
+              <div id="visitExistingOwnerResults" class="pugBookingOwnerResults"></div>
+              <div id="visitExistingOwnerSelected" class="pugBookingOwnerSelected" hidden>
+                <strong id="visitExistingOwnerName"></strong>
+                <button class="pugVisitCancel" id="visitExistingOwnerClear" type="button" data-i18n="booking.owner.change">Змінити власника</button>
+              </div>
+            </div>
+            <div id="visitNewOwnerFields">
             <label class="pugVisitField">
               <span data-i18n="calendar.detail.owner.s.full.name">ПІБ власника *</span>
               <input class="pugVisitInput" id="visitNewOwnerName" placeholder="Напр. Іваненко Олена" data-i18n-placeholder="calendar.detail.for.example.alex.smith">
@@ -1973,6 +1984,7 @@
               <span data-i18n="calendar.detail.address.note">Адреса / нотатка</span>
               <input class="pugVisitInput" id="visitNewOwnerNote" placeholder="Район, адреса, коментар" data-i18n-placeholder="calendar.detail.district.address.comment">
             </label>
+            </div>
           </div>
 
           <div class="pugQuickGroup">
@@ -3164,7 +3176,7 @@
 <script defer src="visit-catalog.js?v=20261108-1"></script>
 <script
   defer
-  src="app.js?v=20261114-visit-polish"
+  src="app.js?v=20261114-existing-owner"
 ></script>
 <div id="deleteModal" class="deleteModalOverlay" style="display:none;">
   <div class="deleteModal">
