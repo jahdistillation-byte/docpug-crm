@@ -8627,6 +8627,63 @@ def public_app_base_url():
     return f"{scheme}://{request.host}"
 
 
+@app.route("/api/clinic/branches", methods=["GET", "POST"])
+@app.patch("/api/clinic/branches/<uuid:branch_id>")
+def api_clinic_branches(branch_id=None):
+    _, auth_error = owner_required()
+    if auth_error:
+        return auth_error
+    org_id = get_current_org_id()
+    if not org_id:
+        return fail("Organization not selected", 400)
+
+    try:
+        if request.method == "GET":
+            rows = supabase.table("branches").select(
+                "id,name,address,is_active,is_primary"
+            ).eq("org_id", org_id).order("is_primary", desc=True).order("name").execute()
+            return ok(rows.data or [])
+
+        data = request.get_json(silent=True)
+        if not isinstance(data, dict):
+            return fail("Перевірте дані філії.", 400)
+        name, address = data.get("name"), data.get("address", "")
+        if not isinstance(name, str) or not 1 <= len(name.strip()) <= 160:
+            return fail("Вкажіть назву філії (до 160 символів).", 400)
+        if not isinstance(address, str) or len(address.strip()) > 500:
+            return fail("Адреса має містити до 500 символів.", 400)
+        name, address = name.strip(), address.strip()
+
+        if request.method == "POST":
+            row = supabase.table("branches").insert({
+                "org_id": org_id, "name": name, "address": address,
+            }).execute()
+            return ok(row.data[0]), 201
+
+        active = data.get("is_active")
+        primary = data.get("make_primary", False)
+        if not isinstance(active, bool) or not isinstance(primary, bool):
+            return fail("Перевірте статус філії.", 400)
+        result = supabase.rpc("update_clinic_branch", {
+            "p_org_id": org_id,
+            "p_branch_id": str(branch_id),
+            "p_name": name,
+            "p_address": address,
+            "p_is_active": active,
+            "p_make_primary": primary,
+        }).execute().data
+        if isinstance(result, list):
+            result = result[0] if result else None
+        if not result or not result.get("id"):
+            return fail("Філію не знайдено.", 404)
+        return ok(result)
+    except Exception as error:
+        if getattr(error, "message", None) == "PRIMARY_BRANCH_MUST_BE_ACTIVE":
+            return fail("Спочатку призначте іншу основну філію.", 409)
+        app.logger.exception("Clinic branch request failed")
+        return fail("Не вдалося виконати операцію з філіями.", 503)
+
+
 @app.get("/api/reports/daily")
 def api_owner_daily_report():
     user, auth_error = owner_required()

@@ -78505,3 +78505,34 @@ html body #visitPaymentModal .visitPaymentSuccess > span {
   font-size: 13px;
   overflow-wrap: anywhere;
 }
+
+#clinicBranches [hidden] { display: none !important; }
+.clinicBranchList, .clinicBranchForm { display: grid; gap: 12px; margin-top: 16px; }
+.clinicBranchForm { max-width: 560px; }
+.clinicBranchForm label { display: grid; gap: 6px; }
+.clinicBranchForm label:has([type=checkbox]) { display: flex; align-items: center; }
+.clinicBranchForm input:not([type=checkbox]) {
+  padding: 10px 12px;
+  border: 1px solid var(--ct-line);
+  border-radius: 9px;
+  background: var(--ct-paper);
+  color: var(--ct-text);
+}
+.clinicBranchRow, .clinicBranchActions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.clinicBranchRow {
+  justify-content: space-between;
+  padding: 14px;
+  border: 1px solid var(--ct-line);
+  border-radius: 12px;
+  overflow-wrap: anywhere;
+}
+.clinicBranchRow small { display: block; color: var(--ct-muted); }
+.clinicBranchButton {
+  min-height: 38px;
+  padding: 6px 12px;
+  border: 1px solid var(--ct-line);
+  border-radius: 9px;
+  background: var(--ct-soft);
+  color: var(--ct-text);
+  cursor: pointer;
+}

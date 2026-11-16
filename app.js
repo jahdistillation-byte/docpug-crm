@@ -117312,6 +117312,7 @@ async function initSettingsUI() {
 
   if (ownerMode) {
     mountCrmImportSettings(page);
+    mountClinicBranches(page);
   }
 
   mountClinicSettingsNavigation(page);
@@ -117364,11 +117365,134 @@ async function initSettingsUI() {
   }
 }
 
+function mountClinicBranches(page) {
+  const panel = document.createElement("section");
+  panel.id = "clinicBranches";
+  panel.className = "clinicSettingsPanel";
+  panel.hidden = true;
+  panel.innerHTML = `
+    <h2>Філії</h2>
+    <button type="button" class="clinicBranchButton" data-add>Додати філію</button>
+    <form class="clinicBranchForm" hidden>
+      <label>Назва<input name="branchName" required maxlength="160"></label>
+      <label>Адреса<input name="address" maxlength="500"></label>
+      <label data-active hidden><input type="checkbox" name="active" checked> Активна (зніміть позначку, щоб архівувати)</label>
+      <label data-primary hidden><input type="checkbox" name="primary"> Зробити основною</label>
+      <div class="clinicBranchActions">
+        <button class="clinicBranchButton" type="submit">Зберегти</button>
+        <button class="clinicBranchButton" type="button" data-cancel>Скасувати</button>
+      </div>
+    </form>
+    <p role="status"></p>
+    <div class="clinicBranchList"></div>`;
+  page.querySelector("#clinicOwnerSettings").after(panel);
+
+  const form = panel.querySelector("form");
+  const status = panel.querySelector("[role=status]");
+  const list = panel.querySelector(".clinicBranchList");
+  const add = panel.querySelector("[data-add]");
+  const { branchName, address, active, primary } = form.elements;
+  let editing = null;
+  let busy = false;
+
+  async function requestBranch(path = "", options = {}) {
+    const response = await fetch("/api/clinic/branches" + path, {
+      credentials: "include", ...options,
+      headers: { "Content-Type": "application/json", ...getOrgHeaders() }
+    });
+    const result = await response.json();
+    if (!response.ok || !result.ok) throw new Error(result.error);
+    return result.data;
+  }
+
+  function edit(branch = null) {
+    editing = branch;
+    branchName.value = branch?.name || "";
+    address.value = branch?.address || "";
+    active.checked = branch?.is_active ?? true;
+    active.disabled = Boolean(branch?.is_primary);
+    primary.checked = false;
+    panel.querySelector("[data-active]").hidden = !branch;
+    panel.querySelector("[data-primary]").hidden = !branch || branch.is_primary;
+    status.textContent = "";
+    form.hidden = false;
+    branchName.focus();
+  }
+
+  function render(rows) {
+    list.replaceChildren();
+    for (const branch of rows) {
+      const row = document.createElement("div");
+      row.className = "clinicBranchRow";
+      row.innerHTML = `<div><strong>${escapeHtml(branch.name)}</strong>
+        <small>${escapeHtml(branch.address || "")}</small>
+        <small>${branch.is_primary ? "Основна філія" : branch.is_active ? "Активна" : "Архівна"}</small></div>
+        <button type="button" class="clinicBranchButton">Редагувати</button>`;
+      row.querySelector("button").addEventListener("click", () => { if (!busy) edit(branch); });
+      list.append(row);
+    }
+  }
+
+  async function load() {
+    add.disabled = true;
+    status.textContent = "Завантажуємо філії…";
+    try {
+      render(await requestBranch());
+      add.disabled = false;
+      status.textContent = "";
+    } catch {
+      status.textContent = "Не вдалося завантажити філії. Відкрийте вкладку ще раз.";
+      throw new Error(status.textContent);
+    }
+  }
+
+  add.disabled = true;
+  add.addEventListener("click", () => { if (!busy) edit(); });
+  form.querySelector("[data-cancel]").addEventListener("click", () => {
+    if (!busy) { form.hidden = true; add.focus(); }
+  });
+  form.addEventListener("submit", async event => {
+    event.preventDefault();
+    if (busy) return;
+    busy = true;
+    const submit = form.querySelector("[type=submit]");
+    submit.disabled = true;
+    let saved = false;
+    try {
+      await requestBranch(editing ? "/" + encodeURIComponent(editing.id) : "", {
+        method: editing ? "PATCH" : "POST",
+        body: JSON.stringify({
+          name: branchName.value, address: address.value,
+          is_active: active.checked, make_primary: primary.checked
+        })
+      });
+      saved = true;
+      form.hidden = true;
+      await load();
+      status.textContent = "Філію збережено.";
+    } catch (error) {
+      status.textContent = saved
+        ? "Філію збережено. Відкрийте вкладку ще раз, щоб оновити список."
+        : getSettingsSafeErrorText(error, "Не вдалося зберегти філію.");
+    } finally {
+      submit.disabled = false;
+      busy = false;
+    }
+  });
+
+  panel.addEventListener("branches-open", () => {
+    if (busy || !add.disabled) return;
+    busy = true;
+    load().catch(() => {}).finally(() => { busy = false; });
+  });
+}
+
 function mountClinicSettingsNavigation(page) {
   const root = page.querySelector(".clinicSettingsPage");
   const entries = [
     ["clinicPersonalSettings", "grid", "Особисті налаштування"],
     ["clinicOwnerSettings", "medical", "Моя клініка"],
+    ["clinicBranches", "partners", "Філії"],
     ["ownerSubscriptionStatus", "wallet", "Підписка"],
     ["crmImportPanel", "file", "Імпорт даних"],
     ["platformClinicPanel", "partners", "Клініки платформи"],
@@ -117394,6 +117518,7 @@ function mountClinicSettingsNavigation(page) {
     entries.forEach(({ panel }, position) => {
       const active = position === index;
       panel.hidden = !active;
+      if (active && panel.id === "clinicBranches") panel.dispatchEvent(new Event("branches-open"));
       buttons[position].setAttribute("aria-selected", String(active));
       buttons[position].tabIndex = active ? 0 : -1;
     });
