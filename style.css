@@ -78536,3 +78536,20 @@ html body #visitPaymentModal .visitPaymentSuccess > span {
   color: var(--ct-text);
   cursor: pointer;
 }
+
+#staffBranches[hidden], #staffBranches [hidden] { display: none !important; }
+#staffBranches .staffBranchOptions { display: grid; gap: 6px; }
+#staffBranches .staffBranchOption {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 1px solid var(--ct-border);
+  border-radius: 10px;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+}
+#staffBranches .staffBranchOption input { margin: 0; accent-color: var(--ct-accent); }
+#staffBranches .staffBranchOption small, #staffBranches .staffBranchStatus { color: var(--ct-muted); }

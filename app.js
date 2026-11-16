@@ -5840,6 +5840,8 @@ function formatCalendarAppointmentCount(count) {
 
 function calendarErrorMessage(error, fallback) {
   const raw = String(error?.message || error || "").trim();
+  if (raw === "calendar branch unavailable") return calendarBranchLabel(3);
+  if (raw === "staff not assigned to calendar branch") return calendarBranchLabel(4);
   const knownErrors = {
     "time slot busy": "calendar.detail.this.time.is.already.booked.for.the.selected.veterinarian.2",
     "end_time must be later than start_time": "calendar.detail.the.end.time.must.be.later.than.the.start.time",
@@ -73192,6 +73194,51 @@ async function refreshCalendarQuietly(events) {
   window.scrollTo({left:windowScroll.x,top:windowScroll.y,behavior:'instant'});
 }
 
+const calendarBranchText = {
+  uk: ["Філія", "Не вдалося завантажити філії.", "Спробувати ще раз", "Філія недоступна.", "Працівник не закріплений за цією філією."],
+  en: ["Branch", "Could not load branches.", "Try again", "This branch is unavailable.", "This staff member is not assigned to this branch."],
+  de: ["Standort", "Standorte konnten nicht geladen werden.", "Erneut versuchen", "Dieser Standort ist nicht verfügbar.", "Diese Person ist diesem Standort nicht zugeordnet."],
+  pl: ["Placówka", "Nie udało się wczytać placówek.", "Spróbuj ponownie", "Ta placówka jest niedostępna.", "Pracownik nie jest przypisany do tej placówki."],
+};
+const calendarBranchLabel = index => (calendarBranchText[getInterfaceLanguage()] || calendarBranchText.uk)[index];
+
+async function loadCalendarBranches() {
+  const response = await fetch("/api/clinic/branches", { credentials: "include", cache: "no-store" });
+  const result = await response.json();
+  if (!response.ok || !result.ok || !Array.isArray(result.data)) throw new Error(calendarBranchLabel(1));
+  const branches = result.data.filter(branch => branch.is_active);
+  if (!branches.length) throw new Error(calendarBranchLabel(1));
+  return branches;
+}
+
+function calendarBranchStorageKey() {
+  return `pug_calendar_branch:${state.me?.org_id || "current"}`;
+}
+
+function selectedCalendarBranch(branches) {
+  const id = localStorage.getItem(calendarBranchStorageKey());
+  return branches.find(branch => branch.id === id) || branches.find(branch => branch.is_primary) || branches[0];
+}
+
+function mountCalendarBranchSelect(page, branches, selected) {
+  const toolbar = page.querySelector(".pcToolbar") || page.querySelector(".calendarHeader");
+  if (!toolbar) return;
+  const label = document.createElement("label");
+  label.className = "calendarBranchControl";
+  label.textContent = calendarBranchLabel(0);
+  const select = document.createElement("select");
+  select.id = "calendarBranchSelect";
+  select.className = "premium-select";
+  for (const branch of branches) select.add(new Option(branch.name, branch.id));
+  select.value = selected.id;
+  select.addEventListener("change", () => {
+    localStorage.setItem(calendarBranchStorageKey(), select.value);
+    renderCalendarTab().then(() => document.getElementById("calendarBranchSelect")?.focus());
+  });
+  label.append(select);
+  toolbar.prepend(label);
+}
+
 async function renderCalendarTab(options = {}) {
   const background=options.background===true;
   const renderRevision=window.__pugCalendarRenderRevision=(window.__pugCalendarRenderRevision||0)+1;
@@ -73216,9 +73263,10 @@ async function renderCalendarTab(options = {}) {
   `;
 
   const [
-  staff,
-  events,
+  allStaff,
+  allEvents,
   staffSchedule,
+  branches,
 ] =
   await Promise.all([
     loadStaffApi(),
@@ -73226,15 +73274,33 @@ async function renderCalendarTab(options = {}) {
     loadStaffScheduleApi(
       today
     ),
+    calendarMode === "month" ? null : loadCalendarBranches().catch(() => []),
   ]);
 
   if(renderRevision!==window.__pugCalendarRenderRevision) return;
   if(background && (state.route!=='calendar' || document.hidden || calendarMode!==requestedMode || (window.__calendarDate||todayISO())!==today || calendarRefreshBlocked())) return;
-  page.__calendarEventsFingerprint=calendarEventsFingerprint(events);
+  if (branches && !branches.length) {
+    if (!background) {
+      page.innerHTML = `<div class="card"><p role="status">${escapeHtml(calendarBranchLabel(1))}</p>
+        <button class="ghost" type="button">${escapeHtml(calendarBranchLabel(2))}</button></div>`;
+      page.querySelector("button").addEventListener("click", () => renderCalendarTab());
+    }
+    return;
+  }
+
+  const branch = branches ? selectedCalendarBranch(branches) : null;
+  page.calendarBranch = branch;
+  const staff = branch
+    ? allStaff.filter(person => person.branch_ids?.includes(branch.id))
+    : allStaff;
+  const events = branch
+    ? allEvents.filter(event => event.branch_id === branch.id)
+    : allEvents;
+  page.__calendarEventsFingerprint=calendarEventsFingerprint(allEvents);
 
   const waitingForCurrentVet =
   getCurrentVetWaitingEvents(
-    events
+    allEvents
   );
 
   startWaitingPatientsPoll();
@@ -73456,6 +73522,7 @@ events.forEach(
     `;
 
     window.mountPugCalendarWorkspace?.(page, {mode: "week", date: today, staff, events});
+    mountCalendarBranchSelect(page, branches, branch);
 
     $("[data-cal-mode='day']")?.addEventListener("click", async () => {
       calendarMode = "day";
@@ -77591,6 +77658,7 @@ page.innerHTML = `
 
 mountMobileCalendarDay(page);
 window.mountPugCalendarWorkspace?.(page, {mode: "day", date: today, staff, events});
+mountCalendarBranchSelect(page, branches, branch);
 initCalendarTopScroll();
   $$("[data-calendar-timeline]")
   .forEach(
@@ -81437,6 +81505,7 @@ async function startMedicalVisitFromCalendarEvent(
 
   const createdVisit =
     await createVisitApi({
+      calendar_event_id: calendarEvent.id,
       pet_id:
         patientId,
 
@@ -81643,7 +81712,8 @@ async function openCalendarEditModal(
       ).filter(
         (item) =>
           item &&
-          item.is_active !== false
+          item.is_active !== false &&
+          (!ev.branch_id || item.branch_ids?.includes(ev.branch_id) || String(item.id) === String(ev.staff_id))
       );
 
     staffSelect.innerHTML = `
@@ -81993,6 +82063,7 @@ if (
       try {
         const createdVisit =
           await createVisitApi({
+            calendar_event_id: ev.id,
             pet_id:
               patientId,
 
@@ -106976,6 +107047,8 @@ function closeVisitModal() {
 
   delete modal.dataset.visitId;
   delete modal.dataset.openSource;
+  delete modal.dataset.branchId;
+  $("#visitBookingBranch").hidden = true;
   delete modal.dataset.patientId;
 
   state.selectedPet = null;
@@ -107242,6 +107315,8 @@ async function openVisitModalForCreate(
   bindAppointmentTemplateDrawer();
 
   delete modal.dataset.visitId;
+  delete modal.dataset.branchId;
+  $("#visitBookingBranch").hidden = true;
 
   const openedFromPatient = Boolean(
     pet?.id || pet?._id
@@ -109253,6 +109328,7 @@ const isOutsideShift =
     try {
       const createdEvent =
         await createCalendarEventApi({
+          ...(modal.dataset.branchId ? { branch_id: modal.dataset.branchId } : {}),
           title:
             `${pet.name || translateInterfaceText("calendar.detail.patient")} — ` +
             `${notePlain || translateInterfaceText("calendar.detail.appointment.2")}`,
@@ -121828,6 +121904,79 @@ function ensureStaffEmergencyContactFields() {
     drawer
   );
 }
+async function renderStaffBranches(drawer, staffRow = null) {
+  const section = drawer.querySelector("#staffBranches");
+  const options = section.querySelector(".staffBranchOptions");
+  const status = section.querySelector(".staffBranchStatus");
+  section.hidden = !isClinicOwner();
+  section.dataset.loaded = "false";
+  const request = Symbol();
+  section.branchRequest = request;
+  options.replaceChildren();
+  status.hidden = true;
+  if (section.hidden) return;
+
+  const ui = getTeamInterfaceText;
+  section.querySelector("h4").textContent = ui("Філії");
+  options.setAttribute("aria-label", ui("Філії"));
+
+  try {
+    const response = await fetch("/api/clinic/branches", {
+      credentials: "include",
+      headers: getOrgHeaders(),
+    });
+    const result = await response.json();
+    if (!response.ok || !result.ok || !Array.isArray(result.data)) {
+      throw new Error("Could not load clinic branches");
+    }
+
+    if (section.branchRequest !== request) return;
+    const selected = new Set(staffRow?.branch_ids || []);
+    section.initialBranchIds = selected;
+    for (const branch of result.data) {
+      if (!branch.is_active && !selected.has(branch.id)) continue;
+
+      const label = document.createElement("label");
+      const input = document.createElement("input");
+      input.type = "checkbox";
+      input.value = branch.id;
+      input.checked = staffRow ? selected.has(branch.id) : branch.is_primary;
+      label.className = "staffBranchOption";
+      const name = document.createElement("span");
+      name.textContent = branch.name;
+      label.append(input, name);
+      if (!branch.is_active || branch.is_primary) {
+        const badge = document.createElement("small");
+        badge.textContent = ui(branch.is_active ? "Основна філія" : "Архівна філія");
+        label.append(badge);
+      }
+      options.append(label);
+    }
+
+    section.dataset.loaded = "true";
+  } catch {
+    if (section.branchRequest !== request) return;
+    status.textContent = ui("Не вдалося завантажити філії. Відкрийте картку ще раз.");
+    status.hidden = false;
+  }
+}
+
+Object.assign(TEAM_INTERFACE_TEXT, {
+  "Філії": { en: "Branches", de: "Standorte", pl: "Placówki" },
+  "Основна філія": { en: "Main branch", de: "Hauptstandort", pl: "Główna placówka" },
+  "Архівна філія": { en: "Archived branch", de: "Archivierter Standort", pl: "Zarchiwizowana placówka" },
+  "Оберіть щонайменше одну філію.": {
+    en: "Select at least one branch.",
+    de: "Wählen Sie mindestens einen Standort aus.",
+    pl: "Wybierz co najmniej jedną placówkę.",
+  },
+  "Не вдалося завантажити філії. Відкрийте картку ще раз.": {
+    en: "Could not load branches. Open the staff form again.",
+    de: "Die Standorte konnten nicht geladen werden. Öffnen Sie das Formular erneut.",
+    pl: "Nie udało się wczytać placówek. Otwórz formularz ponownie.",
+  },
+});
+
 async function openCreateStaffModal() {
   Object.assign(TEAM_INTERFACE_TEXT, {
     "Новий співробітник": {
@@ -121885,7 +122034,7 @@ async function openCreateStaffModal() {
     );
   }
 
-  await renderStaffSpecsBox([]);
+  await Promise.all([renderStaffSpecsBox([]), renderStaffBranches(drawer)]);
 
   drawer.classList.add("open");
   drawer.setAttribute("aria-hidden", "false");
@@ -121956,9 +122105,10 @@ async function openEditStaffModal(staffRow) {
     );
   }
 
-  await renderStaffSpecsBox(
-    staffRow.specialization_ids || []
-  );
+  await Promise.all([
+    renderStaffSpecsBox(staffRow.specialization_ids || []),
+    renderStaffBranches(drawer, staffRow),
+  ]);
 
   drawer.classList.add("open");
   drawer.setAttribute("aria-hidden", "false");
@@ -122054,6 +122204,24 @@ $("#staffSave")?.addEventListener("click", async () => {
     ),
   };
 
+  const branchSection = document.getElementById("staffBranches");
+  if (!branchSection.hidden && branchSection.dataset.loaded === "true") {
+    const choices = Array.from(branchSection.querySelectorAll("input[type=checkbox]"));
+    const selectedIds = choices.filter(input => input.checked).map(input => input.value);
+    if (!selectedIds.length) {
+      const status = branchSection.querySelector(".staffBranchStatus");
+      status.textContent = getTeamInterfaceText("Оберіть щонайменше одну філію.");
+      status.hidden = false;
+      choices[0]?.focus();
+      return;
+    }
+    const initialIds = branchSection.initialBranchIds;
+    if (!staffId || selectedIds.length !== initialIds.size || selectedIds.some(id => !initialIds.has(id))) {
+      payload.branch_ids = selectedIds;
+    }
+    branchSection.querySelector(".staffBranchStatus").hidden = true;
+  }
+
   if (!payload.name) {
     showSettingsMessage(
       getTeamInterfaceText("Вкажіть ПІБ співробітника.")
@@ -122121,6 +122289,7 @@ $("#staffSave")?.addEventListener("click", async () => {
 async function openVisitFromCalendar(hour, staffId) {
   const modal = $("#visitModal");
   if (!modal) return;
+  const branch = document.querySelector('.page[data-page="calendar"]')?.calendarBranch;
 
   await loadAppointmentTemplatesApi();
 
@@ -122159,6 +122328,10 @@ bindAppointmentTemplateDrawer();
   state.selectedPetId = null;
 
   modal.dataset.openSource = "calendar";
+  modal.dataset.branchId = branch?.id || "";
+  const branchInfo = $("#visitBookingBranch");
+  branchInfo.hidden = !branch;
+  branchInfo.textContent = branch ? `${calendarBranchLabel(0)} · ${branch.name}` : "";
   modal.dataset.patientId = "";
 
   const patients = await loadPatientsApi();
@@ -122192,7 +122365,8 @@ $("#visitDate") && ($("#visitDate").value = window.__calendarDate || todayISO())
 $("#visitStartTime") && ($("#visitStartTime").value = hour || "10:00");
 $("#visitDuration") && ($("#visitDuration").value = "60");
 
-  const staff = await loadStaffApi();
+  const allStaff = await loadStaffApi();
+  const staff = branch ? allStaff.filter(person => person.branch_ids?.includes(branch.id)) : allStaff;
   const staffSelect = $("#visitStaff");
   if (staffSelect) {
     staffSelect.innerHTML = `

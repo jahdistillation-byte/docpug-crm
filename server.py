@@ -8630,7 +8630,8 @@ def public_app_base_url():
 @app.route("/api/clinic/branches", methods=["GET", "POST"])
 @app.patch("/api/clinic/branches/<uuid:branch_id>")
 def api_clinic_branches(branch_id=None):
-    _, auth_error = owner_required()
+    require_user = auth_required if request.method == "GET" else owner_required
+    user, auth_error = require_user()
     if auth_error:
         return auth_error
     org_id = get_current_org_id()
@@ -8639,9 +8640,12 @@ def api_clinic_branches(branch_id=None):
 
     try:
         if request.method == "GET":
-            rows = supabase.table("branches").select(
+            query = supabase.table("branches").select(
                 "id,name,address,is_active,is_primary"
-            ).eq("org_id", org_id).order("is_primary", desc=True).order("name").execute()
+            ).eq("org_id", org_id)
+            if user.get("role") != "owner":
+                query = query.eq("is_active", True)
+            rows = query.order("is_primary", desc=True).order("name").execute()
             return ok(rows.data or [])
 
         data = request.get_json(silent=True)
@@ -15025,6 +15029,38 @@ def api_staff():
             "Cannot load staff",
             500,
         )
+
+
+def staff_branch_fields(data, user):
+    if "branch_ids" not in data:
+        return {}, None
+
+    if user.get("role") != "owner":
+        return {}, fail("Лише власник може змінювати філії співробітника.", 403)
+
+    ids = data["branch_ids"]
+    if not isinstance(ids, list) or not ids:
+        return {}, fail("Оберіть щонайменше одну філію.", 400)
+
+    try:
+        branch_ids = [str(uuid.UUID(branch_id)) for branch_id in ids]
+    except (ValueError, TypeError, AttributeError):
+        return {}, fail("Перевірте вибрані філії.", 400)
+
+    return {"branch_ids": list(dict.fromkeys(branch_ids))}, None
+
+
+def staff_branch_write_error(error):
+    messages = {
+        "STAFF_BRANCH_REQUIRED": "Оберіть щонайменше одну філію.",
+        "STAFF_BRANCH_INVALID": "Можна додати лише активні філії вашої клініки.",
+    }
+    message = messages.get(getattr(error, "message", None))
+    if message:
+        return fail(message, 400)
+    raise error
+
+
 @app.post("/api/staff")
 def api_create_staff():
     user, auth_error = (
@@ -15035,6 +15071,10 @@ def api_create_staff():
         return auth_error
 
     d = request.get_json(silent=True) or {}
+
+    branch_fields, branch_error = staff_branch_fields(d, user)
+    if branch_error:
+        return branch_error
 
     name = (
         d.get("name") or ""
@@ -15195,12 +15235,15 @@ def api_create_staff():
         True,
 }
 
-    res = (
-        supabase
-        .table("staff")
-        .insert(payload)
-        .execute()
-    )
+    try:
+        res = (
+            supabase
+            .table("staff")
+            .insert({**payload, **branch_fields})
+            .execute()
+        )
+    except Exception as error:
+        return staff_branch_write_error(error)
 
     row = (
         res.data[0]
@@ -15231,6 +15274,10 @@ def api_update_staff(staff_id):
         )
         or {}
     )
+
+    branch_fields, branch_error = staff_branch_fields(d, user)
+    if branch_error:
+        return branch_error
 
     current_org = (
         get_current_org_id()
@@ -15354,26 +15401,32 @@ def api_update_staff(staff_id):
         )
     }
 
-    if not payload:
+    if not payload and not branch_fields:
         return fail(
             "Nothing to update",
             400,
         )
 
-    res = (
-        supabase
-        .table("staff")
-        .update(payload)
-        .eq(
-            "org_id",
-            current_org
+    try:
+        res = (
+            supabase
+            .table("staff")
+            .update({**payload, **branch_fields})
+            .eq(
+                "org_id",
+                current_org
+            )
+            .eq(
+                "id",
+                staff_id
+            )
+            .execute()
         )
-        .eq(
-            "id",
-            staff_id
-        )
-        .execute()
-    )
+    except Exception as error:
+        return staff_branch_write_error(error)
+
+    if branch_fields and not res.data:
+        return fail("Співробітника не знайдено.", 404)
 
     row = (
         res.data[0]
@@ -16948,6 +17001,28 @@ def api_calendar():
             500,
         )
     
+def calendar_branch_assignment(org_id, branch_id, staff_id):
+    try:
+        branch_id = str(uuid.UUID(branch_id))
+        staff_id = str(uuid.UUID(staff_id))
+    except (ValueError, TypeError, AttributeError):
+        return None, fail("invalid calendar branch assignment", 400)
+
+    branches = supabase.table("branches").select("id").eq(
+        "org_id", org_id
+    ).eq("id", branch_id).eq("is_active", True).limit(1).execute()
+    if not branches.data:
+        return None, fail("calendar branch unavailable", 409)
+
+    staff = supabase.table("staff").select("branch_ids").eq(
+        "org_id", org_id
+    ).eq("id", staff_id).eq("is_active", True).limit(1).execute()
+    if not staff.data or branch_id not in (staff.data[0].get("branch_ids") or []):
+        return None, fail("staff not assigned to calendar branch", 409)
+
+    return branch_id, None
+
+
 @app.post("/api/calendar")
 def api_create_calendar_event():
     user, auth_error = (
@@ -17015,6 +17090,14 @@ def api_create_calendar_event():
     current_org = (
         get_current_org_id()
     )
+    branch_id = None
+    if "branch_id" in d:
+        branch_id, branch_error = calendar_branch_assignment(
+            current_org, d["branch_id"], staff_id
+        )
+        if branch_error:
+            return branch_error
+
     patient_id = str(
         d.get("patient_id")
         or ""
@@ -17155,6 +17238,9 @@ def api_create_calendar_event():
         "note":
             d.get("note"),
     }
+
+    if branch_id:
+        payload["branch_id"] = branch_id
 
     result = (
         supabase
@@ -17355,6 +17441,16 @@ def api_update_calendar_event(event_id):
     current_org = (
         get_current_org_id()
     )
+
+    if (
+        current_event.get("branch_id")
+        and str(target_staff_id) != str(current_event.get("staff_id"))
+    ):
+        _, branch_error = calendar_branch_assignment(
+            current_org, current_event["branch_id"], target_staff_id
+        )
+        if branch_error:
+            return branch_error
 
     result = (
         supabase
@@ -31015,6 +31111,19 @@ def api_create_visit():
             ),
             "weight_kg": d.get("weight_kg"),
         }
+
+        if d.get("calendar_event_id"):
+            event = calendar_event_for_current_org(d["calendar_event_id"])
+            if not event or str(event.get("patient_id")) != pet_id:
+                return fail("Calendar event not found for this patient", 404)
+            if event.get("branch_id"):
+                if str(event.get("staff_id")) != str(payload["staff_id"]):
+                    _, branch_error = calendar_branch_assignment(
+                        current_org, event["branch_id"], payload["staff_id"]
+                    )
+                    if branch_error:
+                        return branch_error
+                payload["branch_id"] = event["branch_id"]
 
         res = insert_with_optional_fallback(
             "visits",

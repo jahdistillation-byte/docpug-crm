@@ -14,10 +14,10 @@
   type="image/jpeg"
   fetchpriority="high"
 >
-<link rel="stylesheet" href="style.css?v=20261116-branches">
+<link rel="stylesheet" href="style.css?v=20261116-staff-branches">
 <link rel="stylesheet" href="stock-catalog.css?v=20261106-8">
 <link rel="stylesheet" href="hospital-ward.css?v=20261114-catalog">
-<link rel="stylesheet" href="calendar-workspace.css?v=20261114-existing-owner">
+<link rel="stylesheet" href="calendar-workspace.css?v=20261116-calendar-branches">
 <link rel="stylesheet" href="calendar-themes.css?v=20261107-1">
 <link rel="stylesheet" href="owners-workspace.css?v=20261112-shared-bg-v1">
 <link rel="stylesheet" href="owner-profile-workspace.css?v=20261108-1">
@@ -1881,6 +1881,7 @@
         <div>
           <div class="pugVisitTitle" data-i18n="calendar.detail.new.appointment">Новий запис прийому</div>
           <div class="pugVisitSub" id="visitModalSub" data-i18n="calendar.detail.patient.3">Пацієнт: —</div>
+          <div class="pugVisitSub" id="visitBookingBranch" hidden></div>
         </div>
       </div>
 
@@ -2597,6 +2598,12 @@
           </label>
         </div>
       </section>
+      <section class="staffEditorSection" id="staffBranches" hidden>
+        <h4>Філії</h4>
+        <div class="staffBranchOptions" role="group" aria-label="Філії"></div>
+        <p class="staffBranchStatus" role="status" hidden></p>
+      </section>
+
       <section class="staffEditorSection">
         <h4>Оплата праці</h4>
         <div class="staffEditorFields">
@@ -3176,7 +3183,7 @@
 <script defer src="visit-catalog.js?v=20261108-1"></script>
 <script
   defer
-  src="app.js?v=20261116-branches"
+  src="app.js?v=20261116-calendar-branches"
 ></script>
 <div id="deleteModal" class="deleteModalOverlay" style="display:none;">
   <div class="deleteModal">
