@@ -75411,7 +75411,7 @@ body[data-theme="white"] .calendarDatePopoverNav:hover {
 }
 
 .teamDirectorySection[hidden],
-.teamDirectoryCard[hidden] {
+html body .page[data-page="team"] .teamPageCard .teamDirectoryCard[hidden] {
   display: none !important;
 }
 
