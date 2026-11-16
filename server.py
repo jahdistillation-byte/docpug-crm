@@ -14841,6 +14841,21 @@ def validate_staff_specialization_ids(
     return clean_ids
 
 
+def recover_staff_specialization_ids(label, catalog_by_name):
+    label = str(label or "").strip().casefold()
+    if not label:
+        return []
+
+    names = [label] if label in catalog_by_name else [
+        name.strip() for name in label.split(",")
+    ]
+    matches = [catalog_by_name.get(name, []) for name in names]
+    if any(len(items) != 1 for items in matches):
+        return []
+
+    return [str(items[0]["id"]) for items in matches]
+
+
 @app.get("/api/staff")
 def api_staff():
     try:
@@ -14957,7 +14972,7 @@ def api_staff():
                 repr(error),
             )
 
-            specializations_rows = []
+            return ok(rows)
 
         specializations_by_id = {
             str(
@@ -14966,6 +14981,12 @@ def api_staff():
             for item in specializations_rows
             if item.get("id")
         }
+
+        catalog_by_name = {}
+        for item in specializations_by_id.values():
+            name = str(item.get("name") or "").strip().casefold()
+            if name:
+                catalog_by_name.setdefault(name, []).append(item)
 
         for row in rows:
             ids = row.get(
@@ -14977,6 +14998,11 @@ def api_staff():
                 list,
             ):
                 ids = []
+
+            if not ids:
+                ids = recover_staff_specialization_ids(
+                    row.get("specialization"), catalog_by_name
+                )
 
             clean_ids = []
             linked = []
@@ -15235,6 +15261,9 @@ def api_create_staff():
         True,
 }
 
+    if "specialization_ids" in d:
+        payload["specialization_ids"] = specialization_ids
+
     try:
         res = (
             supabase
@@ -15400,6 +15429,9 @@ def api_update_staff(staff_id):
                 "specialization_ids"
         )
     }
+
+    if payload.get("specialization_ids") == []:
+        payload["specialization"] = None
 
     if not payload and not branch_fields:
         return fail(
