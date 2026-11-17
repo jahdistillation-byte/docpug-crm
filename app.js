@@ -64419,6 +64419,125 @@ function renderPatientDocumentCard({
   `;
 }
 
+function mountPatientExamDocuments(root, pet, isCurrent) {
+  const card = root.querySelector("[data-patient-exam-documents]");
+  const isActive = () => card.isConnected && isCurrent();
+  const filters = card.querySelector("fieldset");
+  const list = card.querySelector("[data-exam-list]");
+  const status = card.querySelector("[data-exam-status]");
+  const all = card.querySelector("[data-exam-select-all]");
+  const clear = card.querySelector("[data-exam-clear]");
+  const download = card.querySelector("[data-exam-download]");
+  const retry = card.querySelector("[data-exam-retry]");
+  const kind = card.querySelector("[data-exam-kind]");
+  const from = card.querySelector("[data-exam-from]");
+  const to = card.querySelector("[data-exam-to]");
+  const selected = new Set();
+  let studies = [];
+  let visible = [];
+  let exporting = false;
+
+  function refreshSelection() {
+    const visibleCount = visible.filter(study => selected.has(study.key)).length;
+    all.checked = visible.length > 0 && visibleCount === visible.length;
+    all.indeterminate = visibleCount > 0 && visibleCount < visible.length;
+    all.disabled = !visible.length;
+    clear.disabled = !selected.size;
+    download.disabled = exporting || !selected.size;
+    download.textContent = exporting ? "Формуємо PDF…" : `↓ Сформувати PDF${selected.size ? ` · ${selected.size} обрано` : ""}`;
+    const hiddenCount = selected.size - visibleCount;
+    status.textContent = [
+      !visible.length && "За цими фільтрами обстежень немає.",
+      hiddenCount > 0 && `Обрано поза поточними фільтрами: ${hiddenCount}.`,
+    ].filter(Boolean).join(" ");
+  }
+
+  function renderList() {
+    to.setCustomValidity(from.value && to.value && from.value > to.value
+      ? "Дата завершення має бути не раніше дати початку." : "");
+    visible = studies.filter(({ record, type }) =>
+      (!kind.value || type === kind.value)
+      && (!from.value || record.date >= from.value)
+      && (!to.value || record.date <= to.value)
+    );
+    list.innerHTML = visible.map(({ key, record, label, type }) => `
+      <label class="patientExamOption">
+        <input type="checkbox" data-exam-key="${escapeHtml(key)}" ${selected.has(key) ? "checked" : ""}>
+        <span><strong>${escapeHtml(label)}</strong>
+          <small>${escapeHtml(formatLabCardDate(record.date))} · ${type === "ultrasound" ? "УЗД" : "Аналіз"}</small>
+        </span>
+      </label>`).join("");
+    refreshSelection();
+  }
+
+  async function load() {
+    retry.hidden = true;
+    filters.disabled = true;
+    status.textContent = "Завантаження обстежень…";
+    try {
+      const [labs, protocols] = await Promise.all([
+        requestPatientLabs(pet.id), requestPatientLabs(pet.id, "ultrasound"),
+      ]);
+      if (!isActive()) return;
+      studies = [...labs.map(record => ({
+        key: `lab:${record.id}`, record, type: "lab",
+        label: getPatientLabTypeMeta(record.type).name || record.type,
+      })), ...protocols.map(record => ({
+        key: `ultrasound:${record.id}`, record, type: "ultrasound",
+        label: record.values.region || "УЗД",
+        previous: protocols.find(item => item.id === record.values.study?.previous),
+      }))].sort((a, b) => b.record.date.localeCompare(a.record.date));
+      filters.disabled = !studies.length;
+      if (studies.length) renderList();
+      else status.textContent = "У картці пацієнта ще немає аналізів або протоколів УЗД.";
+    } catch (error) {
+      if (!isActive()) return;
+      status.textContent = "Не вдалося завантажити обстеження.";
+      retry.hidden = false;
+    }
+  }
+
+  [kind, from, to].forEach(control => control.addEventListener("change", renderList));
+  list.addEventListener("change", event => {
+    const input = event.target.closest("[data-exam-key]");
+    if (!input) return;
+    if (input.checked) selected.add(input.dataset.examKey);
+    else selected.delete(input.dataset.examKey);
+    refreshSelection();
+  });
+  all.addEventListener("change", () => {
+    for (const { key } of visible) {
+      if (all.checked) selected.add(key);
+      else selected.delete(key);
+    }
+    renderList();
+  });
+  clear.addEventListener("click", () => {
+    selected.clear();
+    renderList();
+  });
+  retry.addEventListener("click", load);
+  download.addEventListener("click", async () => {
+    if (exporting || !selected.size || !to.reportValidity() || !isActive()) return;
+    const chosen = studies.filter(item => selected.has(item.key));
+    exporting = true;
+    filters.disabled = true;
+    refreshSelection();
+    try {
+      await downloadPatientExamPdf(pet, chosen, isActive);
+    } catch (error) {
+      console.error("downloadPatientExamPdf failed:", error);
+      if (isActive()) status.textContent = "Не вдалося сформувати PDF. Спробуйте ще раз.";
+    } finally {
+      exporting = false;
+      filters.disabled = false;
+      download.disabled = !selected.size;
+      download.textContent = `↓ Сформувати PDF · ${selected.size} обрано`;
+    }
+  });
+  load();
+}
+
 async function renderPatientDocumentsTab(
   root,
   pet
@@ -64748,6 +64867,32 @@ async function renderPatientDocumentsTab(
           emptyText:
             ui.templatesUnavailable,
         })}
+        <article class="patientDocumentCard" data-patient-exam-documents>
+          <div class="patientDocumentCardTop">
+            <span class="patientDocumentIcon">${ULTRASOUND_ICON}</span>
+          </div>
+          <h3>Результати обстежень</h3>
+          <p>Об’єднайте вибрані аналізи й УЗД в один PDF.</p>
+          <fieldset class="patientExamFilters" disabled>
+            <label class="patientDocumentSelectLabel">Тип обстеження
+              <select class="patientDocumentSelect" data-exam-kind>
+                <option value="">Усі</option><option value="lab">Аналізи</option><option value="ultrasound">УЗД</option>
+              </select>
+            </label>
+            <div class="patientExamDates">
+              <label class="patientDocumentSelectLabel">Від<input class="patientDocumentSelect" type="date" data-exam-from></label>
+              <label class="patientDocumentSelectLabel">До<input class="patientDocumentSelect" type="date" data-exam-to></label>
+            </div>
+            <div class="patientExamSelection">
+              <label><input type="checkbox" data-exam-select-all disabled> Обрати всі показані</label>
+              <button type="button" class="ghost" data-exam-clear disabled>Очистити вибір</button>
+            </div>
+            <div class="patientExamList" data-exam-list></div>
+          </fieldset>
+          <p role="status" data-exam-status></p>
+          <button type="button" class="ghost" data-exam-retry hidden>Повторити</button>
+          <button type="button" class="patientDocumentCreate" data-exam-download disabled>↓ Сформувати PDF</button>
+        </article>
       </div>
 
       <div
@@ -64763,6 +64908,10 @@ async function renderPatientDocumentsTab(
       </div>
     </section>
   `;
+
+  mountPatientExamDocuments(root, pet, () =>
+    root.isConnected && root.documentsRequest === documentsRequest && JSON.stringify(getOrgHeaders()) === documentsOrg
+  );
 
   root
     .querySelectorAll(
@@ -86996,9 +87145,40 @@ async function downloadLabPdf(
     return {};
   });
 
+  const filename = [
+    "DocPUG",
+    sanitizeLabPdfFilename(isUltrasound ? "УЗД" : (lab.type || "analysis")),
+    sanitizeLabPdfFilename(pet?.name || "patient"),
+    sanitizeLabPdfFilename(lab.date || todayISO()),
+  ].join("_") + ".pdf";
+
+  try {
+    const pdf = await renderPatientExamPdf(pet, lab, clinicProfile, previousUltrasound);
+    pdf.save(filename);
+  } catch (error) {
+    console.error("downloadLabPdf failed:", error);
+    alert(ui.pdfFailed);
+  }
+}
+
+async function downloadPatientExamPdf(pet, studies, isCurrent) {
+  if (!window.html2pdf) throw new Error(getLabPdfUi().moduleMissing);
+  const clinicProfile = state.clinicProfile || await loadClinicProfileApi();
+  let pdf;
+  for (const { record, previous } of studies) {
+    if (!isCurrent()) return;
+    pdf = await renderPatientExamPdf(pet, record, clinicProfile, previous, pdf, true);
+  }
+  if (!isCurrent() || !pdf) return;
+  const filename = ["DocPUG", "Обстеження", sanitizeLabPdfFilename(pet.name || "patient"), todayISO()].join("_");
+  pdf.save(filename + ".pdf");
+}
+
+async function renderPatientExamPdf(pet, lab, clinicProfile, previousUltrasound, target, batch = false) {
+  const isUltrasound = lab.type === "ultrasound";
   const renderHost = document.createElement("div");
 
-renderHost.id = isUltrasound ? "ultrasoundPdfRenderHost" : "labPdfRenderHost";
+renderHost.id = "patientExamPdf-" + crypto.getRandomValues(new Uint32Array(2)).join("-");
 
 renderHost.style.cssText = `
   position: fixed !important;
@@ -87009,7 +87189,7 @@ renderHost.style.cssText = `
   min-width: 794px !important;
   max-width: 794px !important;
 
-  ${isUltrasound ? "" : "min-height: 1123px !important;"}
+  ${isUltrasound || batch ? "" : "min-height: 1123px !important;"}
 
   margin: 0 !important;
   padding: 0 !important;
@@ -87030,31 +87210,17 @@ renderHost.style.cssText = `
   const pdfDocument = isUltrasound
     ? buildLabPdfDocumentBase(pet, lab, clinicProfile, previousUltrasound)
     : buildLabPdfDocument(pet, lab, clinicProfile);
+  if (batch) pdfDocument.style.minHeight = "0";
   renderHost.appendChild(pdfDocument);
   document.body.appendChild(renderHost);
-
-  const filename = [
-    "DocPUG",
-    sanitizeLabPdfFilename(isUltrasound ? "УЗД" : (lab.type || "analysis")),
-    sanitizeLabPdfFilename(pet?.name || "patient"),
-    sanitizeLabPdfFilename(lab.date || todayISO()),
-  ].join("_") + ".pdf";
-
   try {
-    await new Promise((resolve) => {
-      requestAnimationFrame(() => {
-        requestAnimationFrame(resolve);
-      });
-    });
-
     await document.fonts?.ready;
-
     const worker = window
   .html2pdf()
   .set({
     margin: [0, 0, 0, 0],
 
-    filename,
+    enableLinks: !batch,
 
     image: {
       type: "jpeg",
@@ -87131,15 +87297,19 @@ renderHost.style.cssText = `
   .from(pdfDocument);
 
 
-    if (isUltrasound) {
-      await worker.toPdf();
-      const pdf = await worker.get("pdf");
+    if (target) {
+      target.addPage();
+      await worker.set({ pdf: target });
+    }
+    await worker.toPdf();
+    const pdf = await worker.get("pdf");
+    if (isUltrasound || batch) {
       const canvas = await worker.get("canvas");
       const pageSize = await worker.get("pageSize");
       const pageHeight = Math.floor(canvas.width * pageSize.inner.ratio);
       const lastPage = pdf.getNumberOfPages();
-      const offset = (lastPage - 1) * pageHeight;
-      if (lastPage > 1 && offset < canvas.height) {
+      const offset = Math.floor((canvas.height - 1) / pageHeight) * pageHeight;
+      if (Math.ceil(canvas.height / pageHeight) > 1 && offset < canvas.height) {
         const { data } = canvas.getContext("2d")
           .getImageData(0, offset, canvas.width, canvas.height - offset);
         // The render canvas has a white background. Keep any page containing visible ink.
@@ -87153,13 +87323,7 @@ renderHost.style.cssText = `
         if (blank) pdf.deletePage(lastPage);
       }
     }
-    await worker.save();
-  } catch (error) {
-    console.error("downloadLabPdf failed:", error);
-
-    alert(
-  ui.pdfFailed
-);
+    return pdf;
   } finally {
     renderHost.remove();
   }

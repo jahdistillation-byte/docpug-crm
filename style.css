@@ -78681,3 +78681,35 @@ html body #visitPaymentModal .visitPaymentSuccess > span {
 
 .docPugUltrasoundPdfDocument .ultrasoundReportSection thead th { color: #fff !important; }
 .docPugUltrasoundPdfDocument .ultrasoundReportSection tbody :is(th, td) { color: #242833 !important; }
+
+.patientExamFilters {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.patientExamDates {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+.patientExamDates input { box-sizing: border-box; min-width: 0; width: 100%; }
+.patientExamList { max-height: 250px; overflow: auto; }
+.patientExamOption, .patientExamSelection {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.patientExamOption {
+  padding: 8px 4px;
+  border-top: 1px solid var(--ct-line, var(--border-color));
+  cursor: pointer;
+  overflow-wrap: anywhere;
+}
+.patientExamOption small { display: block; color: var(--ct-muted, inherit); }
+.patientExamOption input, .patientExamSelection input { accent-color: var(--ct-accent, #a855f7); }
+.patientExamSelection { justify-content: space-between; flex-wrap: wrap; }
+[data-patient-exam-documents] [data-exam-status]:empty { display: none; }
+[data-patient-exam-documents] [hidden] { display: none !important; }
