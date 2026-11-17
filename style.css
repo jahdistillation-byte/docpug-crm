@@ -78668,3 +78668,6 @@ html body #visitPaymentModal .visitPaymentSuccess > span {
 @media (max-width: 640px) {
   .ultrasoundMetric { grid-template-columns: minmax(0, 1fr); }
 }
+
+.docPugUltrasoundPdfDocument .ultrasoundReportSection thead th { color: #fff !important; }
+.docPugUltrasoundPdfDocument .ultrasoundReportSection tbody :is(th, td) { color: #242833 !important; }

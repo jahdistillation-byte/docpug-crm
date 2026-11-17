@@ -82572,46 +82572,28 @@ async function renderPatientUltrasound(pet) {
     for (const protocol of protocols) {
       const card = document.createElement("article");
       card.className = "patientUltrasoundCard";
-      const findings = Object.entries(protocol.values).flatMap(([key, value]) => {
-        const label = ULTRASOUND_ORGANS[key]?.[0] || (Object.hasOwn(ULTRASOUND_METRICS, key) ? ULTRASOUND_METRICS[key] : "");
-        if (!label || !value) return [];
-        const ref = protocol.refs[key];
-        const bounds = ref && [ref.min !== "" && ref.min != null && `≥ ${ref.min}`, ref.max !== "" && ref.max != null && `≤ ${ref.max}`].filter(Boolean).join(" · ");
-        const display = Object.hasOwn(ULTRASOUND_METRICS, key)
-          ? `${value} мм${bounds ? ` (референс ${bounds} мм)` : ""}` : value;
-        return [`<dt>${escapeHtml(label)}</dt><dd class="patientUltrasoundFindings">${escapeHtml(display)}</dd>`];
-      });
-      const study = protocol.values.study || {};
-      for (const [key, state] of Object.entries(study.organs || {})) {
-        findings.push(`<dt>${escapeHtml(ULTRASOUND_ORGANS[key]?.[0] || key)}</dt><dd>${escapeHtml(ULTRASOUND_STATUS[state] || "")}</dd>`);
-      }
-      const pregnancy = study.pregnancy;
-      if (pregnancy) {
-        const summary = [ULTRASOUND_PREGNANCY_STATUS[pregnancy.status],
-          pregnancy.count && `Візуалізовано: ${pregnancy.count}`,
-          pregnancy.age && `Орієнтовний термін: ${pregnancy.age}`, pregnancy.uterus,
-        ].filter(Boolean).join(" · ");
-        if (summary) findings.push(`<dt>Перебіг вагітності</dt><dd>${escapeHtml(summary)}</dd>`);
-        pregnancy.fetuses?.forEach((fetus, index) => {
-          const observations = Object.entries(fetus).map(([key, value]) => {
-            const observation = ["heart", "movement"].includes(key) ? ULTRASOUND_FETAL_OBSERVATION[value] : value;
-            return `${ULTRASOUND_FETUS_FIELDS[key]}: ${observation}`;
-          });
-          findings.push(`<dt>Плід ${index + 1}</dt><dd>${escapeHtml(observations.join(" · "))}</dd>`);
-        });
-      }
-      if (study.previous) {
-        const previous = protocols.find(item => item.id === study.previous);
-        if (previous) findings.push(`<dt>Попереднє УЗД</dt><dd>${escapeHtml(formatLabCardDate(previous.date))} · ${escapeHtml(previous.values.region || "УЗД")}</dd>`);
-      }
+      const previous = protocols.find(item => item.id === protocol.values.study?.previous);
+      const sections = renderUltrasoundReportSections(protocol, previous);
       card.innerHTML = `
         <header><div><strong>${escapeHtml(protocol.values.region || "УЗД")}</strong>
           <time datetime="${escapeHtml(protocol.date)}">${escapeHtml(formatLabCardDate(protocol.date))}</time></div>
-          <button class="ghost" type="button">Редагувати</button></header>
-        ${protocol.comment ? `<p class="patientUltrasoundFindings">${escapeHtml(protocol.comment)}</p>` : ""}
-        ${findings.length ? `<details><summary>Результати дослідження</summary><dl>${findings.join("")}</dl></details>` : ""}`;
-      card.querySelector("button").addEventListener("click", () =>
+          <div class="ultrasoundReportActions">
+            <button class="primary" type="button" data-pdf>Завантажити PDF</button>
+            <button class="ghost" type="button" data-edit>Редагувати</button>
+          </div></header>
+        ${protocol.comment ? `<p class="patientUltrasoundFindings"><strong>Висновок</strong><br>${escapeHtml(protocol.comment)}</p>` : ""}
+        ${sections ? `<details><summary>Результати дослідження</summary>${sections}</details>` : ""}`;
+      card.querySelector("[data-edit]").addEventListener("click", () =>
         openEditor(protocol.values.template || "abdomen", protocol));
+      const pdfButton = card.querySelector("[data-pdf]");
+      pdfButton.addEventListener("click", async () => {
+        pdfButton.disabled = true;
+        try {
+          await downloadLabPdf(pet, protocol, previous);
+        } finally {
+          pdfButton.disabled = false;
+        }
+      });
       records.append(card);
     }
   }
@@ -85373,7 +85355,7 @@ function buildLabPdfDocumentBase(
   const clinicStamp =
     clinic.clinic_stamp_url || "";
 
-  const speciesKey = getPetSpeciesKey(pet);
+  const speciesKey = isUltrasound ? normalizeSpecies(pet?.species) : getPetSpeciesKey(pet);
 
   const speciesLabel =
     speciesKey === "cat"
@@ -85385,8 +85367,7 @@ function buildLabPdfDocumentBase(
   const values = lab?.values || {};
 
   const preferredKeys =
-    LAB_GROUPS?.[lab?.type] ||
-    Object.keys(values);
+    isUltrasound ? [] : (LAB_GROUPS?.[lab?.type] || Object.keys(values));
 
   const keys = preferredKeys.filter((key) => {
     const value = values[key];
@@ -85690,7 +85671,7 @@ padding: ${labPdfLayout.sectionPadding};
             letter-spacing: .1em;
             text-transform: uppercase;
           ">
-            Коментар ветеринарного лікаря
+            ${isUltrasound ? "Висновок" : "Коментар ветеринарного лікаря"}
           </div>
 
           <div style="
@@ -85768,11 +85749,13 @@ padding: ${labPdfLayout.ownerPadding};
       : "";
   const documentNode = document.createElement("div");
 
-  documentNode.className = "docPugLabPdfDocument";
+  documentNode.className = isUltrasound
+    ? "docPugLabPdfDocument docPugUltrasoundPdfDocument"
+    : "docPugLabPdfDocument";
 
   documentNode.style.cssText = `
     width: 794px;
-    min-height: 1123px;
+    ${isUltrasound ? "" : "min-height: 1123px;"}
     padding: ${labPdfLayout.pagePadding};
     box-sizing: border-box;
     color: #171A21;
@@ -85871,7 +85854,7 @@ documentNode.innerHTML = `
         font-size: 16px;
         font-weight: 900;
       ">
-        Результати лабораторного дослідження
+        ${isUltrasound ? "Протокол ультразвукового дослідження" : "Результати лабораторного дослідження"}
       </div>
 
       <div style="
@@ -85879,7 +85862,7 @@ documentNode.innerHTML = `
         color: #777E8C;
         font-size: 10px;
       ">
-        ${escapeHtml(lab?.type || "Аналіз")}
+        ${escapeHtml(isUltrasound ? (ULTRASOUND_TITLES[lab.values?.template] || "УЗД") : (lab?.type || "Аналіз"))}
       </div>
     </div>
   </header>
@@ -86064,7 +86047,7 @@ font-size: ${
         letter-spacing: .08em;
         text-transform: uppercase;
       ">
-        Лабораторія
+        ${isUltrasound ? "Ділянка дослідження" : "Лабораторія"}
       </div>
 
       <div style="
@@ -86083,11 +86066,12 @@ font-size: ${
 };
         font-weight: 850;
       ">
-        ${escapeHtml(lab?.laboratory || "Не вказано")}
+        ${escapeHtml(isUltrasound ? (lab.values?.region || "УЗД") : (lab?.laboratory || "Не вказано"))}
       </div>
     </div>
   </section>
 
+  ${isUltrasound ? renderUltrasoundReportSections(lab, previousUltrasound, true) : `
   <section style="
    margin-top: ${
   isCompactLabPdf
@@ -86280,11 +86264,13 @@ padding: ${
       </tbody>
     </table>
   </section>
+`}
 
     ${commentHtml}
 
   ${ownerExplanationHtml}
 
+  ${isUltrasound ? "" : `
   <section style="
     margin-top: ${
       isCompactLabPdf
@@ -86317,6 +86303,7 @@ padding: ${
       самостійним діагнозом. Результати повинен інтерпретувати ветеринарний лікар.
     </div>
   </section>
+`}
 
   ${
     clinicSignature || clinicStamp
@@ -86872,7 +86859,8 @@ function buildLabPdfDocument(
 }
 async function downloadLabPdf(
   pet,
-  labOrId
+  labOrId,
+  previousUltrasound
 ) {
   const ui =
     getLabPdfUi();
@@ -86910,13 +86898,17 @@ async function downloadLabPdf(
 
   return;
 }
+  const isUltrasound = lab.type === "ultrasound";
   const clinicProfile =
   state.clinicProfile ||
-  await loadClinicProfileApi();
+  await loadClinicProfileApi().catch(error => {
+    if (!isUltrasound) throw error;
+    return {};
+  });
 
   const renderHost = document.createElement("div");
 
-renderHost.id = "labPdfRenderHost";
+renderHost.id = isUltrasound ? "ultrasoundPdfRenderHost" : "labPdfRenderHost";
 
 renderHost.style.cssText = `
   position: fixed !important;
@@ -86927,7 +86919,7 @@ renderHost.style.cssText = `
   min-width: 794px !important;
   max-width: 794px !important;
 
-  min-height: 1123px !important;
+  ${isUltrasound ? "" : "min-height: 1123px !important;"}
 
   margin: 0 !important;
   padding: 0 !important;
@@ -86945,17 +86937,15 @@ renderHost.style.cssText = `
   background: #FFFFFF;
 `;
 
-  const pdfDocument = buildLabPdfDocument(
-  pet,
-  lab,
-  clinicProfile
-);
+  const pdfDocument = isUltrasound
+    ? buildLabPdfDocumentBase(pet, lab, clinicProfile, previousUltrasound)
+    : buildLabPdfDocument(pet, lab, clinicProfile);
   renderHost.appendChild(pdfDocument);
   document.body.appendChild(renderHost);
 
   const filename = [
     "DocPUG",
-    sanitizeLabPdfFilename(lab.type || "analysis"),
+    sanitizeLabPdfFilename(isUltrasound ? "УЗД" : (lab.type || "analysis")),
     sanitizeLabPdfFilename(pet?.name || "patient"),
     sanitizeLabPdfFilename(lab.date || todayISO()),
   ].join("_") + ".pdf";
@@ -86998,11 +86988,9 @@ renderHost.style.cssText = `
       windowWidth: 794,
 
       onclone: (clonedDocument) => {
-        const host = clonedDocument.getElementById("labPdfRenderHost");
+        const host = clonedDocument.getElementById(renderHost.id);
 
-        const documentElement = clonedDocument.querySelector(
-          ".docPugLabPdfDocument"
-        );
+        const documentElement = host?.querySelector(".docPugLabPdfDocument");
 
         if (host) {
           host.style.position = "absolute";
@@ -87053,6 +87041,28 @@ renderHost.style.cssText = `
   .from(pdfDocument);
 
 
+    if (isUltrasound) {
+      await worker.toPdf();
+      const pdf = await worker.get("pdf");
+      const canvas = await worker.get("canvas");
+      const pageSize = await worker.get("pageSize");
+      const pageHeight = Math.floor(canvas.width * pageSize.inner.ratio);
+      const lastPage = pdf.getNumberOfPages();
+      const offset = (lastPage - 1) * pageHeight;
+      if (lastPage > 1 && offset < canvas.height) {
+        const { data } = canvas.getContext("2d")
+          .getImageData(0, offset, canvas.width, canvas.height - offset);
+        // The render canvas has a white background. Keep any page containing visible ink.
+        let blank = true;
+        for (let pixel = 0; pixel < data.length; pixel += 4) {
+          if (data[pixel + 3] && (data[pixel] < 255 || data[pixel + 1] < 255 || data[pixel + 2] < 255)) {
+            blank = false;
+            break;
+          }
+        }
+        if (blank) pdf.deletePage(lastPage);
+      }
+    }
     await worker.save();
   } catch (error) {
     console.error("downloadLabPdf failed:", error);
