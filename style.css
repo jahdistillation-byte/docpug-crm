@@ -78553,3 +78553,66 @@ html body #visitPaymentModal .visitPaymentSuccess > span {
 }
 #staffBranches .staffBranchOption input { margin: 0; accent-color: var(--ct-accent); }
 #staffBranches .staffBranchOption small, #staffBranches .staffBranchStatus { color: var(--ct-muted); }
+
+#monthScheduleEditorOverlay .monthScheduleEditorTabs { display: flex !important; }
+#monthScheduleEditorOverlay .monthScheduleEditorRows:not([hidden]) {
+  display: block !important;
+  overflow: auto;
+}
+#monthScheduleEditorOverlay :is(.monthScheduleEditorRows, .monthScheduleRepeatContent, .monthScheduleEditorColumns)[hidden] {
+  display: none !important;
+}
+#monthScheduleEditorOverlay .monthScheduleDayBranch select { width: 100%; min-width: 0; }
+@media (min-width: 901px) {
+  #monthScheduleEditorOverlay .monthScheduleEditorColumns:not([hidden]),
+  #monthScheduleEditorOverlay .monthScheduleEditorRow {
+    display: grid !important;
+    grid-template-columns: minmax(140px, 1.5fr) minmax(120px, 1.2fr) minmax(100px, 1fr) repeat(2, minmax(85px, .8fr));
+    gap: 10px;
+  }
+  #monthScheduleEditorOverlay .monthScheduleRepeatGrid > :first-child,
+  #monthScheduleEditorOverlay .monthScheduleSeriesBranch { grid-column: span 2 !important; }
+}
+@media (max-width: 900px) {
+  #monthScheduleEditorOverlay .monthScheduleDayBranch { grid-column: 1 / -1; }
+}
+
+
+.patientDiagnosticTabs {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 auto 16px;
+}
+.patientDiagnosticTabs button { min-width: 96px; }
+.patientUltrasoundPage .premiumLabTypeText { overflow-wrap: anywhere; }
+.patientUltrasoundPage [data-ultrasound-records], .patientUltrasoundFields { display: grid; gap: 12px; }
+.patientUltrasoundFields { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.patientUltrasoundDialog.premiumLabModal {
+  position: fixed;
+  margin: auto;
+  max-height: calc(100dvh - 32px);
+  transform: none;
+  padding: 0;
+}
+.patientUltrasoundDialog:not([open]) { display: none; }
+.patientUltrasoundDialog::backdrop { background: rgba(8, 7, 20, .72); backdrop-filter: blur(6px); }
+.patientUltrasoundDialog form { display: flex; flex-direction: column; min-height: 0; }
+.patientUltrasoundDialog .premiumLabModalScroll { display: grid; gap: 16px; }
+.patientUltrasoundDialog .premiumLabModalHeader, .patientUltrasoundDialog .premiumLabModalFooter { flex: none; }
+.patientUltrasoundDialog .premiumLabResultTop a { color: inherit; text-decoration: underline; }
+.patientUltrasoundCard {
+  padding: 16px;
+  background: var(--ct-card, var(--card-bg));
+  border: 1px solid var(--ct-line, var(--border-color));
+  border-radius: 14px;
+}
+.patientUltrasoundCard header { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.patientUltrasoundCard time { display: block; color: var(--ct-muted, inherit); }
+.patientUltrasoundCard dd { margin: 0 0 10px; }
+.patientUltrasoundCard dt { font-weight: 600; }
+.patientUltrasoundFindings { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media (max-width: 640px) {
+  .patientUltrasoundFields { grid-template-columns: minmax(0, 1fr); }
+}

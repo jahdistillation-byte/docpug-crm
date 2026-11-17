@@ -78845,7 +78845,7 @@ function normalizePatientLabFromApi(
 }
 
 async function requestPatientLabs(
-  patientId
+  patientId, kind = "lab"
 ) {
   const normalizedPatientId =
     String(
@@ -78863,7 +78863,7 @@ async function requestPatientLabs(
       encodeURIComponent(
         normalizedPatientId
       )
-    }/labs`,
+    }/labs${kind === "ultrasound" ? "?kind=ultrasound" : ""}`,
     {
       method: "GET",
       credentials: "include",
@@ -78913,7 +78913,7 @@ async function requestPatientLabs(
       normalizePatientLabFromApi
     );
 
-  patientLabsApiCache.set(
+  if (kind !== "ultrasound") patientLabsApiCache.set(
     normalizedPatientId,
     normalizedItems
   );
@@ -79023,6 +79023,8 @@ async function requestCreatePatientLab(
       data.item || {}
     );
 
+  if (updatedLab.type === "ultrasound") return updatedLab;
+
   const currentLabs =
     getCachedPatientLabs(
       normalizedPatientId
@@ -79114,6 +79116,8 @@ async function requestUpdatePatientLab(
     normalizePatientLabFromApi(
       data.item || {}
     );
+
+  if (createdLab.type === "ultrasound") return createdLab;
 
   const currentLabs =
     getCachedPatientLabs(
@@ -82404,6 +82408,281 @@ if (arrivalButton) {
 };
 }
 
+function mountDiagnosticTabs(panel, pet, active) {
+  const controls = document.createElement("div");
+  controls.className = "patientDiagnosticTabs";
+  controls.setAttribute("role", "group");
+  controls.setAttribute("aria-label", "Діагностика");
+  const tabs = [
+    ["lab", translateInterfaceText("patients.card.labs.title"), () => renderLabsTab(pet)],
+    ["ultrasound", "УЗД", () => renderPatientUltrasound(pet)],
+  ];
+  for (const [key, label, open] of tabs) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = key === active ? "primary" : "ghost";
+    button.textContent = label;
+    button.setAttribute("aria-pressed", String(key === active));
+    if (key !== active) button.addEventListener("click", open);
+    controls.append(button);
+  }
+  panel.prepend(controls);
+}
+
+const ULTRASOUND_ORGANS = {
+  liver: ["Печінка", { portal_vein: "Діаметр ворітної вени" }],
+  gallbladder: ["Жовчний міхур і протоки", { gallbladder_wall: "Товщина стінки", bile_duct: "Діаметр спільної жовчної протоки" }],
+  spleen: ["Селезінка", { spleen_thickness: "Товщина селезінки" }],
+  kidneys: ["Нирки", { left_kidney: "Довжина лівої нирки", right_kidney: "Довжина правої нирки" }],
+  bladder: ["Сечовий міхур і уретра", { bladder_wall: "Товщина стінки сечового міхура" }],
+  digestive: ["Шлунок і кишківник", { stomach_wall: "Товщина стінки шлунка", duodenum_wall: "Товщина стінки дванадцятипалої кишки", jejunum_wall: "Товщина стінки порожньої кишки", ileum_wall: "Товщина стінки клубової кишки", colon_wall: "Товщина стінки ободової кишки" }],
+  pancreas: ["Підшлункова залоза", { pancreas_left: "Ширина лівої частки", pancreas_body: "Ширина тіла", pancreas_right: "Товщина правої частки" }],
+  adrenals: ["Надниркові залози", { left_adrenal: "Товщина каудального полюса лівої залози", right_adrenal: "Товщина каудального полюса правої залози" }],
+  reproductive: ["Репродуктивна система", { prostate_width: "Ширина простати", uterine_horn: "Діаметр рогу матки" }],
+  nodes: ["Лімфатичні вузли", { node_short_axis: "Коротка вісь досліджуваного вузла" }],
+  peritoneum: ["Очеревина та вільна рідина", {}],
+  pregnancy: ["Вагітність", { biparietal_diameter: "Біпарієтальний діаметр плода" }],
+  heart: ["Серце · ехокардіографія", {}],
+  thorax: ["Грудна клітка та плевра", {}],
+  neck: ["Шия та щитоподібна залоза", {}],
+  eye: ["Око", {}],
+  musculoskeletal: ["М’які тканини та суглоби", {}],
+  other: ["Інша ділянка", {}],
+};
+const ULTRASOUND_ABDOMEN = ["liver", "gallbladder", "spleen", "kidneys", "bladder", "digestive", "pancreas", "adrenals", "reproductive", "nodes", "peritoneum", "other"];
+const ULTRASOUND_TITLES = { abdomen: "Черевна порожнина", ...Object.fromEntries(
+  Object.entries(ULTRASOUND_ORGANS).map(([key, [title]]) => [key, title])
+) };
+const ULTRASOUND_METRICS = Object.assign({}, ...Object.values(ULTRASOUND_ORGANS).map(([, metrics]) => metrics));
+const ULTRASOUND_ICON = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M3 11h4l2-3 3 6 2-3h7M8 21h8m-4-4v4"/></svg>';
+
+function getUltrasoundReference(species, weight, metric) {
+  if (species === "dog" && ["duodenum_wall", "jejunum_wall"].includes(metric) && weight >= 2.1 && weight <= 64) {
+    const bands = metric === "duodenum_wall"
+      ? [[20, 5.1], [30, 5.3], [Infinity, 6]]
+      : [[20, 4.1], [40, 4.4], [Infinity, 4.7]];
+    return { max: bands.find(([upper]) => weight < upper)[1], source: "14599172" };
+  }
+  if (species === "cat") {
+    const intestinalBounds = { duodenum_wall: [1.78, 2.51], jejunum_wall: [1.96, 2.67] }[metric];
+    if (intestinalBounds) return { min: intestinalBounds[0], max: intestinalBounds[1], source: "24174500" };
+    if (["left_adrenal", "right_adrenal"].includes(metric)) {
+      return { min: 3, max: 4.5, source: "23234721" };
+    }
+    const bounds = { pancreas_left: [2.6, 9.5], pancreas_body: [3.5, 8.5] }[metric];
+    if (bounds) return { min: bounds[0], max: bounds[1], source: "16050283" };
+  }
+  return {};
+}
+
+async function renderPatientUltrasound(pet) {
+  const box = $("#patientTabContent");
+  if (!box || !pet?.id) return;
+  const species = normalizeSpecies(pet.species);
+  const weight = Number(String(pet.weight_kg ?? pet.weight ?? "").replace(",", "."));
+  const speciesText = { dog: "Собака", cat: "Кіт" }[species] || "Інший або невідомий вид";
+  const panel = document.createElement("section");
+  panel.className = "patientInfoBox premiumLabsPage patientUltrasoundPage";
+  panel.innerHTML = `
+    <section class="premiumLabsHero">
+      <div class="premiumLabsHeroText"><h2>УЗД пацієнта</h2>
+        <p>Оберіть зону дослідження, щоб створити протокол.</p>
+        <p>Референси пацієнта · ${speciesText}</p></div>
+      <div class="premiumLabsHeroIcon">${ULTRASOUND_ICON}</div>
+    </section>
+    <section class="premiumLabTypes">
+      ${Object.entries(ULTRASOUND_TITLES).map(([key, title]) => `
+        <button type="button" class="premiumLabTypeButton" data-ultrasound-template="${key}">
+          <span class="premiumLabTypeIcon">${ULTRASOUND_ICON}</span>
+          <span class="premiumLabTypeText"><strong>${title}</strong></span>
+          <span class="premiumLabTypeAction"><span>＋ Створити</span></span>
+        </button>`).join("")}
+    </section>
+    <section class="premiumLabsHistory">
+      <div class="premiumLabsHistoryHead"><h3>Історія УЗД</h3></div>
+      <p data-ultrasound-status role="status"></p><div data-ultrasound-records></div>
+    </section>`;
+  box.replaceChildren(panel);
+  mountDiagnosticTabs(panel, pet, "ultrasound");
+  const status = panel.querySelector("[data-ultrasound-status]");
+  const records = panel.querySelector("[data-ultrasound-records]");
+
+  async function load() {
+    status.hidden = false;
+    status.textContent = "Завантаження…";
+    let protocols;
+    try {
+      protocols = await requestPatientLabs(pet.id, "ultrasound");
+    } catch {
+      status.textContent = "Не вдалося завантажити протоколи УЗД. ";
+      const retry = document.createElement("button");
+      retry.type = "button";
+      retry.className = "ghost";
+      retry.textContent = "Спробувати ще раз";
+      retry.addEventListener("click", load, { once: true });
+      status.append(retry);
+      return;
+    }
+    if (!panel.isConnected) return;
+    status.hidden = protocols.length > 0;
+    status.textContent = "Протоколів УЗД ще немає.";
+    records.replaceChildren();
+    for (const protocol of protocols) {
+      const card = document.createElement("article");
+      card.className = "patientUltrasoundCard";
+      const findings = Object.entries(protocol.values).flatMap(([key, value]) => {
+        const label = ULTRASOUND_ORGANS[key]?.[0] || (Object.hasOwn(ULTRASOUND_METRICS, key) ? ULTRASOUND_METRICS[key] : "");
+        if (!label || !value) return [];
+        const ref = protocol.refs[key];
+        const bounds = ref && [ref.min !== "" && ref.min != null && `≥ ${ref.min}`, ref.max !== "" && ref.max != null && `≤ ${ref.max}`].filter(Boolean).join(" · ");
+        const display = Object.hasOwn(ULTRASOUND_METRICS, key)
+          ? `${value} мм${bounds ? ` (референс ${bounds} мм)` : ""}` : value;
+        return [`<dt>${escapeHtml(label)}</dt><dd class="patientUltrasoundFindings">${escapeHtml(display)}</dd>`];
+      });
+      card.innerHTML = `
+        <header><div><strong>${escapeHtml(protocol.values.region || "УЗД")}</strong>
+          <time datetime="${escapeHtml(protocol.date)}">${escapeHtml(formatLabCardDate(protocol.date))}</time></div>
+          <button class="ghost" type="button">Редагувати</button></header>
+        ${protocol.comment ? `<p class="patientUltrasoundFindings">${escapeHtml(protocol.comment)}</p>` : ""}
+        ${findings.length ? `<details><summary>Результати дослідження</summary><dl>${findings.join("")}</dl></details>` : ""}`;
+      card.querySelector("button").addEventListener("click", () =>
+        openEditor(protocol.values.template || "abdomen", protocol));
+      records.append(card);
+    }
+  }
+
+  function openEditor(template, protocol = null) {
+    if (!Object.hasOwn(ULTRASOUND_TITLES, template)) template = "abdomen";
+    const values = protocol?.values || {};
+    const sections = template === "abdomen" ? ULTRASOUND_ABDOMEN : [template];
+    const measurements = Object.entries(Object.assign({}, ...sections.map(key => ULTRASOUND_ORGANS[key][1])));
+    const references = Object.fromEntries(measurements.map(([key]) => [key,
+      values[key] != null ? (protocol?.refs?.[key] || {}) : getUltrasoundReference(species, weight, key),
+    ]));
+    const dialog = document.createElement("dialog");
+    dialog.className = "patientUltrasoundDialog premiumLabModal";
+    dialog.setAttribute("aria-labelledby", "patientUltrasoundTitle");
+    const decimalInput = (name, value) => `<input name="${name}" value="${escapeHtml(String(value ?? ""))}" inputmode="decimal" pattern="[0-9]+([.,][0-9]+)?" maxlength="16" placeholder="—">`;
+    dialog.innerHTML = `
+      <form>
+        <header class="premiumLabModalHeader">
+          <div class="premiumLabModalHeaderMain"><span class="premiumLabModalIcon">${ULTRASOUND_ICON}</span>
+            <div><h2 id="patientUltrasoundTitle">${protocol ? "Редагувати протокол УЗД" : "Нове УЗД"}</h2>
+              <p>${ULTRASOUND_TITLES[template]} · ${escapeHtml(pet.name || speciesText)}</p></div>
+          </div>
+          <button type="button" class="premiumLabModalClose" aria-label="Закрити" data-close>×</button>
+        </header>
+        <div class="premiumLabModalScroll">
+          <div class="patientUltrasoundFields">
+            <label class="premiumLabField"><span>Дата дослідження</span>
+              <input type="date" name="date" value="${escapeHtml(protocol?.date || todayISO())}" required></label>
+            <label class="premiumLabField"><span>Ділянка дослідження</span>
+              <input name="region" value="${escapeHtml(values.region || (template === "other" ? "" : ULTRASOUND_TITLES[template]))}" maxlength="150" required></label>
+          </div>
+          ${measurements.length ? `<section class="premiumLabResultsSection">
+            <h3>Вимірювання</h3>
+            <p>${speciesText}${species === "dog" && weight > 0 ? ` · ${weight} кг` : ""}. Межі референсу можна уточнити для цього протоколу.</p>
+            <div class="premiumLabResultsGrid">
+              ${measurements.map(([key, label]) => {
+                const ref = references[key];
+                const citation = ["14599172", "16050283", "24174500", "23234721"].includes(ref.source)
+                  ? `<small><a href="https://pubmed.ncbi.nlm.nih.gov/${ref.source}/" target="_blank" rel="noopener noreferrer">${ref.source === "24174500" ? "Діапазон у дослідженні" : "Джерело референсу"}</a></small>` : "";
+                return `<article class="premiumLabResultCard">
+                  <div class="premiumLabResultTop"><div><strong>${label}</strong>${citation}</div></div>
+                  <label class="premiumLabValueField"><span>Результат, мм</span>${decimalInput(key, values[key])}</label>
+                  <div class="premiumLabReferenceGrid">
+                    <label><span>Мін., мм</span>${decimalInput(key + "_min", ref.min)}</label>
+                    <label><span>Макс., мм</span>${decimalInput(key + "_max", ref.max)}</label>
+                  </div>
+                </article>`;
+              }).join("")}
+            </div>
+          </section>` : ""}
+          <div class="patientUltrasoundFields">
+            ${sections.map(key => `<label class="premiumLabCommentField"><span>${ULTRASOUND_ORGANS[key][0]} · опис</span>
+              <textarea name="${key}" maxlength="${key === "other" ? 2500 : 1500}" rows="2">${escapeHtml(values[key] || "")}</textarea></label>`).join("")}
+          </div>
+          <label class="premiumLabCommentField"><span>Висновок</span>
+            <textarea name="conclusion" maxlength="6000" rows="3">${escapeHtml(protocol?.comment || "")}</textarea></label>
+          <p role="alert" hidden></p>
+        </div>
+        <footer class="premiumLabModalFooter">
+          <button type="button" class="premiumLabCancel" data-close>Скасувати</button>
+          <button type="submit" class="premiumLabSave">Зберегти протокол</button>
+        </footer>
+      </form>`;
+    const form = dialog.querySelector("form");
+    const submit = form.querySelector("[type=submit]");
+    const error = form.querySelector("[role=alert]");
+    const closeButtons = [...form.querySelectorAll("[data-close]")];
+    closeButtons.forEach(button => button.addEventListener("click", () => dialog.close()));
+    dialog.addEventListener("cancel", event => {
+      if (submit.disabled) event.preventDefault();
+    });
+    dialog.addEventListener("close", () => dialog.remove(), { once: true });
+    form.addEventListener("submit", async event => {
+      event.preventDefault();
+      if (submit.disabled) return;
+      const data = new FormData(form);
+      const read = key => String(data.get(key) || "").trim();
+      const findings = { region: read("region"), template };
+      const refs = {};
+      const comment = read("conclusion");
+      const showError = message => {
+        error.textContent = message;
+        error.hidden = false;
+        error.scrollIntoView({ block: "nearest" });
+      };
+      error.hidden = true;
+      if (!findings.region) return showError("Вкажіть ділянку дослідження.");
+      for (const key of sections) {
+        if (read(key)) findings[key] = read(key);
+      }
+      for (const [key, label] of measurements) {
+        const value = read(key);
+        if (!value) continue;
+        const min = read(key + "_min").replace(",", ".");
+        const max = read(key + "_max").replace(",", ".");
+        if (min && max && Number(min) > Number(max)) {
+          showError(`${label}: мінімум має бути меншим або дорівнювати максимуму.`);
+          return;
+        }
+        findings[key] = value.replace(",", ".");
+        const previous = references[key];
+        const source = min === String(previous.min ?? "") && max === String(previous.max ?? "")
+          ? previous.source
+          : "";
+        if (min || max) refs[key] = { min, max, ...(source ? { source } : {}) };
+      }
+      if (!comment && Object.keys(findings).length === 2) {
+        showError("Додайте вимірювання, опис або висновок УЗД.");
+        return;
+      }
+      const result = { type: "ultrasound", date: read("date"), values: findings, refs, comment };
+      submit.disabled = true;
+      closeButtons.forEach(button => { button.disabled = true; });
+      try {
+        if (protocol) await requestUpdatePatientLab(pet.id, protocol.id, result);
+        else await requestCreatePatientLab(pet.id, result);
+        dialog.close();
+        if (panel.isConnected) await load();
+      } catch (saveError) {
+        showError(saveError.message || "Не вдалося зберегти протокол УЗД.");
+      } finally {
+        submit.disabled = false;
+        closeButtons.forEach(button => { button.disabled = false; });
+      }
+    });
+    panel.append(dialog);
+    dialog.showModal();
+  }
+
+  panel.querySelectorAll("[data-ultrasound-template]").forEach(button => {
+    button.addEventListener("click", () => openEditor(button.dataset.ultrasoundTemplate));
+  });
+  await load();
+}
+
 async function renderLabsTab(
   pet
 ) {
@@ -82462,6 +82741,8 @@ async function renderLabsTab(
     </div>
   `;
 
+  const loadingPanel = box.firstElementChild;
+  mountDiagnosticTabs(loadingPanel, pet, "lab");
   let labs = [];
 
   try {
@@ -82469,7 +82750,9 @@ async function renderLabsTab(
       await requestPatientLabs(
         pet.id
       );
+    if (!box.contains(loadingPanel)) return;
   } catch (error) {
+    if (!box.contains(loadingPanel)) return;
     console.error(
       "requestPatientLabs failed:",
       error
@@ -82510,6 +82793,7 @@ async function renderLabsTab(
       </div>
     `;
 
+    mountDiagnosticTabs(box.firstElementChild, pet, "lab");
     return;
   }
 
@@ -82825,6 +83109,7 @@ async function renderLabsTab(
     </div>
   `;
 
+  mountDiagnosticTabs(box.firstElementChild, pet, "lab");
   box
     .querySelectorAll("[data-create-lab-type]")
     .forEach((button) => {

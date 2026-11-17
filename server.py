@@ -20447,6 +20447,18 @@ def api_get_patient_labs(
             400,
         )
 
+    ultrasound_only = request.args.get("kind") == "ultrasound"
+
+    def build_results_query():
+        query = supabase.table("patient_labs").select("*").eq(
+            "org_id", current_org
+        ).eq("patient_id", patient_id)
+        query = (
+            query.eq("lab_type", "ultrasound") if ultrasound_only
+            else query.neq("lab_type", "ultrasound")
+        )
+        return query.order("performed_at", desc=True).order("created_at", desc=True).limit(100)
+
     try:
         patient_result = execute_with_retry(
             lambda: (
@@ -20473,32 +20485,7 @@ def api_get_patient_labs(
                 404,
             )
 
-        labs_result = execute_with_retry(
-            lambda: (
-                supabase
-                .table("patient_labs")
-                .select("*")
-                .eq(
-                    "org_id",
-                    current_org,
-                )
-                .eq(
-                    "patient_id",
-                    patient_id,
-                )
-                .order(
-                    "performed_at",
-                    desc=True,
-                )
-                .order(
-                    "created_at",
-                    desc=True,
-                )
-                .limit(100)
-            ),
-            attempts=3,
-            delay=0.25,
-        )
+        labs_result = execute_with_retry(build_results_query, attempts=3, delay=0.25)
 
         return ok({
             "items":
@@ -20517,6 +20504,56 @@ def api_get_patient_labs(
             "аналізи пацієнта.",
             500,
         )
+def validate_ultrasound_protocol(values, conclusion, refs):
+    notes = {
+        "liver", "gallbladder", "spleen", "kidneys", "bladder", "digestive",
+        "pancreas", "adrenals", "reproductive", "nodes", "peritoneum", "pregnancy",
+        "heart", "thorax", "neck", "eye", "musculoskeletal", "other",
+    }
+    measurements = {
+        "portal_vein", "gallbladder_wall", "bile_duct", "spleen_thickness",
+        "left_kidney", "right_kidney", "bladder_wall", "stomach_wall",
+        "duodenum_wall", "jejunum_wall", "ileum_wall", "colon_wall", "pancreas_left",
+        "pancreas_body", "pancreas_right", "left_adrenal", "right_adrenal",
+        "prostate_width", "uterine_horn", "node_short_axis", "biparietal_diameter",
+    }
+    fields = dict.fromkeys(notes, 1500)
+    fields.update(dict.fromkeys(measurements, 16))
+    fields.update(region=150, other=2500, template=32)
+    if not isinstance(values, dict) or any(
+        key not in fields or not isinstance(value, str) or len(value) > fields[key]
+        for key, value in values.items()
+    ):
+        return fail("Перевірте поля протоколу УЗД.", 400)
+
+    def is_measurement(value):
+        return isinstance(value, str) and len(value) <= 16 and re.fullmatch(r"[0-9]+(?:\.[0-9]+)?", value)
+
+    if "template" in values and values["template"] not in notes | {"abdomen"}:
+        return fail("Невідомий шаблон протоколу УЗД.", 400)
+    if not values.get("region", "").strip():
+        return fail("Вкажіть ділянку дослідження.", 400)
+    if any(not is_measurement(values[key]) for key in measurements & values.keys()):
+        return fail("Перевірте значення вимірювань УЗД.", 400)
+    if not isinstance(refs, dict):
+        return fail("Перевірте референси УЗД.", 400)
+    for key, bounds in refs.items():
+        if key not in measurements or key not in values or not isinstance(bounds, dict):
+            return fail("Перевірте референси УЗД.", 400)
+        lower, upper = bounds.get("min", ""), bounds.get("max", "")
+        if (
+            bounds.keys() - {"min", "max", "source"}
+            or (lower != "" and not is_measurement(lower))
+            or (upper != "" and not is_measurement(upper))
+            or (lower and upper and float(lower) > float(upper))
+            or bounds.get("source", "") not in ("", "14599172", "16050283", "24174500", "23234721")
+        ):
+            return fail("Перевірте референси УЗД.", 400)
+    if not conclusion and not any(value.strip() for key, value in values.items() if key not in {"region", "template"}):
+        return fail("Додайте вимірювання, опис або висновок УЗД.", 400)
+    return None
+
+
 @app.post(
     "/api/patients/<patient_id>/labs"
 )
@@ -20582,6 +20619,11 @@ def api_create_patient_lab(
     values = data.get("values")
 
     refs = data.get("refs") or {}
+
+    if lab_type == "ultrasound":
+        protocol_error = validate_ultrasound_protocol(values, comment, refs)
+        if protocol_error:
+            return protocol_error
 
     if not lab_type:
         return fail(
@@ -20808,6 +20850,11 @@ def api_update_patient_lab(
 
     values = data.get("values")
     refs = data.get("refs") or {}
+
+    if lab_type == "ultrasound":
+        protocol_error = validate_ultrasound_protocol(values, comment, refs)
+        if protocol_error:
+            return protocol_error
 
     if not lab_type:
         return fail(
@@ -21195,6 +21242,7 @@ def api_get_patient_ai_context(
                 supabase
                 .table("patient_labs")
                 .select("*")
+                .neq("lab_type", "ultrasound")
                 .eq(
                     "org_id",
                     current_org,
