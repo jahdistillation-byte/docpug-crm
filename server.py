@@ -20508,7 +20508,7 @@ def validate_ultrasound_protocol(values, conclusion, refs):
     notes = {
         "liver", "gallbladder", "spleen", "kidneys", "bladder", "digestive",
         "pancreas", "adrenals", "reproductive", "nodes", "peritoneum", "pregnancy",
-        "heart", "thorax", "neck", "eye", "musculoskeletal", "other",
+        "heart", "thorax", "neck", "eye", "musculoskeletal", "other", "ureters", "vessels",
     }
     measurements = {
         "portal_vein", "gallbladder_wall", "bile_duct", "spleen_thickness",
@@ -20516,6 +20516,7 @@ def validate_ultrasound_protocol(values, conclusion, refs):
         "duodenum_wall", "jejunum_wall", "ileum_wall", "colon_wall", "pancreas_left",
         "pancreas_body", "pancreas_right", "left_adrenal", "right_adrenal",
         "prostate_width", "uterine_horn", "node_short_axis", "biparietal_diameter",
+        "left_ureter_width", "right_ureter_width", "aorta_width", "caudal_vena_cava_width",
     }
     fields = dict.fromkeys(notes, 1500)
     fields.update(dict.fromkeys(measurements, 16))
@@ -20523,13 +20524,15 @@ def validate_ultrasound_protocol(values, conclusion, refs):
     if not isinstance(values, dict) or any(
         key not in fields or not isinstance(value, str) or len(value) > fields[key]
         for key, value in values.items()
+        if key != "study"
     ):
         return fail("Перевірте поля протоколу УЗД.", 400)
 
     def is_measurement(value):
         return isinstance(value, str) and len(value) <= 16 and re.fullmatch(r"[0-9]+(?:\.[0-9]+)?", value)
 
-    if "template" in values and values["template"] not in notes | {"abdomen"}:
+    template = values.get("template")
+    if "template" in values and template not in notes | {"abdomen", "urogenital", "urinary", "digestive_bundle", "followup"}:
         return fail("Невідомий шаблон протоколу УЗД.", 400)
     if not values.get("region", "").strip():
         return fail("Вкажіть ділянку дослідження.", 400)
@@ -20549,7 +20552,56 @@ def validate_ultrasound_protocol(values, conclusion, refs):
             or bounds.get("source", "") not in ("", "14599172", "16050283", "24174500", "23234721")
         ):
             return fail("Перевірте референси УЗД.", 400)
-    if not conclusion and not any(value.strip() for key, value in values.items() if key not in {"region", "template"}):
+    study = values.get("study", {})
+    invalid_study = "Перевірте структуровані дані протоколу УЗД."
+    if not isinstance(study, dict) or study.keys() - {"organs", "pregnancy", "previous"}:
+        return fail(invalid_study, 400)
+    states = study.get("organs", {})
+    if not isinstance(states, dict) or any(
+        key not in notes - {"pregnancy"} or state not in ("assessed", "limited", "unseen", "skipped")
+        for key, state in states.items()
+    ) or (states and template == "pregnancy"):
+        return fail(invalid_study, 400)
+    if "previous" in study:
+        previous = study["previous"]
+        if template != "followup" or not isinstance(previous, str) or not re.fullmatch(r"[A-Za-z0-9_-]{1,64}", previous):
+            return fail(invalid_study, 400)
+
+    pregnancy = study.get("pregnancy", {})
+    if not isinstance(pregnancy, dict) or pregnancy.keys() - {"status", "count", "age", "uterus", "fetuses"}:
+        return fail(invalid_study, 400)
+    if "pregnancy" in study and template != "pregnancy":
+        return fail(invalid_study, 400)
+    for key, limit in {"status": 20, "count": 2, "age": 100, "uterus": 1500}.items():
+        if key in pregnancy and (
+            not isinstance(pregnancy[key], str) or not pregnancy[key].strip() or len(pregnancy[key]) > limit
+        ):
+            return fail(invalid_study, 400)
+    if "status" in pregnancy and pregnancy["status"] not in ("confirmed", "not_seen", "uncertain"):
+        return fail(invalid_study, 400)
+    if "count" in pregnancy and not re.fullmatch(r"[0-9]{1,2}", pregnancy["count"]):
+        return fail(invalid_study, 400)
+
+    fetuses = pregnancy.get("fetuses", [])
+    if not isinstance(fetuses, list) or len(fetuses) > 32:
+        return fail(invalid_study, 400)
+    fetus_numbers = {"heart_rate", "sac", "crown_rump", "bpd"}
+    fetus_observations = {"heart", "movement"}
+    for fetus in fetuses:
+        if not isinstance(fetus, dict) or not fetus or fetus.keys() - (fetus_numbers | fetus_observations | {"location", "notes"}):
+            return fail(invalid_study, 400)
+        for key, value in fetus.items():
+            if not isinstance(value, str) or not value.strip():
+                return fail(invalid_study, 400)
+            if key in fetus_numbers and not is_measurement(value):
+                return fail(invalid_study, 400)
+            if key in fetus_observations and value not in ("seen", "unseen", "skipped"):
+                return fail(invalid_study, 400)
+            if (key == "location" and len(value) > 100) or (key == "notes" and len(value) > 1000):
+                return fail(invalid_study, 400)
+    has_pregnancy_findings = bool(pregnancy.keys() - {"fetuses"} or fetuses)
+    has_findings = any(value.strip() for key, value in values.items() if key not in {"region", "template", "study"})
+    if not (conclusion or has_findings or states or has_pregnancy_findings):
         return fail("Додайте вимірювання, опис або висновок УЗД.", 400)
     return None
 

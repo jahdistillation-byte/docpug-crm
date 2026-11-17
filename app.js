@@ -79023,7 +79023,7 @@ async function requestCreatePatientLab(
       data.item || {}
     );
 
-  if (updatedLab.type === "ultrasound") return updatedLab;
+  if (createdLab.type === "ultrasound") return createdLab;
 
   const currentLabs =
     getCachedPatientLabs(
@@ -79117,7 +79117,7 @@ async function requestUpdatePatientLab(
       data.item || {}
     );
 
-  if (createdLab.type === "ultrasound") return createdLab;
+  if (updatedLab.type === "ultrasound") return updatedLab;
 
   const currentLabs =
     getCachedPatientLabs(
@@ -82441,7 +82441,9 @@ const ULTRASOUND_ORGANS = {
   reproductive: ["Репродуктивна система", { prostate_width: "Ширина простати", uterine_horn: "Діаметр рогу матки" }],
   nodes: ["Лімфатичні вузли", { node_short_axis: "Коротка вісь досліджуваного вузла" }],
   peritoneum: ["Очеревина та вільна рідина", {}],
-  pregnancy: ["Вагітність", { biparietal_diameter: "Біпарієтальний діаметр плода" }],
+  pregnancy: ["Вагітність", {}],
+  ureters: ["Сечоводи", { left_ureter_width: "Діаметр лівого сечоводу", right_ureter_width: "Діаметр правого сечоводу" }],
+  vessels: ["Магістральні судини", { aorta_width: "Діаметр аорти", caudal_vena_cava_width: "Діаметр каудальної порожнистої вени" }],
   heart: ["Серце · ехокардіографія", {}],
   thorax: ["Грудна клітка та плевра", {}],
   neck: ["Шия та щитоподібна залоза", {}],
@@ -82449,11 +82451,51 @@ const ULTRASOUND_ORGANS = {
   musculoskeletal: ["М’які тканини та суглоби", {}],
   other: ["Інша ділянка", {}],
 };
-const ULTRASOUND_ABDOMEN = ["liver", "gallbladder", "spleen", "kidneys", "bladder", "digestive", "pancreas", "adrenals", "reproductive", "nodes", "peritoneum", "other"];
-const ULTRASOUND_TITLES = { abdomen: "Черевна порожнина", ...Object.fromEntries(
-  Object.entries(ULTRASOUND_ORGANS).map(([key, [title]]) => [key, title])
-) };
-const ULTRASOUND_METRICS = Object.assign({}, ...Object.values(ULTRASOUND_ORGANS).map(([, metrics]) => metrics));
+const ULTRASOUND_URINARY = ["kidneys", "ureters", "bladder"];
+const ULTRASOUND_GROUPS = {
+  abdomen: ["liver", "gallbladder", "spleen", "pancreas", "digestive", ...ULTRASOUND_URINARY, "reproductive", "adrenals", "nodes", "vessels", "peritoneum", "other"],
+  urogenital: [...ULTRASOUND_URINARY, "reproductive"],
+  urinary: ULTRASOUND_URINARY,
+  digestive_bundle: ["digestive", "liver", "gallbladder", "pancreas"],
+};
+const ULTRASOUND_TITLES = {
+  abdomen: "Черевна порожнина",
+  urogenital: "Сечостатева система",
+  urinary: "Сечова система",
+  digestive_bundle: "ШКТ + печінка, жовчні шляхи й підшлункова",
+  followup: "УЗД у динаміці",
+  ...Object.fromEntries(Object.entries(ULTRASOUND_ORGANS).map(([key, [title]]) => [key, title])),
+};
+const ULTRASOUND_STATUS = {
+  assessed: "Оцінено",
+  limited: "Візуалізація обмежена",
+  unseen: "Не візуалізовано",
+  skipped: "Не оцінювали",
+};
+const ULTRASOUND_PREGNANCY_STATUS = {
+  confirmed: "Підтверджено",
+  not_seen: "Ознак вагітності не виявлено",
+  uncertain: "Результат невизначений",
+};
+const ULTRASOUND_FETAL_OBSERVATION = {
+  seen: "Візуалізується",
+  unseen: "Не візуалізується",
+  skipped: "Не оцінювали",
+};
+const ULTRASOUND_FETUS_FIELDS = {
+  location: "Розташування",
+  heart: "Серцева активність",
+  movement: "Рухи",
+  heart_rate: "ЧСС, уд./хв",
+  sac: "Внутрішній діаметр хоріальної порожнини, мм",
+  crown_rump: "Куприково-тім’яний розмір, мм",
+  bpd: "Біпарієтальний діаметр, мм",
+  notes: "Примітка",
+};
+const ULTRASOUND_METRICS = {
+  ...Object.assign({}, ...Object.values(ULTRASOUND_ORGANS).map(([, metrics]) => metrics)),
+  biparietal_diameter: "Біпарієтальний діаметр плода",
+};
 const ULTRASOUND_ICON = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M3 11h4l2-3 3 6 2-3h7M8 21h8m-4-4v4"/></svg>';
 
 function getUltrasoundReference(species, weight, metric) {
@@ -82507,10 +82549,10 @@ async function renderPatientUltrasound(pet) {
   const status = panel.querySelector("[data-ultrasound-status]");
   const records = panel.querySelector("[data-ultrasound-records]");
 
+  let protocols = [];
   async function load() {
     status.hidden = false;
     status.textContent = "Завантаження…";
-    let protocols;
     try {
       protocols = await requestPatientLabs(pet.id, "ultrasound");
     } catch {
@@ -82539,6 +82581,29 @@ async function renderPatientUltrasound(pet) {
           ? `${value} мм${bounds ? ` (референс ${bounds} мм)` : ""}` : value;
         return [`<dt>${escapeHtml(label)}</dt><dd class="patientUltrasoundFindings">${escapeHtml(display)}</dd>`];
       });
+      const study = protocol.values.study || {};
+      for (const [key, state] of Object.entries(study.organs || {})) {
+        findings.push(`<dt>${escapeHtml(ULTRASOUND_ORGANS[key]?.[0] || key)}</dt><dd>${escapeHtml(ULTRASOUND_STATUS[state] || "")}</dd>`);
+      }
+      const pregnancy = study.pregnancy;
+      if (pregnancy) {
+        const summary = [ULTRASOUND_PREGNANCY_STATUS[pregnancy.status],
+          pregnancy.count && `Візуалізовано: ${pregnancy.count}`,
+          pregnancy.age && `Орієнтовний термін: ${pregnancy.age}`, pregnancy.uterus,
+        ].filter(Boolean).join(" · ");
+        if (summary) findings.push(`<dt>Перебіг вагітності</dt><dd>${escapeHtml(summary)}</dd>`);
+        pregnancy.fetuses?.forEach((fetus, index) => {
+          const observations = Object.entries(fetus).map(([key, value]) => {
+            const observation = ["heart", "movement"].includes(key) ? ULTRASOUND_FETAL_OBSERVATION[value] : value;
+            return `${ULTRASOUND_FETUS_FIELDS[key]}: ${observation}`;
+          });
+          findings.push(`<dt>Плід ${index + 1}</dt><dd>${escapeHtml(observations.join(" · "))}</dd>`);
+        });
+      }
+      if (study.previous) {
+        const previous = protocols.find(item => item.id === study.previous);
+        if (previous) findings.push(`<dt>Попереднє УЗД</dt><dd>${escapeHtml(formatLabCardDate(previous.date))} · ${escapeHtml(previous.values.region || "УЗД")}</dd>`);
+      }
       card.innerHTML = `
         <header><div><strong>${escapeHtml(protocol.values.region || "УЗД")}</strong>
           <time datetime="${escapeHtml(protocol.date)}">${escapeHtml(formatLabCardDate(protocol.date))}</time></div>
@@ -82554,8 +82619,11 @@ async function renderPatientUltrasound(pet) {
   function openEditor(template, protocol = null) {
     if (!Object.hasOwn(ULTRASOUND_TITLES, template)) template = "abdomen";
     const values = protocol?.values || {};
-    const sections = template === "abdomen" ? ULTRASOUND_ABDOMEN : [template];
-    const measurements = Object.entries(Object.assign({}, ...sections.map(key => ULTRASOUND_ORGANS[key][1])));
+    const study = values.study || {};
+    const isPregnancy = template === "pregnancy";
+    const isFollowup = template === "followup";
+    const sections = isPregnancy ? [] : isFollowup ? ULTRASOUND_GROUPS.abdomen : (ULTRASOUND_GROUPS[template] || [template]);
+    const measurements = sections.flatMap(key => Object.entries(ULTRASOUND_ORGANS[key][1]));
     const references = Object.fromEntries(measurements.map(([key]) => [key,
       values[key] != null ? (protocol?.refs?.[key] || {}) : getUltrasoundReference(species, weight, key),
     ]));
@@ -82563,6 +82631,52 @@ async function renderPatientUltrasound(pet) {
     dialog.className = "patientUltrasoundDialog premiumLabModal";
     dialog.setAttribute("aria-labelledby", "patientUltrasoundTitle");
     const decimalInput = (name, value) => `<input name="${name}" value="${escapeHtml(String(value ?? ""))}" inputmode="decimal" pattern="[0-9]+([.,][0-9]+)?" maxlength="16" placeholder="—">`;
+    const select = (name, options, value) => `<select name="${name}"><option value="">—</option>
+      ${Object.entries(options).map(([key, label]) => `<option value="${escapeHtml(key)}" ${key === value ? "selected" : ""}>${escapeHtml(label)}</option>`).join("")}
+    </select>`;
+    const textInput = (name, value, limit) => `<input name="${name}" maxlength="${limit}" value="${escapeHtml(value || "")}">`;
+    const notesInput = (name, value, limit) => `<textarea name="${name}" maxlength="${limit}" rows="2">${escapeHtml(value || "")}</textarea>`;
+    const pregnancy = study.pregnancy || {};
+    const fetusCard = fetus => `
+      <fieldset class="ultrasoundFetus">
+        <legend>Плід</legend>
+        <div class="patientUltrasoundFields">
+          <label>Розташування${textInput("location", fetus.location, 100)}</label>
+          <label>ЧСС, уд./хв${decimalInput("heart_rate", fetus.heart_rate)}</label>
+          <label>Серцева активність${select("heart", ULTRASOUND_FETAL_OBSERVATION, fetus.heart)}</label>
+          <label>Рухи${select("movement", ULTRASOUND_FETAL_OBSERVATION, fetus.movement)}</label>
+          ${["sac", "crown_rump", "bpd"].map(key => `<label>${ULTRASOUND_FETUS_FIELDS[key]}${decimalInput(key, fetus[key])}</label>`).join("")}
+          <label>Примітка${notesInput("notes", fetus.notes, 1000)}</label>
+        </div>
+        <button class="ghost" type="button" data-remove-fetus>Видалити плід</button>
+      </fieldset>`;
+    const organCard = key => {
+      const [title, metrics] = ULTRASOUND_ORGANS[key];
+      const hasData = values[key] || study.organs?.[key] || Object.keys(metrics).some(metric => values[metric] != null);
+      return `<details class="ultrasoundOrgan" ${sections.length === 1 || hasData ? "open" : ""}>
+        <summary>${title}<span data-organ-state>${ULTRASOUND_STATUS[study.organs?.[key]] || ""}</span></summary>
+        <div class="ultrasoundOrganBody">
+          <div class="patientUltrasoundFields">
+            <label>Статус огляду${select("status_" + key, ULTRASOUND_STATUS, study.organs?.[key])}</label>
+            <label>УЗ-опис${notesInput(key, values[key], key === "other" ? 2500 : 1500)}</label>
+          </div>
+          ${Object.entries(metrics).map(([metric, label]) => {
+            const ref = references[metric];
+            const source = ["14599172", "16050283", "24174500", "23234721"].includes(ref.source) ? ref.source : "";
+            return `<div class="ultrasoundMetric">
+              <label>${label}, мм${decimalInput(metric, values[metric])}<small data-previous-metric="${metric}" hidden></small></label>
+              <details><summary>Референс${ref.min != null || ref.max != null ? ` · ${escapeHtml(String(ref.min || "—"))}–${escapeHtml(String(ref.max || "—"))} мм` : ""}</summary>
+                <div class="patientUltrasoundFields">
+                  <label>Мін., мм${decimalInput(metric + "_min", ref.min)}</label>
+                  <label>Макс., мм${decimalInput(metric + "_max", ref.max)}</label>
+                </div>
+                ${source ? `<a href="https://pubmed.ncbi.nlm.nih.gov/${source}/" target="_blank" rel="noopener noreferrer">Джерело референсу</a>` : ""}
+              </details>
+            </div>`;
+          }).join("")}
+        </div>
+      </details>`;
+    };
     dialog.innerHTML = `
       <form>
         <header class="premiumLabModalHeader">
@@ -82579,29 +82693,26 @@ async function renderPatientUltrasound(pet) {
             <label class="premiumLabField"><span>Ділянка дослідження</span>
               <input name="region" value="${escapeHtml(values.region || (template === "other" ? "" : ULTRASOUND_TITLES[template]))}" maxlength="150" required></label>
           </div>
-          ${measurements.length ? `<section class="premiumLabResultsSection">
-            <h3>Вимірювання</h3>
-            <p>${speciesText}${species === "dog" && weight > 0 ? ` · ${weight} кг` : ""}. Межі референсу можна уточнити для цього протоколу.</p>
-            <div class="premiumLabResultsGrid">
-              ${measurements.map(([key, label]) => {
-                const ref = references[key];
-                const citation = ["14599172", "16050283", "24174500", "23234721"].includes(ref.source)
-                  ? `<small><a href="https://pubmed.ncbi.nlm.nih.gov/${ref.source}/" target="_blank" rel="noopener noreferrer">${ref.source === "24174500" ? "Діапазон у дослідженні" : "Джерело референсу"}</a></small>` : "";
-                return `<article class="premiumLabResultCard">
-                  <div class="premiumLabResultTop"><div><strong>${label}</strong>${citation}</div></div>
-                  <label class="premiumLabValueField"><span>Результат, мм</span>${decimalInput(key, values[key])}</label>
-                  <div class="premiumLabReferenceGrid">
-                    <label><span>Мін., мм</span>${decimalInput(key + "_min", ref.min)}</label>
-                    <label><span>Макс., мм</span>${decimalInput(key + "_max", ref.max)}</label>
-                  </div>
-                </article>`;
-              }).join("")}
+          ${isFollowup ? `<label class="ultrasoundOrganBody">Попередній протокол
+            ${select("previous", Object.fromEntries(protocols.filter(item => item.id !== protocol?.id).map(item =>
+              [item.id, `${formatLabCardDate(item.date)} · ${item.values.region || "УЗД"}`])), study.previous)}
+          </label>` : ""}
+          ${isPregnancy ? `<section class="ultrasoundOrganBody">
+            <h3>Перебіг вагітності</h3>
+            <div class="patientUltrasoundFields">
+              <label>Результат дослідження${select("pregnancy_status", ULTRASOUND_PREGNANCY_STATUS, pregnancy.status)}</label>
+              <label>Кількість візуалізованих плодів
+                <input name="pregnancy_count" type="number" min="0" max="99" value="${escapeHtml(pregnancy.count || "")}">
+              </label>
+              <label>Орієнтовний термін${textInput("pregnancy_age", pregnancy.age, 100)}</label>
+              <label>Матка, плаценти та плодові оболонки${notesInput("pregnancy_uterus", pregnancy.uterus, 1500)}</label>
             </div>
-          </section>` : ""}
-          <div class="patientUltrasoundFields">
-            ${sections.map(key => `<label class="premiumLabCommentField"><span>${ULTRASOUND_ORGANS[key][0]} · опис</span>
-              <textarea name="${key}" maxlength="${key === "other" ? 2500 : 1500}" rows="2">${escapeHtml(values[key] || "")}</textarea></label>`).join("")}
-          </div>
+            <label>Загальний УЗ-опис${notesInput("pregnancy", values.pregnancy, 1500)}</label>
+            <div data-fetuses>${(pregnancy.fetuses || (values.biparietal_diameter ? [{ bpd: values.biparietal_diameter }] : [])).map(fetusCard).join("")}</div>
+            <button class="ghost" type="button" data-add-fetus>＋ Додати плід</button>
+          </section>` : `<section class="ultrasoundOrgans">
+            ${sections.map(organCard).join("")}
+          </section>`}
           <label class="premiumLabCommentField"><span>Висновок</span>
             <textarea name="conclusion" maxlength="6000" rows="3">${escapeHtml(protocol?.comment || "")}</textarea></label>
           <p role="alert" hidden></p>
@@ -82612,6 +82723,47 @@ async function renderPatientUltrasound(pet) {
         </footer>
       </form>`;
     const form = dialog.querySelector("form");
+    const fetusList = form.querySelector("[data-fetuses]");
+    const addFetus = form.querySelector("[data-add-fetus]");
+    const numberFetuses = () => {
+      [...fetusList.children].forEach((card, index) => {
+        card.querySelector("legend").textContent = `Плід ${index + 1}`;
+      });
+      addFetus.disabled = fetusList.children.length >= 32;
+    };
+    if (fetusList) {
+      numberFetuses();
+      addFetus.addEventListener("click", () => {
+        fetusList.insertAdjacentHTML("beforeend", fetusCard({}));
+        numberFetuses();
+        fetusList.lastElementChild.querySelector("input").focus();
+      });
+      fetusList.addEventListener("click", event => {
+        const remove = event.target.closest("[data-remove-fetus]");
+        if (!remove) return;
+        remove.closest("fieldset").remove();
+        numberFetuses();
+        addFetus.focus();
+      });
+    }
+    form.querySelector(".ultrasoundOrgans")?.addEventListener("change", event => {
+      if (event.target.name?.startsWith("status_")) {
+        event.target.closest("details").querySelector("[data-organ-state]").textContent = ULTRASOUND_STATUS[event.target.value] || "";
+      }
+    });
+    const previousSelect = form.elements.namedItem("previous");
+    if (previousSelect) {
+      const updateComparison = () => {
+        const previous = protocols.find(item => item.id === previousSelect.value);
+        form.querySelectorAll("[data-previous-metric]").forEach(hint => {
+          const previousValue = previous?.values[hint.dataset.previousMetric];
+          hint.hidden = previousValue == null;
+          hint.textContent = previousValue == null ? "" : `Попереднє: ${previousValue} мм`;
+        });
+      };
+      previousSelect.addEventListener("change", updateComparison);
+      updateComparison();
+    }
     const submit = form.querySelector("[type=submit]");
     const error = form.querySelector("[role=alert]");
     const closeButtons = [...form.querySelectorAll("[data-close]")];
@@ -82627,6 +82779,20 @@ async function renderPatientUltrasound(pet) {
       const read = key => String(data.get(key) || "").trim();
       const findings = { region: read("region"), template };
       const refs = {};
+      const details = {};
+      if (isFollowup && read("previous")) details.previous = read("previous");
+      if (isPregnancy) {
+        if (read("pregnancy")) findings.pregnancy = read("pregnancy");
+        const assessment = Object.fromEntries(["status", "count", "age", "uterus"]
+          .map(key => [key, read("pregnancy_" + key)]).filter(([, value]) => value));
+        const fetuses = [...fetusList.children].map(card => Object.fromEntries(
+          [...card.querySelectorAll("[name]")].map(input => [input.name,
+            input.inputMode === "decimal" ? input.value.trim().replace(",", ".") : input.value.trim(),
+          ]).filter(([, value]) => value)
+        )).filter(fetus => Object.keys(fetus).length);
+        if (fetuses.length) assessment.fetuses = fetuses;
+        if (Object.keys(assessment).length) details.pregnancy = assessment;
+      }
       const comment = read("conclusion");
       const showError = message => {
         error.textContent = message;
@@ -82635,9 +82801,12 @@ async function renderPatientUltrasound(pet) {
       };
       error.hidden = true;
       if (!findings.region) return showError("Вкажіть ділянку дослідження.");
+      const organs = {};
       for (const key of sections) {
         if (read(key)) findings[key] = read(key);
+        if (read("status_" + key)) organs[key] = read("status_" + key);
       }
+      if (Object.keys(organs).length) details.organs = organs;
       for (const [key, label] of measurements) {
         const value = read(key);
         if (!value) continue;
@@ -82654,10 +82823,11 @@ async function renderPatientUltrasound(pet) {
           : "";
         if (min || max) refs[key] = { min, max, ...(source ? { source } : {}) };
       }
-      if (!comment && Object.keys(findings).length === 2) {
+      if (!comment && Object.keys(findings).length === 2 && !details.organs && !details.pregnancy) {
         showError("Додайте вимірювання, опис або висновок УЗД.");
         return;
       }
+      if (Object.keys(details).length) findings.study = details;
       const result = { type: "ultrasound", date: read("date"), values: findings, refs, comment };
       submit.disabled = true;
       closeButtons.forEach(button => { button.disabled = true; });

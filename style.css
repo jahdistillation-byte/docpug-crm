@@ -78616,3 +78616,55 @@ html body #visitPaymentModal .visitPaymentSuccess > span {
 @media (max-width: 640px) {
   .patientUltrasoundFields { grid-template-columns: minmax(0, 1fr); }
 }
+
+.ultrasoundOrgans, .ultrasoundOrganBody, [data-fetuses] {
+  display: grid;
+  gap: 12px;
+}
+.ultrasoundOrgan, .ultrasoundFetus {
+  min-width: 0;
+  margin: 0;
+  border: 1px solid var(--ct-line, var(--border-color, #504860));
+  border-radius: 12px;
+}
+.ultrasoundOrgan > summary {
+  padding: 12px 14px;
+  cursor: pointer;
+  font-weight: 700;
+}
+.ultrasoundOrgan > summary span {
+  margin-inline-start: 10px;
+  color: var(--ct-muted, inherit);
+  font-size: .8em;
+  font-weight: 500;
+}
+.ultrasoundOrgan > .ultrasoundOrganBody, .ultrasoundFetus { padding: 12px 14px; }
+.ultrasoundFetus > button { margin-top: 12px; }
+.ultrasoundMetric {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  align-items: start;
+  gap: 10px;
+}
+.ultrasoundMetric > details > summary { padding: 8px 0; cursor: pointer; }
+.patientUltrasoundDialog :is(.ultrasoundOrganBody, .ultrasoundFetus) label {
+  display: grid;
+  align-content: start;
+  gap: 5px;
+}
+.patientUltrasoundDialog :is(.ultrasoundOrganBody, .ultrasoundFetus) :is(input, select, textarea) {
+  box-sizing: border-box;
+  min-width: 0;
+  width: 100%;
+  padding: 8px 10px;
+  font: inherit;
+  color: inherit;
+  background: var(--ct-paper, rgba(130, 120, 150, .13));
+  border: 1px solid var(--ct-line, var(--border-color, #504860));
+  border-radius: 8px;
+}
+.patientUltrasoundDialog .ultrasoundOrganBody button { justify-self: start; }
+.patientUltrasoundDialog [hidden] { display: none !important; }
+@media (max-width: 640px) {
+  .ultrasoundMetric { grid-template-columns: minmax(0, 1fr); }
+}
