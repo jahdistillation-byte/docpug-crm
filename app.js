@@ -85052,6 +85052,8 @@ function getLabPdfUi() {
       values[0];
 
   return {
+    collectionTitle: pick("Результати обстежень", "Examination results", "Untersuchungsergebnisse", "Wyniki badań"),
+
     clinic:
       pick(
         "Ветеринарна клініка",
@@ -86003,7 +86005,7 @@ padding: ${labPdfLayout.ownerPadding};
   `;
 
 documentNode.innerHTML = `
-  <header style="
+  <header data-exam-pdf-brand style="
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
@@ -86088,7 +86090,7 @@ documentNode.innerHTML = `
     </div>
 
     <div style="text-align: right;">
-      <div style="
+      <div data-exam-pdf-title style="
         color: #242833;
         font-size: 16px;
         font-weight: 900;
@@ -86096,7 +86098,7 @@ documentNode.innerHTML = `
         ${isUltrasound ? "Протокол ультразвукового дослідження" : "Результати лабораторного дослідження"}
       </div>
 
-      <div style="
+      <div data-exam-pdf-study style="
         margin-top: 5px;
         color: #777E8C;
         font-size: 10px;
@@ -86109,7 +86111,7 @@ documentNode.innerHTML = `
   ${
     clinicPhone || clinicAddress || clinicWebsite
       ? `
-        <div style="
+        <div data-exam-pdf-contacts style="
           display: flex;
           flex-wrap: wrap;
           gap: 6px 16px;
@@ -86152,7 +86154,7 @@ documentNode.innerHTML = `
       : ""
   }
 
-  <section style="
+  <section data-exam-pdf-meta style="
     display: grid;
     grid-template-columns: 1.25fr 1fr 1fr;
     gap: 10px;
@@ -86162,7 +86164,7 @@ documentNode.innerHTML = `
     : "20px"
 };
   ">
-    <div style="
+    <div data-exam-pdf-patient style="
       padding: ${
   isCompactLabPdf
     ? "6px 10px"
@@ -87167,14 +87169,14 @@ async function downloadPatientExamPdf(pet, studies, isCurrent) {
   let pdf;
   for (const { record, previous } of studies) {
     if (!isCurrent()) return;
-    pdf = await renderPatientExamPdf(pet, record, clinicProfile, previous, pdf, true);
+    pdf = await renderPatientExamPdf(pet, record, clinicProfile, previous, pdf, true, studies.length > 1);
   }
   if (!isCurrent() || !pdf) return;
   const filename = ["DocPUG", "Обстеження", sanitizeLabPdfFilename(pet.name || "patient"), todayISO()].join("_");
   pdf.save(filename + ".pdf");
 }
 
-async function renderPatientExamPdf(pet, lab, clinicProfile, previousUltrasound, target, batch = false) {
+async function renderPatientExamPdf(pet, lab, clinicProfile, previousUltrasound, target, batch = false, collection = false) {
   const isUltrasound = lab.type === "ultrasound";
   const renderHost = document.createElement("div");
 
@@ -87211,6 +87213,24 @@ renderHost.style.cssText = `
     ? buildLabPdfDocumentBase(pet, lab, clinicProfile, previousUltrasound)
     : buildLabPdfDocument(pet, lab, clinicProfile);
   if (batch) pdfDocument.style.minHeight = "0";
+  if (collection) {
+    const brand = pdfDocument.querySelector("[data-exam-pdf-brand]");
+    const title = brand.querySelector("[data-exam-pdf-title]");
+    const study = brand.querySelector("[data-exam-pdf-study]");
+    if (isUltrasound) study.textContent = "УЗД · " + (lab.values?.region || study.textContent.trim());
+    if (!target) {
+      title.textContent = getLabPdfUi().collectionTitle;
+    } else {
+      const heading = document.createElement("h2");
+      heading.style.cssText = "margin:0;padding-bottom:8px;border-bottom:1px solid #E1E4E9;color:#242833;font-size:16px;line-height:1.4;overflow-wrap:anywhere";
+      heading.textContent = study.textContent.trim();
+      brand.replaceWith(heading);
+      pdfDocument.querySelector("[data-exam-pdf-contacts]")?.remove();
+      pdfDocument.querySelector("[data-exam-pdf-patient]").remove();
+      pdfDocument.querySelector("[data-exam-pdf-meta]").style.gridTemplateColumns = "1fr 1fr";
+    }
+  }
+
   renderHost.appendChild(pdfDocument);
   document.body.appendChild(renderHost);
   try {
