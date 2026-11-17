@@ -82517,6 +82517,94 @@ function getUltrasoundReference(species, weight, metric) {
   return {};
 }
 
+function renderUltrasoundReportSections(protocol, previous, forPdf = false) {
+  const values = protocol.values || {};
+  const study = values.study || {};
+  const number = value => String(value).replace(".", ",");
+  const text = value => escapeHtml(String(value ?? ""));
+  const paragraph = value => value
+    ? `<p class="patientUltrasoundFindings" style="margin:6px 0;white-space:pre-wrap;overflow-wrap:anywhere">${text(value)}</p>`
+    : "";
+  const measurements = rows => {
+    if (!rows.length) return "";
+    const showReference = rows.some(row => row.reference);
+    const showPrevious = rows.some(row => row.previous);
+    return `
+    <table style="width:100%;border-collapse:collapse;margin-top:8px;text-align:left;table-layout:fixed">
+      <thead><tr style="${forPdf ? "background:#282333;color:#fff" : ""}">
+        <th scope="col" style="padding:5px 8px;width:52%">Показник</th>
+        <th scope="col" style="padding:5px 8px">Результат</th>
+        ${showReference ? '<th scope="col" style="padding:5px 8px">Референс</th>' : ""}
+        ${showPrevious ? '<th scope="col" style="padding:5px 8px">Попереднє УЗД</th>' : ""}
+      </tr></thead>
+      <tbody>${rows.map((row, index) => `<tr style="${forPdf && index % 2 === 0 ? "background:#F7F5FA" : ""}">
+        <th scope="row" style="padding:5px 8px;font-weight:600;overflow-wrap:anywhere">${text(row.label)}</th>
+        <td style="padding:5px 8px">${text(row.value)}</td>
+        ${showReference ? `<td style="padding:5px 8px">${text(row.reference || "—")}</td>` : ""}
+        ${showPrevious ? `<td style="padding:5px 8px">${text(row.previous || "—")}</td>` : ""}
+      </tr>`).join("")}</tbody>
+    </table>`;
+  };
+  const block = (title, content, status = "") => `
+    <section class="ultrasoundReportSection" style="${forPdf ? "margin:10px 0;padding:10px 12px;border:1px solid #E9E4EF;border-radius:10px;font-size:11px;line-height:1.4;page-break-inside:avoid" : ""}">
+      <header style="display:flex;justify-content:space-between;align-items:baseline;gap:8px;break-after:avoid;page-break-after:avoid">
+        <strong style="font-size:${forPdf ? "13px" : "inherit"}">${text(title)}</strong>
+        ${status ? `<span class="ultrasoundReportStatus" style="${forPdf ? "background:#F2ECFA;color:#51367B;border-radius:6px;padding:3px 7px;font-size:10px;font-weight:700" : ""}">${text(status)}</span>` : ""}
+      </header>
+      ${content}
+    </section>`;
+  const metricRow = ([key, label]) => {
+    if (values[key] == null || values[key] === "") return [];
+    const { min, max } = protocol.refs?.[key] || {};
+    const lower = min != null && min !== "" ? number(min) : "";
+    const upper = max != null && max !== "" ? number(max) : "";
+    const bounds = lower && upper ? `${lower}–${upper}` : lower ? `≥ ${lower}` : upper ? `≤ ${upper}` : "";
+    const earlier = previous?.values?.[key];
+    return [{
+      label, value: `${number(values[key])} мм`, reference: bounds && `${bounds} мм`,
+      previous: earlier != null && earlier !== "" ? `${number(earlier)} мм` : "",
+    }];
+  };
+
+  const sections = [];
+  if (previous) {
+    sections.push(block("Попереднє УЗД", paragraph(
+      `${formatLabCardDate(previous.date)} · ${previous.values?.region || "УЗД"}`
+    )));
+  }
+  const order = new Set([...ULTRASOUND_GROUPS.abdomen, ...Object.keys(ULTRASOUND_ORGANS)]);
+  for (const key of order) {
+    if (key === "pregnancy") continue;
+    const [title, metrics] = ULTRASOUND_ORGANS[key];
+    const rows = Object.entries(metrics).flatMap(metricRow);
+    const status = ULTRASOUND_STATUS[study.organs?.[key]];
+    if (values[key] || rows.length || status) {
+      sections.push(block(title, paragraph(values[key]) + measurements(rows), status));
+    }
+  }
+  const pregnancy = study.pregnancy || {};
+  const legacyMetrics = metricRow(["biparietal_diameter", ULTRASOUND_METRICS.biparietal_diameter]);
+  const pregnancyDetail = [
+    pregnancy.count != null && `Кількість візуалізованих плодів: ${pregnancy.count}`,
+    pregnancy.age && `Орієнтовний термін: ${pregnancy.age}`,
+    pregnancy.uterus && `Матка, плаценти та плодові оболонки: ${pregnancy.uterus}`,
+    values.pregnancy,
+  ].filter(Boolean).map(paragraph).join("");
+  if (pregnancyDetail || pregnancy.status || legacyMetrics.length) {
+    sections.push(block("Перебіг вагітності", pregnancyDetail + measurements(legacyMetrics),
+      ULTRASOUND_PREGNANCY_STATUS[pregnancy.status]));
+  }
+  for (const [index, fetus] of (pregnancy.fetuses || []).entries()) {
+    const rows = Object.entries(ULTRASOUND_FETUS_FIELDS).flatMap(([key, label]) => {
+      if (key === "notes" || fetus[key] == null || fetus[key] === "") return [];
+      const value = ["heart", "movement"].includes(key) ? ULTRASOUND_FETAL_OBSERVATION[fetus[key]] : key === "location" ? fetus[key] : number(fetus[key]);
+      return [{ label, value }];
+    });
+    sections.push(block(`Плід ${index + 1}`, measurements(rows) + paragraph(fetus.notes)));
+  }
+  return sections.join("");
+}
+
 async function renderPatientUltrasound(pet) {
   const box = $("#patientTabContent");
   if (!box || !pet?.id) return;
@@ -85314,8 +85402,10 @@ function getLabPdfStatusMeta(
 function buildLabPdfDocumentBase(
   pet,
   lab,
-  clinicProfile = {}
+  clinicProfile = {},
+  previousUltrasound
 ) {
+  const isUltrasound = lab?.type === "ultrasound";
   const clinic = {
     ...DEFAULT_CLINIC_PROFILE,
     ...(clinicProfile || {}),

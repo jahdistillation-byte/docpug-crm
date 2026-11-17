@@ -78610,8 +78610,18 @@ html body #visitPaymentModal .visitPaymentSuccess > span {
 }
 .patientUltrasoundCard header { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .patientUltrasoundCard time { display: block; color: var(--ct-muted, inherit); }
-.patientUltrasoundCard dd { margin: 0 0 10px; }
-.patientUltrasoundCard dt { font-weight: 600; }
+.ultrasoundReportActions { display: flex; flex-wrap: wrap; gap: 8px; }
+.ultrasoundReportSection {
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px solid var(--ct-line, var(--border-color));
+  border-radius: 10px;
+}
+.ultrasoundReportStatus { color: var(--ct-muted, inherit); font-size: .85em; }
+.ultrasoundReportSection th, .ultrasoundReportSection td { overflow-wrap: anywhere; }
+@media (max-width: 640px) {
+  .patientUltrasoundCard > header { flex-wrap: wrap; }
+}
 .patientUltrasoundFindings { white-space: pre-wrap; overflow-wrap: anywhere; }
 @media (max-width: 640px) {
   .patientUltrasoundFields { grid-template-columns: minmax(0, 1fr); }
