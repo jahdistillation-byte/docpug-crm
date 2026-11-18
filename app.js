@@ -53102,6 +53102,41 @@ function printA4Only(visitId) {
 // =========================
 // PATIENTS TAB — ИСПРАВЛЕННЫЙ РЕНДЕР
 // =========================
+const patientHospitalStatusRequests = new Map();
+
+function refreshPatientHospitalBadges(container, patientId = "") {
+  const requestKey = String(patientId);
+  let request = patientHospitalStatusRequests.get(requestKey);
+  if (!request) {
+    const params = new URLSearchParams(requestKey ? { patient_id: requestKey } : {});
+    request = fetch(`/api/patients/hospitalization-status?${params}`, {
+      credentials: "include",
+      cache: "no-store",
+    }).then(async response => {
+      if (!response.ok) throw new Error(`Hospitalization status HTTP ${response.status}`);
+      const result = await response.json();
+      return new Set(Array.isArray(result.data) ? result.data.map(String) : []);
+    }).finally(() => patientHospitalStatusRequests.delete(requestKey));
+    patientHospitalStatusRequests.set(requestKey, request);
+  }
+
+  return request.then(activePatients => {
+    if (!container?.isConnected) return;
+    container.querySelectorAll("[data-patient-hospital-badge]").forEach(badge => {
+      badge.hidden = !activePatients.has(badge.dataset.patientHospitalBadge);
+    });
+  }).catch(error => console.warn("Could not load hospitalization badges:", error));
+}
+
+function renderPatientHospitalBadge(patientId) {
+  const labels = {
+    uk: "У СТАЦІОНАРІ", en: "IN HOSPITAL", de: "STATIONÄR", pl: "W SZPITALU",
+  };
+  return `<span class="patientHospitalBadge" data-patient-hospital-badge="${escapeHtml(String(patientId))}" hidden>
+    ${escapeHtml(labels[getInterfaceLanguage()] || labels.uk)}
+  </span>`;
+}
+
 function renderPatientsTab() {
   const page = document.querySelector('.page[data-page="patients"]');
   if (!page) return;
@@ -53313,6 +53348,7 @@ function renderPatientsTab() {
             <button type="button" class="clientPatientName">
               <span class="patientDirectoryMark">${getStockIcon("paw")}</span>
               <span>${escapeHtml(patientName)}</span>
+              ${renderPatientHospitalBadge(patient.id)}
             </button>
             <div class="patientDirectoryMeta">${meta}</div>
           </div>
@@ -53411,6 +53447,7 @@ function renderPatientsTab() {
       }
     );
 mountMobilePatientsList(page, patients, owners);
+  void refreshPatientHospitalBadges(patientListElement);
   patientListElement.onclick =
     async (event) => {
       const editButton =
@@ -59170,6 +59207,7 @@ root.innerHTML = `
             ${escapeHtml(patientName)}
           </h1>
 
+          ${renderPatientHospitalBadge(pet.id)}
           <button
             type="button"
             data-patient-status-toggle
@@ -59646,6 +59684,7 @@ root.innerHTML = `
 `;
 
 window.mountPugPatientHeader?.(root);
+void refreshPatientHospitalBadges(root.querySelector(".patientPremiumNameRow"), pet.id);
 
 const backButton =
   root.querySelector(

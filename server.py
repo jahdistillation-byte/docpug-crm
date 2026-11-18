@@ -17730,6 +17730,45 @@ def api_delete_staff_schedule():
 # =========================
 # API: PATIENTS
 # =========================
+@app.get("/api/patients/hospitalization-status")
+def api_patient_hospitalization_status():
+    _, auth_error = auth_required()
+    if auth_error:
+        return auth_error
+
+    org_id = get_current_org_id()
+    if not org_id:
+        return fail("Organization not selected", 400)
+
+    patient_id = request.args.get("patient_id")
+    if patient_id is not None:
+        try:
+            patient_id = str(uuid.UUID(patient_id))
+        except ValueError:
+            return fail("Некоректний ID пацієнта.", 400)
+
+    def query():
+        result = (supabase.table("hospitalizations").select("patient_id")
+                  .eq("org_id", org_id).eq("is_active", True))
+        return result.eq("patient_id", patient_id).limit(1) if patient_id else result.order("id")
+
+    try:
+        if patient_id:
+            rows = report_rows(query)
+        else:
+            rows = []
+            while True:
+                offset = len(rows)
+                page = report_rows(lambda: query().range(offset, offset + 499))
+                rows.extend(page)
+                if len(page) < 500:
+                    break
+        return ok(list(dict.fromkeys(str(row["patient_id"]) for row in rows if row.get("patient_id"))))
+    except Exception:
+        app.logger.exception("Could not load patient hospitalization status")
+        return fail("Не вдалося завантажити статус стаціонару.", 500)
+
+
 @app.get("/api/patients")
 def api_get_patients():
     user, auth_error = auth_required()
