@@ -537,3 +537,46 @@ body[data-theme="white"] .page[data-page="stock"] {
 @media (prefers-reduced-motion: reduce) {
   .page[data-page="stock"] :is(.stockCatalogRow, .stockCatalogChevron) { transition: none; }
 }
+
+.stockBranchBalances {
+  margin-bottom: 16px;
+  padding: 14px 16px;
+  border: 1px solid var(--ct-line, var(--border-color, #54505d));
+  border-radius: 14px;
+}
+.stockBranchBalances summary { cursor: pointer; font-weight: 700; }
+.stockBranchBody, .stockBranchOperation { display: grid; gap: 10px; margin-top: 12px; }
+.stockBranchOperation { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); align-items: end; }
+.stockBranchOperation p { grid-column: 1 / -1; }
+.stockBranchBody label { display: grid; gap: 4px; }
+.stockBranchBody :is(select,input) {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  min-height: 38px;
+  padding: 6px 8px;
+  color: inherit;
+  background: var(--ct-card, var(--card-bg));
+  border: 1px solid var(--ct-line, var(--border-color, #54505d));
+  border-radius: 8px;
+}
+.stockBranchQuantities { list-style: none; padding: 0; }
+.stockBranchQuantities li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--ct-line, var(--border-color, #54505d));
+}
+.stockBranchBalances [hidden] { display: none !important; }
+
+.stockAdjustmentField select, .stockReceiveNote select {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 42px;
+  padding: 6px 10px;
+  color: inherit;
+  background: var(--ct-card, var(--card-bg));
+  border: 1px solid var(--ct-line, var(--border-color, #54505d));
+  border-radius: 8px;
+}

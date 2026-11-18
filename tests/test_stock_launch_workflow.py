@@ -11,6 +11,9 @@ os.environ.setdefault("SESSION_SECRET_KEY", "test-session-secret")
 import server
 
 
+STOCK_ITEM_ID = "00000000-0000-4000-8000-000000000010"
+
+
 class Query:
     def __init__(self, db, table):
         self.db, self.table = db, table
@@ -73,7 +76,7 @@ class Database:
     def __init__(self):
         self.sequence, self.fail_movement = 10, False
         self.rows = {
-            "stock": [{"id": "item", "org_id": "clinic", "name": "Test", "qty": 10.0, "price": 12, "purchase_price": 5, "unit": "мл", "active": True}],
+            "stock": [{"id": STOCK_ITEM_ID, "org_id": "clinic", "name": "Test", "qty": 10.0, "price": 12, "purchase_price": 5, "unit": "мл", "active": True}],
             "stock_movements": [], "visit_stock": [],
             "visits": [{"id": "visit", "org_id": "clinic", "currency": "UAH"}],
             "orgs": [{"id": "clinic", "currency": "UAH"}],
@@ -82,6 +85,45 @@ class Database:
     def table(self, name):
         return Query(self, name)
 
+
+    def rpc(self, name, params):
+        if self.fail_movement:
+            raise RuntimeError("simulated movement failure")
+        stock = self.rows["stock"][0]
+        lines = self.rows["visit_stock"]
+        visit_id = params["p_visit_id"]
+        if name == "add_branch_visit_stock":
+            self.assert_rpc_stock(params["p_stock_id"], stock["id"])
+            quantity = params["p_qty"]
+            line = {"id": str(self.sequence), "visit_id": visit_id, "stock_id": stock["id"],
+                    "qty": quantity, "name_snap": stock["name"], "price_snap": params["p_price"] or stock["price"],
+                    "inventory_synced": True, "inventory_branch_id": "branch"}
+        elif name == "remove_branch_visit_stock":
+            line, = [row for row in lines if row["id"] == params["p_line_id"]]
+            quantity = line["qty"]
+        else:
+            raise AssertionError(name)
+        self.sequence += 1
+        removed = name == "remove_branch_visit_stock"
+        before = stock["qty"]
+        stock["qty"] = server.stock_balance_after(before, quantity, income=removed)
+        if removed:
+            lines.remove(line)
+        else:
+            lines.append(line)
+        self.table("stock_movements").insert({
+            "org_id": params["p_org_id"], "stock_id": stock["id"], "visit_id": visit_id,
+            "movement_type": "income" if removed else "writeoff", "quantity": quantity,
+            "quantity_before": before, "quantity_after": stock["qty"],
+        }).execute()
+        return SimpleNamespace(execute=lambda: SimpleNamespace(data={
+            "line": deepcopy(line), "stock": deepcopy(stock), "branch_quantity": stock["qty"], "restored": removed,
+        }))
+
+    @staticmethod
+    def assert_rpc_stock(requested, stored):
+        if requested != stored:
+            raise AssertionError((requested, stored))
 
 class StockLaunchTests(unittest.TestCase):
     def setUp(self):
@@ -96,11 +138,11 @@ class StockLaunchTests(unittest.TestCase):
             self.addCleanup(p.stop)
 
     def adjust(self, mode, quantity):
-        return self.client.post("/api/stock/item/adjust", json={"mode": mode, "quantity": quantity})
+        return self.client.post(f"/api/stock/{STOCK_ITEM_ID}/adjust", json={"mode": mode, "quantity": quantity})
 
     def test_receipt_visit_use_and_removal_preserve_balance_and_history(self):
         self.assertEqual(self.adjust("income", 2.5).status_code, 200)
-        added = self.client.post("/api/visits/visit/stock", json={"stock_id": "item", "quantity": .3})
+        added = self.client.post("/api/visits/visit/stock", json={"stock_id": STOCK_ITEM_ID, "quantity": .3})
         self.assertEqual(added.status_code, 200, added.get_json())
         self.assertAlmostEqual(self.db.rows["stock"][0]["qty"], 12.2)
         line_id = added.get_json()["data"]["line"]["id"]
@@ -109,7 +151,7 @@ class StockLaunchTests(unittest.TestCase):
         self.assertAlmostEqual(self.db.rows["stock"][0]["qty"], 12.5)
         self.assertEqual(self.client.delete(f"/api/visits/visit/stock/{line_id}").status_code, 404)
         self.assertAlmostEqual(self.db.rows["stock"][0]["qty"], 12.5)
-        history = self.client.get("/api/stock/item/movements").get_json()["data"]
+        history = self.client.get(f"/api/stock/{STOCK_ITEM_ID}/movements").get_json()["data"]
         self.assertEqual(len(history["items"]), 3)
         self.assertEqual(history["unit"], "мл")
         self.assertFalse(history["has_more"])
@@ -118,7 +160,7 @@ class StockLaunchTests(unittest.TestCase):
         self.db.fail_movement = True
         self.assertEqual(self.adjust("writeoff", 1).status_code, 500)
         self.assertEqual(self.db.rows["stock"][0]["qty"], 10)
-        response = self.client.post("/api/visits/visit/stock", json={"stock_id": "item", "quantity": 1})
+        response = self.client.post("/api/visits/visit/stock", json={"stock_id": STOCK_ITEM_ID, "quantity": 1})
         self.assertEqual(response.status_code, 500)
         self.assertEqual(self.db.rows["stock"][0]["qty"], 10)
         self.assertEqual(self.db.rows["visit_stock"], [])
@@ -126,7 +168,7 @@ class StockLaunchTests(unittest.TestCase):
     def test_fractional_use_leaves_no_phantom_stock(self):
         self.db.rows["stock"][0]["qty"] = .3
         for _ in range(3):
-            response = self.client.post("/api/visits/visit/stock", json={"stock_id": "item", "quantity": .1})
+            response = self.client.post("/api/visits/visit/stock", json={"stock_id": STOCK_ITEM_ID, "quantity": .1})
             self.assertEqual(response.status_code, 200, response.get_json())
         self.assertEqual(self.db.rows["stock"][0]["qty"], 0)
         self.assertEqual(self.adjust("writeoff", .1).status_code, 409)
@@ -141,54 +183,54 @@ class StockLaunchTests(unittest.TestCase):
         for value in [True, False, None, "", "abc", "NaN", "Infinity", "1e999", -1, 0]:
             with self.subTest(value=value):
                 self.assertEqual(self.adjust("income", value).status_code, 400)
-                response = self.client.post("/api/visits/visit/stock", json={"stock_id": "item", "quantity": value})
+                response = self.client.post("/api/visits/visit/stock", json={"stock_id": STOCK_ITEM_ID, "quantity": value})
                 self.assertEqual(response.status_code, 400)
         self.assertEqual(self.db.rows["stock"][0]["qty"], 10)
         self.assertEqual(self.db.rows["stock_movements"], [])
 
     def test_insufficient_stock_and_foreign_visit_are_rejected(self):
         self.assertEqual(self.adjust("writeoff", 11).status_code, 409)
-        response = self.client.post("/api/visits/foreign/stock", json={"stock_id": "item", "quantity": 1})
+        response = self.client.post("/api/visits/foreign/stock", json={"stock_id": STOCK_ITEM_ID, "quantity": 1})
         self.assertEqual(response.status_code, 404)
         self.assertEqual(self.db.rows["visit_stock"], [])
 
     def test_history_is_scoped_paginated_and_read_only(self):
         for i in range(55):
-            self.db.rows["stock_movements"].append({"id": f"{i:03}", "created_at": "2026-11-06", "org_id": "clinic", "stock_id": "item", "movement_type": "income", "quantity": 1})
-        self.db.rows["stock_movements"].append({"id": "secret", "org_id": "other", "stock_id": "item"})
+            self.db.rows["stock_movements"].append({"id": f"{i:03}", "created_at": "2026-11-06", "org_id": "clinic", "stock_id": STOCK_ITEM_ID, "movement_type": "income", "quantity": 1})
+        self.db.rows["stock_movements"].append({"id": "secret", "org_id": "other", "stock_id": STOCK_ITEM_ID})
         before = deepcopy(self.db.rows)
-        page = self.client.get("/api/stock/item/movements").get_json()["data"]
+        page = self.client.get(f"/api/stock/{STOCK_ITEM_ID}/movements").get_json()["data"]
         self.assertEqual(len(page["items"]), 50)
         self.assertTrue(page["has_more"])
-        tail = self.client.get("/api/stock/item/movements?offset=50").get_json()["data"]
+        tail = self.client.get(f"/api/stock/{STOCK_ITEM_ID}/movements?offset=50").get_json()["data"]
         self.assertEqual(len(tail["items"]), 5)
         self.assertFalse(tail["has_more"])
         self.assertEqual(self.client.get("/api/stock/foreign/movements").status_code, 404)
-        self.assertEqual(self.client.get("/api/stock/item/movements?offset=-1").status_code, 400)
+        self.assertEqual(self.client.get(f"/api/stock/{STOCK_ITEM_ID}/movements?offset=-1").status_code, 400)
         self.assertEqual(self.db.rows, before)
 
     def test_session_and_manual_adjustment_permissions(self):
         self.user["role"] = "doctor"
         self.assertEqual(self.adjust("income", 1).status_code, 403)
         with patch.object(server, "get_current_user", return_value=None):
-            self.assertEqual(self.client.get("/api/stock/item/movements").status_code, 401)
+            self.assertEqual(self.client.get(f"/api/stock/{STOCK_ITEM_ID}/movements").status_code, 401)
 
     def test_unit_cannot_reinterpret_existing_balances_or_history(self):
-        response = self.client.put("/api/stock/item", json={"unit": "шт"})
+        response = self.client.put(f"/api/stock/{STOCK_ITEM_ID}", json={"unit": "шт"})
         self.assertEqual(response.status_code, 409)
         self.assertEqual(self.db.rows["stock"][0]["unit"], "мл")
         self.db.rows["stock"][0]["qty"] = 0
-        self.db.rows["stock_movements"].append({"id": "m", "org_id": "clinic", "stock_id": "item"})
-        self.assertEqual(self.client.put("/api/stock/item", json={"unit": "шт"}).status_code, 409)
-        self.assertEqual(self.client.put("/api/stock/item", json={"unit": "мл", "name": "Updated"}).status_code, 200)
+        self.db.rows["stock_movements"].append({"id": "m", "org_id": "clinic", "stock_id": STOCK_ITEM_ID})
+        self.assertEqual(self.client.put(f"/api/stock/{STOCK_ITEM_ID}", json={"unit": "шт"}).status_code, 409)
+        self.assertEqual(self.client.put(f"/api/stock/{STOCK_ITEM_ID}", json={"unit": "мл", "name": "Updated"}).status_code, 200)
         self.db.rows["stock_movements"] = []
-        self.assertEqual(self.client.put("/api/stock/item", json={"unit": "шт"}).status_code, 200)
+        self.assertEqual(self.client.put(f"/api/stock/{STOCK_ITEM_ID}", json={"unit": "шт"}).status_code, 200)
 
     def test_purchase_reference_reads_same_document_without_financial_writes(self):
         self.db.rows.update({
             "stock_purchases": [{"id": "purchase", "org_id": "clinic", "supplier_id": "supplier", "total_amount": "9001.10", "paid_amount": "1.01", "status": "ordered"}],
             "suppliers": [{"id": "supplier", "org_id": "clinic", "name": "Supplier"}],
-            "stock_purchase_items": [{"id": "line", "purchase_id": "purchase", "stock_id": "item", "ordered_qty": 10, "received_qty": 0}],
+            "stock_purchase_items": [{"id": "line", "purchase_id": "purchase", "stock_id": STOCK_ITEM_ID, "ordered_qty": 10, "received_qty": 0}],
         })
         before = deepcopy(self.db.rows)
         response = self.client.get("/api/finance/purchases/purchase")

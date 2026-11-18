@@ -21,7 +21,15 @@
  }
  window.pugVisitCatalogSearch=(items,query,kind='service')=>(Array.isArray(items)?items:[]).filter(item=>item.active!==false).map((item,index)=>({item,index,rank:rank(item,query,kind)})).filter(row=>Number.isFinite(row.rank)).sort((a,b)=>a.rank-b.rank||String(a.item.name||'').localeCompare(String(b.item.name||''),getCalendarLocale())||a.index-b.index).map(row=>row.item);
  const visitKey=kind=>String(state.selectedVisitId||'')+':'+kind;
- const getItems=kind=>kind==='service'?loadServices():loadStock();
+ let visitStock = { visitId: "", balances: {} };
+ const getItems = kind => {
+   if (kind === 'service') return loadServices();
+   if (visitStock.visitId !== String(state.selectedVisitId || '')) return [];
+   return loadStock().map(item => ({ ...item, qty: visitStock.balances[item.id] ?? 0 }));
+ };
+ window.updatePugVisitStockBalance = (visitId, stockId, quantity, branchId) => {
+   if (visitStock.visitId === visitId && visitStock.branch_id === branchId) visitStock.balances[stockId] = quantity;
+ };
  const money=item=>formatClinicMoney(Number(item.price)||0);
  const unit=item=>typeof getStockInterfaceText==='function'?getStockInterfaceText(String(item.unit||'шт')):String(item.unit||'шт');
  const quantity=item=>(Number(item.qty)||0).toLocaleString(getCalendarLocale(),{maximumFractionDigits:3});
@@ -46,11 +54,25 @@
    closeActiveCatalog?.();
    const t=words(),origin=document.getElementById(kind==='service'?'visitServicePickerButton':'visitStockPickerButton'),context=String(state.selectedVisitId||'');
    let items=getItems(kind).filter(item=>item.active!==false);
-   try{if(!items.length){if(kind==='service')await loadServicesApi();else await loadStockApi();items=getItems(kind).filter(item=>item.active!==false);}}
+   try {
+     if (kind === 'stock') {
+       const [availability] = await Promise.all([
+         stockApiRequest('/api/visits/' + encodeURIComponent(context) + '/stock/availability', {
+           cache: 'no-store', headers: getOrgHeaders(),
+         }),
+         state.stockLoaded ? Promise.resolve() : loadStockApi(),
+       ]);
+       if (request !== catalogRequest || context !== String(state.selectedVisitId || '')) return;
+       visitStock = { visitId: context, ...availability };
+     } else if (!items.length) {
+       await loadServicesApi();
+     }
+     items = getItems(kind).filter(item => item.active !== false);
+   }
    catch(error){showCrmNotice({title:t.loadError});return;}
    if(request!==catalogRequest||context!==String(state.selectedVisitId||''))return;
    const modal=document.createElement('div');modal.id='pugVisitCatalogModal';modal.className='vcOverlay';modal.dataset.kind=kind;
-   modal.innerHTML=`<div class="vcBackdrop" data-vc-close></div><section class="vcDialog" role="dialog" aria-modal="true" aria-labelledby="vcTitle"><header class="vcHead"><div><span class="vcKicker">${escapeHtml(kind==='service'?t.serviceKicker:t.stockKicker)}</span><h2 id="vcTitle">${escapeHtml(t[kind])}</h2><p>${escapeHtml(t.subtitle)}</p></div><button type="button" class="vcClose" data-vc-close aria-label="${escapeHtml(t.close)}">${getStockIcon('close')}</button></header><div class="vcTools"><label class="vcSearch">${getStockIcon('search')}<input id="vcSearchInput" type="search" role="combobox" aria-label="${escapeHtml(t.search)}" aria-controls="vcResults" aria-autocomplete="list" aria-expanded="true" placeholder="${escapeHtml(t.search)}" autocomplete="off" spellcheck="false"></label><div class="vcCategories"></div><div class="vcStatus"><span class="vcCount" role="status" aria-live="polite"></span>${kind==='stock'?`<label class="vcAvailability"><input type="checkbox" id="vcShowAbsent">${escapeHtml(t.absent)}</label>`:''}</div></div><div id="vcResults" class="vcResults" role="listbox" aria-label="${escapeHtml(t[kind])}"></div><footer class="vcFooter">${escapeHtml(t.keys)}</footer></section>`;
+   modal.innerHTML=`<div class="vcBackdrop" data-vc-close></div><section class="vcDialog" role="dialog" aria-modal="true" aria-labelledby="vcTitle"><header class="vcHead"><div><span class="vcKicker">${escapeHtml(kind==='service'?t.serviceKicker:[t.stockKicker,visitStock.name].filter(Boolean).join(' · '))}</span><h2 id="vcTitle">${escapeHtml(t[kind])}</h2><p>${escapeHtml(t.subtitle)}</p></div><button type="button" class="vcClose" data-vc-close aria-label="${escapeHtml(t.close)}">${getStockIcon('close')}</button></header><div class="vcTools"><label class="vcSearch">${getStockIcon('search')}<input id="vcSearchInput" type="search" role="combobox" aria-label="${escapeHtml(t.search)}" aria-controls="vcResults" aria-autocomplete="list" aria-expanded="true" placeholder="${escapeHtml(t.search)}" autocomplete="off" spellcheck="false"></label><div class="vcCategories"></div><div class="vcStatus"><span class="vcCount" role="status" aria-live="polite"></span>${kind==='stock'?`<label class="vcAvailability"><input type="checkbox" id="vcShowAbsent">${escapeHtml(t.absent)}</label>`:''}</div></div><div id="vcResults" class="vcResults" role="listbox" aria-label="${escapeHtml(t[kind])}"></div><footer class="vcFooter">${escapeHtml(t.keys)}</footer></section>`;
    document.body.append(modal);const previousOverflow=document.body.style.overflow;document.body.style.overflow='hidden';
    const input=modal.querySelector('#vcSearchInput'),results=modal.querySelector('#vcResults'),categories=modal.querySelector('.vcCategories');let selectedCategory='',query='',showAbsent=false,rows=[],active=-1,closed=false;
    const close=()=>{if(closed)return;closed=true;if(closeActiveCatalog===close)closeActiveCatalog=null;document.removeEventListener('keydown',onKey,true);modal.remove();document.body.style.overflow=previousOverflow;if(origin?.isConnected)origin.focus();};

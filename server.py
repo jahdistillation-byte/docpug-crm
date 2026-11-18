@@ -3988,6 +3988,96 @@ def api_get_stock():
         )
 
 
+@app.get("/api/stock/<uuid:stock_id>/branches")
+def api_stock_branch_balances(stock_id):
+    _, auth_error = auth_required()
+    if auth_error:
+        return auth_error
+    org_id = get_current_org_id()
+    if not org_id:
+        return fail("Organization not selected", 400)
+
+    try:
+        item = supabase.table("stock").select("id").eq("org_id", org_id).eq("id", str(stock_id)).limit(1).execute()
+        if not item.data:
+            return fail("Позицію не знайдено.", 404)
+        branches = supabase.table("branches").select("id,name,is_active,is_primary").eq("org_id", org_id).order("is_primary", desc=True).order("name").execute()
+        balances = supabase.table("stock_branch_balances").select("branch_id,quantity").eq("org_id", org_id).eq("stock_id", str(stock_id)).execute()
+        operations = supabase.table("stock_branch_operations").select("from_branch_id,to_branch_id,quantity,created_at,comment").eq("org_id", org_id).eq("stock_id", str(stock_id)).order("created_at", desc=True).limit(25).execute()
+        movements = supabase.table("stock_movements").select(
+            "branch_id,movement_type,quantity,created_at,comment"
+        ).eq("org_id", org_id).eq("stock_id", str(stock_id)).not_.is_("branch_id", "null").is_(
+            "branch_operation_id", "null"
+        ).order(
+            "created_at", desc=True
+        ).limit(25).execute()
+        branch_operations = list(operations.data or [])
+        for movement in movements.data or []:
+            kind = movement["movement_type"]
+            if kind in {"income", "writeoff"}:
+                branch_operations.append({
+                    "from_branch_id": movement["branch_id"] if kind == "writeoff" else None,
+                    "to_branch_id": movement["branch_id"] if kind == "income" else None,
+                    "quantity": movement["quantity"], "created_at": movement["created_at"],
+                    "comment": movement.get("comment"),
+                })
+        branch_operations.sort(key=lambda entry: entry["created_at"], reverse=True)
+        quantities = {row["branch_id"]: row["quantity"] for row in balances.data or []}
+        return ok({
+            "branches": [
+                {**branch, "quantity": quantities.get(branch["id"], 0)}
+                for branch in branches.data or []
+            ],
+            "operations": branch_operations[:25],
+        })
+    except Exception as error:
+        print("Stock branch balances:", repr(error), flush=True)
+        return fail("Не вдалося завантажити залишки філій.", 500)
+
+
+@app.post("/api/stock/<uuid:stock_id>/branches")
+def api_stock_branch_operation(stock_id):
+    user, auth_error = owner_or_admin_required()
+    if auth_error:
+        return auth_error
+    org_id = get_current_org_id()
+    if not org_id:
+        return fail("Organization not selected", 400)
+    data = request.get_json(silent=True)
+    if not isinstance(data, dict):
+        return fail("Перевірте дані руху складу.", 400)
+    try:
+        operation_id = str(uuid.UUID(data["operation_id"]))
+        from_branch = str(uuid.UUID(data["from_branch"])) if data.get("from_branch") else None
+        to_branch = str(uuid.UUID(data["to_branch"])) if data.get("to_branch") else None
+        quantity = stock_movement_quantity(data)
+    except (KeyError, TypeError, ValueError, AttributeError):
+        return fail("Перевірте філії та кількість.", 400)
+    if from_branch == to_branch:
+        return fail("Оберіть філію для руху або дві різні філії для переміщення.", 400)
+    try:
+        supabase.rpc("record_stock_branch_operation", {
+            "p_org_id": org_id, "p_stock_id": str(stock_id), "p_actor_id": user["id"],
+            "p_operation_id": operation_id, "p_from_branch": from_branch,
+            "p_to_branch": to_branch, "p_quantity": quantity,
+            "p_comment": str(data.get("comment") or "").strip()[:2000] or None,
+        }).execute()
+        return ok({})
+    except Exception as error:
+        messages = {
+            "STOCK_BRANCH_INSUFFICIENT": ("Недостатньо товару у філії списання.", 409),
+            "STOCK_BRANCH_ITEM_NOT_FOUND": ("Позицію не знайдено.", 404),
+            "STOCK_BRANCH_INVALID_BRANCH": ("Оберіть активну філію цієї клініки.", 400),
+            "STOCK_BRANCH_INVALID_OPERATION": ("Перевірте філії та кількість.", 400),
+            "STOCK_BRANCH_OPERATION_CONFLICT": ("Цей номер операції вже використано.", 409),
+        }
+        if getattr(error, "message", None) in messages:
+            message, status = messages[error.message]
+            return fail(message, status)
+        print("Stock branch operation:", repr(error), flush=True)
+        return fail("Не вдалося зберегти рух складу.", 500)
+
+
 @app.get("/api/stock/<stock_id>/movements")
 def api_get_stock_movements(stock_id):
     user, auth_error = auth_required()
@@ -5102,750 +5192,136 @@ def api_remove_service_from_visit(visit_id, line_id):
         return fail("Не вдалося видалити послугу.", 500)
 
 
-@app.post("/api/visits/<visit_id>/stock")
-def api_add_stock_to_visit(
-    visit_id
-):
-    user, auth_error = (
-        auth_required()
-    )
-
+@app.get("/api/visits/<uuid:visit_id>/stock/availability")
+def api_visit_stock_availability(visit_id):
+    _, auth_error = auth_required()
     if auth_error:
         return auth_error
-
-    data = (
-        request.get_json(
-            silent=True
-        )
-        or {}
-    )
-
-    stock_id = str(
-        data.get("stock_id")
-        or data.get("stockId")
-        or ""
-    ).strip()
-
+    org_id = get_current_org_id()
+    if not org_id:
+        return fail("Organization not selected", 400)
     try:
+        visits = supabase.table("visits").select("branch_id").eq("org_id", org_id).eq("id", str(visit_id)).limit(1).execute().data
+        if not visits:
+            return fail("Візит не знайдено.", 404)
+        branch_id = visits[0]["branch_id"]
+        branches = supabase.table("branches").select("name").eq("org_id", org_id).eq(
+            "id", branch_id
+        ).limit(1).execute().data
+        balances = {}
+        for offset in range(0, 50000, 500):
+            rows = supabase.table("stock_branch_balances").select("stock_id,quantity").eq(
+                "org_id", org_id
+            ).eq("branch_id", branch_id).gt("quantity", 0).order("stock_id").range(offset, offset + 499).execute().data or []
+            balances.update({row["stock_id"]: row["quantity"] for row in rows})
+            if len(rows) < 500:
+                return ok({"branch_id": branch_id, "name": branches[0]["name"] if branches else "", "balances": balances})
+        return fail("Забагато позицій на складі філії.", 409)
+    except Exception as error:
+        print("Visit stock availability:", repr(error), flush=True)
+        return fail("Не вдалося завантажити склад філії.", 500)
+
+
+def visit_stock_error(error):
+    key = getattr(error, "message", None)
+    errors = {
+        "VISIT_STOCK_VISIT_NOT_FOUND": ("Візит не знайдено.", 404),
+        "VISIT_STOCK_LINE_NOT_FOUND": ("Препарат у візиті не знайдено.", 404),
+        "STOCK_BRANCH_ITEM_NOT_FOUND": ("Препарат не знайдено або він неактивний.", 404),
+        "VISIT_STOCK_BRANCH_CHANGED": ("Спочатку поверніть препарати, списані з іншої філії.", 409),
+        "VISIT_STOCK_CURRENCY_CHANGED": ("Visit currency differs from clinic currency.", 409),
+        "STOCK_BRANCH_OPERATION_CONFLICT": ("Цей номер операції вже використано.", 409),
+        "VISIT_STOCK_LINE_CHANGED": ("Позиція змінилася. Оновіть візит.", 409),
+        "STOCK_BRANCH_INVALID_BRANCH": ("Філія візиту неактивна.", 409),
+        "STOCK_BRANCH_INVALID_OPERATION": ("Перевірте кількість препарату.", 400),
+    }
+    if key == "STOCK_BRANCH_INSUFFICIENT":
+        available = getattr(error, "details", None)
+        return fail(f"Недостатньо препарату у філії візиту. Доступно: {available}." if available else
+                    "Недостатньо препарату у філії візиту.", 409)
+    if key in errors:
+        return fail(*errors[key])
+    print("Visit stock operation:", repr(error), flush=True)
+    return fail("Не вдалося змінити склад візиту.", 500)
+
+
+@app.post("/api/visits/<visit_id>/stock")
+def api_add_stock_to_visit(visit_id):
+    user, auth_error = auth_required()
+    if auth_error:
+        return auth_error
+    org_id = get_current_org_id()
+    data = request.get_json(silent=True)
+    if not isinstance(data, dict):
+        return fail("Перевірте дані препарату.", 400)
+    try:
+        stock_id = str(uuid.UUID(data.get("stock_id") or data.get("stockId") or ""))
         quantity = stock_movement_quantity(data)
-    except ValueError as error:
-        return fail(str(error), 400)
-
-    if not stock_id:
-        return fail(
-            "Оберіть препарат.",
-            400
-        )
-
-    if quantity <= 0:
-        return fail(
-            "Кількість повинна бути більшою за нуль.",
-            400
-        )
-
-    current_org = (
-        get_current_org_id()
-    )
-
-    line_id = None
-    quantity_before = None
-    quantity_after = None
-    stock_was_updated = False
-
+        request_id = str(uuid.UUID(data["request_id"])) if data.get("request_id") else None
+    except (ValueError, TypeError, AttributeError):
+        return fail("Оберіть препарат і перевірте кількість.", 400)
     try:
-        currency_error = check_visit_catalog_currency(
-            visit_id,
-            current_org
-        )
-
+        currency_error = check_visit_catalog_currency(visit_id, org_id)
         if currency_error is not None:
             return currency_error
-
-
-        stock_result = (
-            supabase
-            .table("stock")
-            .select("*")
-            .eq(
-                "org_id",
-                current_org
-            )
-            .eq(
-                "id",
-                stock_id
-            )
-            .limit(1)
-            .execute()
-        )
-
-        if not stock_result.data:
-            return fail(
-                "Позицію складу не знайдено.",
-                404
-            )
-
-        stock_item = (
-            stock_result.data[0]
-        )
-
-        if (
-            stock_item.get("active")
-            is False
-        ):
-            return fail(
-                "Ця позиція неактивна.",
-                409
-            )
-
-        quantity_before = (
-            stock_number(
-                stock_item.get("qty")
-            )
-        )
-
-        if quantity > quantity_before:
-            return fail(
-                (
-                    "Недостатньо препарату. "
-                    f"На складі: "
-                    f"{quantity_before} "
-                    f"{stock_item.get('unit') or 'шт'}."
-                ),
-                409
-            )
-
-        quantity_after = stock_balance_after(quantity_before, quantity, income=False)
-
-        price_snap = stock_number(
-            data.get("price_snap")
-            if data.get("price_snap")
-            is not None
-            else stock_item.get("price")
-        )
-
-        name_snap = str(
-            stock_item.get("name")
-            or "Позиція"
-        ).strip()
-
-        line_result = (
-            supabase
-            .table("visit_stock")
-            .insert({
-                "visit_id": visit_id,
-                "stock_id": stock_id,
-                "qty": quantity,
-                "price_snap": price_snap,
-                "name_snap": name_snap,
-                "inventory_synced": True,
-            })
-            .execute()
-        )
-
-        if not line_result.data:
-            return fail(
-                "Не вдалося додати препарат у візит.",
-                500
-            )
-
-        line_row = (
-            line_result.data[0]
-        )
-
-        line_id = line_row.get("id")
-
-        now_iso = (
-            datetime
-            .now(timezone.utc)
-            .isoformat()
-        )
-
-        update_result = (
-            supabase
-            .table("stock")
-            .update({
-                "qty": quantity_after,
-                "updated_at": now_iso,
-            })
-            .eq(
-                "org_id",
-                current_org
-            )
-            .eq(
-                "id",
-                stock_id
-            )
-            .eq(
-                "qty",
-                quantity_before
-            )
-            .execute()
-        )
-
-        if not update_result.data:
-            if line_id:
-                (
-                    supabase
-                    .table("visit_stock")
-                    .delete()
-                    .eq(
-                        "id",
-                        line_id
-                    )
-                    .execute()
-                )
-
-            return fail(
-                (
-                    "Залишок змінився. "
-                    "Оновіть сторінку та повторіть."
-                ),
-                409
-            )
-
-        stock_was_updated = True
-
-        try:
-            (
-                supabase
-                .table("stock_movements")
-                .insert({
-                    "org_id": current_org,
-                    "stock_id": stock_id,
-                    "visit_id": visit_id,
-                    "created_by": (
-                        user.get("id")
-                    ),
-                    "movement_type":
-    "writeoff",
-                    "quantity": quantity,
-                    "quantity_before":
-                        quantity_before,
-                    "quantity_after":
-                        quantity_after,
-                    "unit_cost":
-                        stock_number(
-                            stock_item.get(
-                                "purchase_price"
-                            )
-                        ),
-                    "name_snap":
-                        name_snap,
-                    "comment":
-                        "Списано у візит",
-                })
-                .execute()
-            )
-
-        except Exception:
-            if stock_was_updated:
-                (
-                    supabase
-                    .table("stock")
-                    .update({
-                        "qty":
-                            quantity_before,
-                        "updated_at":
-                            now_iso,
-                    })
-                    .eq(
-                        "org_id",
-                        current_org
-                    )
-                    .eq(
-                        "id",
-                        stock_id
-                    )
-                    .eq(
-                        "qty",
-                        quantity_after
-                    )
-                    .execute()
-                )
-
-            if line_id:
-                (
-                    supabase
-                    .table("visit_stock")
-                    .delete()
-                    .eq(
-                        "id",
-                        line_id
-                    )
-                    .execute()
-                )
-
-            raise
-
-        write_audit_event(
-            action="stock.added",
-            entity_type="visit_stock",
-            entity_id=line_id,
-            entity_label=name_snap,
-            summary="Препарат списано у візит",
-            before_data={
-                "stock_qty": quantity_before,
-            },
-            after_data={
-                "stock_qty": quantity_after,
-                "line_id": line_id,
-                "visit_id": visit_id,
-                "stock_id": stock_id,
-                "qty": quantity,
-                "name_snap": name_snap,
-            },
-            metadata={
-                "visit_id": visit_id,
-                "stock_id": stock_id,
-                "unit": stock_item.get("unit") or "шт",
-            },
-        )
-
-        return ok({
-    "line": {
-        "id": line_id,
-
-        "stockId": stock_id,
-        "stock_id": stock_id,
-
-        "qty": quantity,
-        "quantity": quantity,
-
-        "priceSnap": price_snap,
-        "price_snap": price_snap,
-
-        "nameSnap": name_snap,
-        "name_snap": name_snap,
-
-        "unitSnap": (
-            stock_item.get("unit")
-            or "шт"
-        ),
-
-        "inventorySynced": True,
-        "inventory_synced": True,
-    },
-
-    "stock": (
-        serialize_stock_item(
-            update_result.data[0]
-        )
-    ),
-})
-
+        payload = supabase.rpc("add_branch_visit_stock", {
+            "p_org_id": org_id, "p_visit_id": visit_id, "p_stock_id": stock_id,
+            "p_actor": user["id"], "p_qty": quantity, "p_request_id": request_id,
+            "p_price": stock_number(data["price_snap"]) if data.get("price_snap") is not None else None,
+        }).execute().data
+        row, stock = payload["line"], serialize_stock_item(payload["stock"])
+        line = {**row, "stockId": stock_id, "quantity": row["qty"],
+                "priceSnap": row["price_snap"], "nameSnap": row["name_snap"],
+                "unitSnap": stock["unit"], "inventorySynced": True}
+        if not payload.get("replayed"):
+            write_audit_event(action="stock.added", entity_type="visit_stock", entity_id=row["id"],
+                              entity_label=row["name_snap"], summary="Препарат списано у візит",
+                              after_data={"qty": quantity, "stock_qty": payload["branch_quantity"]},
+                              metadata={"visit_id": visit_id, "stock_id": stock_id,
+                                        "branch_id": row["inventory_branch_id"], "unit": stock["unit"]})
+        return ok({"line": line, "stock": stock, "branch_quantity": payload["branch_quantity"],
+                   "branch_id": row["inventory_branch_id"]})
     except Exception as error:
-        print(
-            "❌ Add stock to visit:",
-            repr(error),
-            flush=True,
-        )
+        return visit_stock_error(error)
 
-        return fail(
-            "Не вдалося списати препарат у візит.",
-            500
-        )
-    
-@app.delete(
-    "/api/visits/<visit_id>/stock/<line_id>"
-)
-def api_remove_stock_from_visit(
-    visit_id,
-    line_id,
-):
-    user, auth_error = (
-        auth_required()
-    )
 
+@app.delete("/api/visits/<visit_id>/stock/<line_id>")
+def api_remove_stock_from_visit(visit_id, line_id):
+    user, auth_error = auth_required()
     if auth_error:
         return auth_error
-
-    current_org = (
-        get_current_org_id()
-    )
-
-    line_row = None
-    line_deleted = False
-    stock_updated = False
-
-    quantity_before = None
-    quantity_after = None
-    stock_id = None
-    now_iso = None
-
+    org_id = get_current_org_id()
+    if not org_id:
+        return fail("Organization not selected", 400)
     try:
-        visit_result = (
-            supabase
-            .table("visits")
-            .select("id")
-            .eq(
-                "org_id",
-                current_org
-            )
-            .eq(
-                "id",
-                visit_id
-            )
-            .limit(1)
-            .execute()
+        visit = supabase.table("visits").select("id").eq("org_id", org_id).eq("id", visit_id).limit(1).execute()
+        if not visit.data:
+            return fail("Візит не знайдено.", 404)
+        lines = supabase.table("visit_stock").select("qty,price_snap").eq("visit_id", visit_id).eq("id", line_id).limit(1).execute()
+        if not lines.data:
+            return fail("Препарат у візиті не знайдено.", 404)
+        line = lines.data[0]
+        finance_error = check_visit_line_removal_finance(
+            visit_id, org_id, finance_decimal_from_database(line["qty"]) * finance_decimal_from_database(line["price_snap"])
         )
-
-        if not visit_result.data:
-            return fail(
-                "Візит не знайдено.",
-                404
-            )
-
-        line_result = (
-            supabase
-            .table("visit_stock")
-            .select("*")
-            .eq(
-                "visit_id",
-                visit_id
-            )
-            .eq(
-                "id",
-                line_id
-            )
-            .limit(1)
-            .execute()
-        )
-
-        if not line_result.data:
-            return fail(
-                "Препарат у візиті не знайдено.",
-                404
-            )
-
-        line_row = (
-            line_result.data[0]
-        )
-
-        finance_error = (
-            check_visit_line_removal_finance(
-                visit_id,
-                current_org,
-                finance_decimal_from_database(
-                    line_row.get("qty")
-                )
-                * finance_decimal_from_database(
-                    line_row.get("price_snap")
-                ),
-            )
-        )
-
         if finance_error is not None:
             return finance_error
-
-        inventory_synced = (
-            line_row.get(
-                "inventory_synced"
-            )
-            is True
-        )
-
-        # Стара строка не списывала склад.
-        # Просто удаляем её без возврата.
-        if not inventory_synced:
-            delete_result = (
-                supabase
-                .table("visit_stock")
-                .delete()
-                .eq(
-                    "visit_id",
-                    visit_id
-                )
-                .eq(
-                    "id",
-                    line_id
-                )
-                .execute()
-            )
-
-            if not delete_result.data:
-                return fail(
-                    "Не вдалося видалити препарат.",
-                    500
-                )
-
-            write_audit_event(
-                action="stock.removed",
-                entity_type="visit_stock",
-                entity_id=line_id,
-                entity_label=(
-                    line_row.get("name_snap")
-                    or "Препарат"
-                ),
-                summary="Препарат видалено з візиту",
-                before_data={
-                    "line_id": line_id,
-                    "visit_id": visit_id,
-                    "stock_id": line_row.get("stock_id"),
-                    "qty": line_row.get("qty"),
-                    "name_snap": line_row.get("name_snap"),
-                    "inventory_synced": False,
-                },
-                metadata={
-                    "visit_id": visit_id,
-                    "stock_id": line_row.get("stock_id"),
-                    "restored": False,
-                },
-            )
-
-            return ok({
-                "restored": False,
-                "stock": None,
-            })
-
-        stock_id = str(
-            line_row.get("stock_id")
-            or ""
-        ).strip()
-
-        quantity = stock_number(
-            line_row.get("qty")
-        )
-
-        if (
-            not stock_id
-            or quantity <= 0
-        ):
-            return fail(
-                "Некоректний рядок препарату.",
-                409
-            )
-
-        stock_result = (
-            supabase
-            .table("stock")
-            .select("*")
-            .eq(
-                "org_id",
-                current_org
-            )
-            .eq(
-                "id",
-                stock_id
-            )
-            .limit(1)
-            .execute()
-        )
-
-        if not stock_result.data:
-            return fail(
-                "Позицію складу не знайдено.",
-                404
-            )
-
-        stock_item = (
-            stock_result.data[0]
-        )
-
-        quantity_before = (
-            stock_number(
-                stock_item.get("qty")
-            )
-        )
-
-        quantity_after = stock_balance_after(quantity_before, quantity, income=True)
-
-        now_iso = (
-            datetime
-            .now(timezone.utc)
-            .isoformat()
-        )
-
-        delete_result = (
-            supabase
-            .table("visit_stock")
-            .delete()
-            .eq(
-                "visit_id",
-                visit_id
-            )
-            .eq(
-                "id",
-                line_id
-            )
-            .execute()
-        )
-
-        if not delete_result.data:
-            return fail(
-                "Не вдалося видалити препарат.",
-                500
-            )
-
-        line_deleted = True
-
-        update_result = (
-            supabase
-            .table("stock")
-            .update({
-                "qty": quantity_after,
-                "updated_at": now_iso,
-            })
-            .eq(
-                "org_id",
-                current_org
-            )
-            .eq(
-                "id",
-                stock_id
-            )
-            .eq(
-                "qty",
-                quantity_before
-            )
-            .execute()
-        )
-
-        if not update_result.data:
-            raise RuntimeError(
-                "Stock quantity changed"
-            )
-
-        stock_updated = True
-
-        (
-            supabase
-            .table("stock_movements")
-            .insert({
-                "org_id": current_org,
-                "stock_id": stock_id,
-                "visit_id": visit_id,
-                "created_by": (
-                    user.get("id")
-                ),
-                "movement_type":
-                    "income",
-                "quantity": quantity,
-                "quantity_before":
-                    quantity_before,
-                "quantity_after":
-                    quantity_after,
-                "unit_cost":
-                    stock_number(
-                        stock_item.get(
-                            "purchase_price"
-                        )
-                    ),
-                "name_snap": (
-                    line_row.get(
-                        "name_snap"
-                    )
-                    or stock_item.get(
-                        "name"
-                    )
-                ),
-                "comment":
-                    "Повернено після видалення з візиту",
-            })
-            .execute()
-        )
-
-        write_audit_event(
-            action="stock.removed",
-            entity_type="visit_stock",
-            entity_id=line_id,
-            entity_label=(
-                line_row.get("name_snap")
-                or stock_item.get("name")
-                or "Препарат"
-            ),
-            summary="Препарат видалено з візиту та повернено на склад",
-            before_data={
-                "stock_qty": quantity_before,
-                "line_id": line_id,
-                "visit_id": visit_id,
-                "stock_id": stock_id,
-                "qty": quantity,
-                "name_snap": line_row.get("name_snap"),
-                "inventory_synced": True,
-            },
-            after_data={
-                "stock_qty": quantity_after,
-            },
-            metadata={
-                "visit_id": visit_id,
-                "stock_id": stock_id,
-                "restored": True,
-                "unit": stock_item.get("unit") or "шт",
-            },
-        )
-
-        return ok({
-            "restored": True,
-
-            "stock":
-                serialize_stock_item(
-                    update_result.data[0]
-                ),
-        })
-
+        payload = supabase.rpc("remove_branch_visit_stock", {
+            "p_org_id": org_id, "p_visit_id": visit_id, "p_line_id": line_id,
+            "p_actor": user["id"], "p_expected_qty": line["qty"], "p_expected_price": line["price_snap"],
+        }).execute().data
+        row = payload["line"]
+        write_audit_event(action="stock.removed", entity_type="visit_stock", entity_id=line_id,
+                          entity_label=row.get("name_snap") or "Препарат", summary="Препарат видалено з візиту",
+                          before_data={"qty": row["qty"]},
+                          metadata={"visit_id": visit_id, "stock_id": row["stock_id"],
+                                    "branch_id": row.get("inventory_branch_id"), "restored": payload["restored"]})
+        return ok({"restored": payload["restored"], "stock": serialize_stock_item(payload.get("stock")),
+                   "branch_quantity": payload.get("branch_quantity"), "branch_id": row.get("inventory_branch_id")})
     except Exception as error:
-        # Если возврат сорвался,
-        # возвращаем состояние обратно.
-        if (
-            stock_updated
-            and stock_id
-            and quantity_before
-            is not None
-        ):
-            try:
-                (
-                    supabase
-                    .table("stock")
-                    .update({
-                        "qty":
-                            quantity_before,
-                        "updated_at":
-                            now_iso,
-                    })
-                    .eq(
-                        "org_id",
-                        current_org
-                    )
-                    .eq(
-                        "id",
-                        stock_id
-                    )
-                    .eq(
-                        "qty",
-                        quantity_after
-                    )
-                    .execute()
-                )
-            except Exception:
-                pass
+        return visit_stock_error(error)
 
-        if (
-            line_deleted
-            and line_row
-        ):
-            try:
-                (
-                    supabase
-                    .table("visit_stock")
-                    .insert(
-                        line_row
-                    )
-                    .execute()
-                )
-            except Exception:
-                pass
 
-        print(
-            "❌ Remove stock from visit:",
-            repr(error),
-            flush=True,
-        )
-
-        return fail(
-            "Не вдалося повернути препарат на склад.",
-            500
-        )    
-    
 # =====================================================
 # FINANCE API
 # =====================================================
@@ -13741,10 +13217,15 @@ def api_receive_stock_purchase(
     ).strip()
 
     try:
+        branch_id = str(uuid.UUID(data["branch_id"])) if data.get("branch_id") else None
+    except (ValueError, TypeError, AttributeError):
+        return fail("Оберіть філію приймання.", 400)
+
+    try:
         rpc_result = (
             supabase
             .rpc(
-                "receive_stock_purchase",
+                "receive_stock_purchase_at_branch",
                 {
                     "p_org_id":
                         current_org,
@@ -13762,6 +13243,8 @@ def api_receive_stock_purchase(
 
                     "p_items":
                         clean_items,
+
+                    "p_branch_id": branch_id,
 
                     "p_note":
                         note or None,
@@ -13848,6 +13331,11 @@ def api_receive_stock_purchase(
         message = str(
             error
         )
+
+        if "STOCK_BRANCH_INVALID_BRANCH" in message:
+            return fail("Оберіть активну філію приймання.", 400)
+        if "STOCK_BRANCH_OPERATION_CONFLICT" in message:
+            return fail("Поставка з цим номером уже прив’язана до іншої філії.", 409)
 
         readable_errors = {
             "Purchase not found":
@@ -28396,8 +27884,21 @@ def api_create_hospitalization():
                 409
             )
 
+        branch_id = None
+        if data.get("branch_id"):
+            try:
+                branch_id = str(uuid.UUID(data["branch_id"]))
+            except (ValueError, TypeError, AttributeError):
+                return fail("Оберіть філію стаціонару.", 400)
+            branch = supabase.table("branches").select("id").eq("org_id", current_org).eq(
+                "id", branch_id
+            ).eq("is_active", True).limit(1).execute()
+            if not branch.data:
+                return fail("Оберіть активну філію стаціонару.", 409)
+
         payload = {
             "org_id": current_org,
+            "branch_id": branch_id,
             "patient_id": patient_id,
             "doctor_id": doctor_id or None,
             "status": status,
@@ -28943,8 +28444,8 @@ def hospital_billing_error(error):
         return jsonify(ok=False, error="Недостатньо прав для цієї дії.", code="HOSPITAL_FORBIDDEN"), 403
     if code == "P0002":
         return jsonify(ok=False, error="Пацієнта, активну позицію або працівника не знайдено.", code="HOSPITAL_NOT_FOUND"), 404
-    if "insufficient stock" in message:
-        return jsonify(ok=False, error="Недостатній залишок матеріалу. Оновіть дані та перевірте фактичну кількість.", code="HOSPITAL_STOCK_SHORTAGE"), 409
+    if "insufficient stock" in message or "stock_branch_insufficient" in message:
+        return jsonify(ok=False, error="Недостатній залишок матеріалу. Оновіть дані та перевірте фактичну кількість у філії стаціонару.", code="HOSPITAL_STOCK_SHORTAGE"), 409
     if code in {"23505", "40001", "55000"}:
         return jsonify(ok=False, error="Дані змінилися або призначення вже закрито. Оновіть карту стаціонару.", code="HOSPITAL_STATE_CHANGED"), 409
     if code in {"22023", "22P02", "22007", "22008", "22003", "23514"}:
@@ -29068,7 +28569,7 @@ def api_hospital_treatment_catalog(hospitalization_id):
     except (ValueError, TypeError, AttributeError):
         return fail("Некоректна госпіталізація.", 400)
     try:
-        hospital = supabase.table("hospitalizations").select("id").eq("org_id", org_id).eq("id", clean_id).limit(1).execute().data
+        hospital = supabase.table("hospitalizations").select("id,branch_id").eq("org_id", org_id).eq("id", clean_id).limit(1).execute().data
         if not hospital:
             return fail("Hospitalization not found", 404)
         org = supabase.table("orgs").select("currency").eq("id", org_id).limit(1).execute().data
@@ -29084,10 +28585,18 @@ def api_hospital_treatment_catalog(hospitalization_id):
                     break
             else:
                 return fail("Каталог завеликий для цього вікна.", 409)
+            branch_quantities = {}
+            if table == "stock":
+                identifiers = [entry["id"] for entry in entries]
+                for offset in range(0, len(identifiers), 250):
+                    balances = supabase.table("stock_branch_balances").select("stock_id,quantity").eq(
+                        "org_id", org_id
+                    ).eq("branch_id", hospital[0]["branch_id"]).in_("stock_id", identifiers[offset:offset + 250]).execute()
+                    branch_quantities.update({row["stock_id"]: row["quantity"] for row in balances.data or []})
             for entry in entries:
                 entry["price"] = str(Decimal(str(entry.get("price") or 0)).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP))
                 if table == "stock":
-                    entry["qty"] = str(entry.get("qty") or 0)
+                    entry["qty"] = str(branch_quantities.get(entry["id"], 0))
             catalog[table] = entries
         return ok({"currency": org[0]["currency"], **catalog})
     except Exception as error:
@@ -32252,7 +31761,7 @@ def api_delete_visit(
         result = (
             supabase
             .rpc(
-                "delete_visit_with_stock_restore",
+                "delete_visit_with_branch_stock_restore",
                 {
                     "p_org_id":
                         current_org,
@@ -32287,62 +31796,11 @@ def api_delete_visit(
         return ok(data)
 
     except Exception as error:
-        error_text = str(error)
+        if getattr(error, "message", None) == "VISIT_STOCK_BRANCH_CHANGED":
+            return visit_stock_error(error)
+        print("Delete visit with stock restore:", repr(error), flush=True)
+        return fail("Не вдалося видалити візит та повернути препарати на склад.", 500)
 
-    error_details = getattr(
-        error,
-        "details",
-        None,
-    )
-
-    error_message = getattr(
-        error,
-        "message",
-        None,
-    )
-
-    error_code = getattr(
-        error,
-        "code",
-        None,
-    )
-
-    print(
-        "❌ Delete visit with stock restore",
-        {
-            "visit_id": visit_id,
-            "org_id": current_org,
-            "user_id": current_user_id,
-            "error": repr(error),
-            "message": error_message,
-            "details": error_details,
-            "code": error_code,
-        },
-        flush=True,
-    )
-
-    return jsonify({
-        "ok": False,
-
-        "error":
-            (
-                "Не вдалося видалити візит "
-                "та повернути препарати на склад."
-            ),
-
-        "debug": {
-            "message":
-                error_message or
-                error_text,
-
-            "details":
-                error_details,
-
-            "code":
-                error_code,
-        },
-    }), 500
-        
 
 # =========================
 # API: UPLOAD FILES

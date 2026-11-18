@@ -15832,11 +15832,14 @@ async function addStockLineToVisitNow(
     );
   }
 
-  const quantity =
-    Math.max(
-      1,
-      Number(qty) || 1
-    );
+  const quantity = Number(qty);
+  if (!Number.isFinite(quantity) || quantity <= 0) throw new Error("Перевірте кількість препарату.");
+
+  const price = Number(stockItem.price || 0);
+  const signature = JSON.stringify([stockId, quantity, price]);
+  if (current.pendingStockAddition?.signature !== signature) {
+    current.pendingStockAddition = { signature, requestId: crypto.randomUUID() };
+  }
 
   const data =
     await stockApiRequest(
@@ -15851,14 +15854,13 @@ async function addStockLineToVisitNow(
             String(stockId),
 
           quantity,
-
-          price_snap:
-            Number(
-              stockItem.price || 0
-            ),
+          request_id: current.pendingStockAddition.requestId,
+          price_snap: price,
         }),
       }
     );
+
+  if (data.branch_quantity != null) window.updatePugVisitStockBalance?.(vid, stockId, data.branch_quantity, data.branch_id);
 
   const line =
     data?.line;
@@ -15869,10 +15871,8 @@ async function addStockLineToVisitNow(
     );
   }
 
-  current.stock = [
-    ...current.stock,
-    line,
-  ];
+  delete current.pendingStockAddition;
+  if (!current.stock.some(item => item.id === line.id)) current.stock = [...current.stock, line];
 
   current.stock_json =
     current.stock;
@@ -15997,6 +15997,8 @@ async function removeStockLineFromVisitNow(
         method: "DELETE",
       }
     );
+
+  if (data.branch_quantity != null) window.updatePugVisitStockBalance?.(vid, data.stock.id, data.branch_quantity, data.branch_id);
 
   const nextStock =
     current.stock.slice();
@@ -36506,7 +36508,8 @@ async function receiveFinancePurchaseApi(
   purchaseId,
   items,
   note = "",
-  requestKey = ""
+  requestKey = "",
+  branchId = ""
 ) {
   const cleanPurchaseId =
     String(
@@ -36603,8 +36606,8 @@ async function receiveFinancePurchaseApi(
         },
 
         body: JSON.stringify({
-          items:
-            cleanItems,
+          items: cleanItems,
+          branch_id: branchId || null,
 
           note:
             String(
@@ -41724,7 +41727,7 @@ Object.assign(
     },
   }
 );
-function openFinancePurchaseReceiveModal(purchase, onSuccess) {
+async function openFinancePurchaseReceiveModal(purchase, onSuccess) {
   document.querySelector(".financePurchaseReceiveOverlay")?.remove();
 
   const allItems = (Array.isArray(purchase?.items) ? purchase.items : [])
@@ -41755,6 +41758,14 @@ function openFinancePurchaseReceiveModal(purchase, onSuccess) {
     return;
   }
 
+  let branches;
+  try {
+    branches = await loadCalendarBranches();
+  } catch {
+    openDeleteModal("Не вдалося завантажити філії приймання.", null, "info");
+    return;
+  }
+  document.querySelector(".financePurchaseReceiveOverlay")?.remove();
   const overlay = document.createElement("div");
   overlay.className =
     "financeSupplierCreateOverlay financePurchaseReceiveOverlay";
@@ -41823,6 +41834,9 @@ function openFinancePurchaseReceiveModal(purchase, onSuccess) {
           `).join("")}
         </div>
 
+        <label class="stockReceiveNote"><span>Філія приймання</span>
+          <select name="receipt_branch" required>${stockBranchSelectOptions(branches)}</select>
+        </label>
         <label class="stockReceiveNote"><span>${escapeHtml(stockWorkspaceText("Примітка"))}</span><textarea name="receipt_note" maxlength="2000" rows="2"></textarea></label>
         <p class="stockReceiveSummary" role="status"></p>
         <div class="financeSupplierCreateError" role="alert" hidden></div>
@@ -41961,14 +41975,15 @@ function openFinancePurchaseReceiveModal(purchase, onSuccess) {
 
     try {
       const note = form.elements.receipt_note.value.trim();
-      const signature = JSON.stringify({ items: cleanItems, note });
+      const branchId = form.elements.receipt_branch.value;
+      const signature = JSON.stringify({ items: cleanItems, note, branchId });
       if (pendingReceipt?.signature !== signature) {
         pendingReceipt = {
           signature,
           key: typeof crypto?.randomUUID === "function" ? crypto.randomUUID() : `receipt-${Date.now()}-${Math.random().toString(36).slice(2)}`,
         };
       }
-      const result = await receiveFinancePurchaseApi(purchase.id, cleanItems, note, pendingReceipt.key);
+      const result = await receiveFinancePurchaseApi(purchase.id, cleanItems, note, pendingReceipt.key, branchId);
       submitting = false;
       close();
       if (typeof onSuccess === "function") await onSuccess(result);
@@ -49336,6 +49351,135 @@ async function loadStockMovementHistory(button) {
   }
 }
 
+function mountStockBranchBalances(page, items) {
+  if (!items.length) return;
+  const panel = document.createElement("details");
+  panel.className = "stockBranchBalances";
+  panel.open = Boolean(state.stockBranchPanelOpen);
+  panel.innerHTML = `
+    <summary>Залишки за філіями</summary>
+    <div class="stockBranchBody">
+      <label>Позиція<select data-branch-stock-item>${items.map(item =>
+        `<option value="${escapeHtml(item.id)}">${escapeHtml(item.name)}</option>`
+      ).join("")}</select></label>
+      <p role="status"></p>
+      <div data-branch-stock-result></div>
+    </div>`;
+  page.querySelector("#stockPremiumGrid").before(panel);
+  const itemSelect = panel.querySelector("[data-branch-stock-item]");
+  const result = panel.querySelector("[data-branch-stock-result]");
+  const status = panel.querySelector("[role=status]");
+  let requestVersion = 0;
+  let saving = false;
+  if (items.some(item => item.id === state.stockBranchItem)) itemSelect.value = state.stockBranchItem;
+
+  async function load() {
+    const itemId = itemSelect.value;
+    state.stockBranchItem = itemId;
+    const version = ++requestVersion;
+    result.replaceChildren();
+    status.textContent = "Завантаження залишків…";
+    try {
+      const data = await stockApiRequest(`/api/stock/${encodeURIComponent(itemId)}/branches`, { headers: getOrgHeaders() });
+      if (!panel.isConnected || version !== requestVersion) return;
+      const item = items.find(entry => entry.id === itemId);
+      const branches = data.branches;
+      const active = branches.filter(branch => branch.is_active);
+      const quantity = value => `${Number(value).toLocaleString(getCalendarLocale(), { maximumFractionDigits: 6 })} ${item.unit}`;
+      const names = Object.fromEntries(branches.map(branch => [branch.id, branch.name]));
+      const branchOptions = '<option value="">Оберіть філію</option>' + active.map(branch =>
+        `<option value="${escapeHtml(branch.id)}">${escapeHtml(branch.name)}</option>`
+      ).join("");
+      status.textContent = `Усі філії · ${quantity(branches.reduce((sum, branch) => sum + Number(branch.quantity), 0))}`;
+      result.innerHTML = `
+        <ul class="stockBranchQuantities">${branches.map(branch =>
+          `<li><span>${escapeHtml(branch.name)}${branch.is_active ? "" : " · неактивна"}</span><strong>${escapeHtml(quantity(branch.quantity))}</strong></li>`
+        ).join("")}</ul>
+        ${isOwnerOrAdmin() && active.length ? `
+          <form class="stockBranchOperation">
+            <label>Операція<select name="mode">
+              <option value="income">Надходження</option>
+              <option value="writeoff">Списання</option>
+              ${active.length > 1 ? '<option value="transfer">Переміщення</option>' : ""}
+            </select></label>
+            <label hidden>Звідки<select name="from">${branchOptions}</select></label>
+            <label>Куди<select name="to" required>${branchOptions}</select></label>
+            <label>Кількість<input name="quantity" required inputmode="decimal" pattern="[0-9]+([.,][0-9]+)?" maxlength="18"></label>
+            <button type="submit" class="primary">Зберегти рух</button>
+            <p role="alert" hidden></p>
+          </form>` : ""}
+        ${data.operations.length ? `<details><summary>Історія рухів філій</summary>
+          <ul class="stockBranchQuantities">${data.operations.map(operation => {
+            const from = names[operation.from_branch_id];
+            const to = names[operation.to_branch_id];
+            const label = from && to ? `${from} → ${to}` : to ? `Надходження · ${to}` : `Списання · ${from}`;
+            return `<li><span>${escapeHtml(formatStockDate(operation.created_at))} · ${escapeHtml(label)}${operation.comment ? ` · ${escapeHtml(operation.comment)}` : ""}</span>
+              <strong>${escapeHtml(quantity(operation.quantity))}</strong></li>`;
+          }).join("")}</ul></details>` : ""}`;
+      const form = result.querySelector("form");
+      if (!form) return;
+      const fields = form.elements;
+      const alert = form.querySelector("[role=alert]");
+      const submit = form.querySelector("button");
+      let pending;
+      function updateMode() {
+        fields.from.required = fields.mode.value !== "income";
+        fields.to.required = fields.mode.value !== "writeoff";
+        fields.from.closest("label").hidden = !fields.from.required;
+        fields.to.closest("label").hidden = !fields.to.required;
+      }
+      fields.mode.addEventListener("change", updateMode);
+      form.addEventListener("submit", async event => {
+        event.preventDefault();
+        if (saving) return;
+        const details = {
+          from_branch: fields.from.required ? fields.from.value : null,
+          to_branch: fields.to.required ? fields.to.value : null,
+          quantity: Number(fields.quantity.value.replace(",", ".")),
+        };
+        const signature = JSON.stringify(details);
+        if (pending?.signature !== signature) pending = { signature, id: crypto.randomUUID() };
+        saving = true;
+        alert.hidden = true;
+        itemSelect.disabled = true;
+        submit.disabled = true;
+        try {
+          await stockApiRequest(`/api/stock/${encodeURIComponent(itemId)}/branches`, {
+            method: "POST", headers: getOrgHeaders(),
+            body: JSON.stringify({ ...details, operation_id: pending.id }),
+          });
+          if (panel.isConnected) {
+            await loadStockApi(true);
+            if (panel.isConnected) renderStockTab();
+          }
+        } catch (error) {
+          alert.textContent = error.message;
+          alert.hidden = false;
+        } finally {
+          saving = false;
+          itemSelect.disabled = false;
+          submit.disabled = false;
+        }
+      });
+    } catch (error) {
+      if (!panel.isConnected || version !== requestVersion) return;
+      status.textContent = error.message;
+      const retry = document.createElement("button");
+      retry.type = "button";
+      retry.className = "ghost";
+      retry.textContent = "Повторити";
+      retry.addEventListener("click", load);
+      result.append(retry);
+    }
+  }
+  panel.addEventListener("toggle", () => {
+    state.stockBranchPanelOpen = panel.open;
+    if (panel.open && !requestVersion) load();
+  });
+  itemSelect.addEventListener("change", load);
+  if (panel.open) load();
+}
+
 function renderStockTab() {
   const page =
     document.querySelector(
@@ -49802,6 +49946,7 @@ const currentSpecies =
   `;
 
     mountStockNavigation(page);
+    mountStockBranchBalances(page, items);
     page
     ._stockLocalizationObserver
     ?.disconnect();
@@ -51913,7 +52058,7 @@ function getStockAvailableQuantityMessage(
 }
 
 
-function openStockAdjustmentModal(
+async function openStockAdjustmentModal(
   stockItem,
   mode = "income"
 ) {
@@ -51927,6 +52072,22 @@ function openStockAdjustmentModal(
     normalizeStockItem(
       stockItem
     );
+
+  let stockBranches;
+  try {
+    const data = await stockApiRequest(`/api/stock/${encodeURIComponent(item.id)}/branches`, {
+      headers: getOrgHeaders(), cache: "no-store",
+    });
+    stockBranches = data.branches.filter(branch => branch.is_active);
+  } catch (error) {
+    showStockAlert(error.message);
+    return;
+  }
+  if (!stockBranches.length) {
+    showStockAlert("Немає активних філій.");
+    return;
+  }
+  document.getElementById("stockAdjustmentModal")?.remove();
 
   const isIncome =
     mode === "income";
@@ -52014,7 +52175,7 @@ function openStockAdjustmentModal(
             )}
           </strong>
 
-          <small>
+          <small data-adjustment-balance>
             ${getStockInterfaceText(
               "Зараз:"
             )}
@@ -52031,6 +52192,11 @@ function openStockAdjustmentModal(
           </small>
         </div>
       </div>
+
+      <label class="stockAdjustmentField">
+        <span>Філія</span>
+        <select id="stockAdjustmentBranch">${stockBranchSelectOptions(stockBranches)}</select>
+      </label>
 
       <label class="stockAdjustmentField">
         <span>
@@ -52162,6 +52328,10 @@ function openStockAdjustmentModal(
     }
   );
 
+  const branchSelect = modal.querySelector("#stockAdjustmentBranch");
+  const branchQuantity = () => Number(stockBranches.find(branch => branch.id === branchSelect.value)?.quantity || 0);
+  let pendingOperation;
+
   const calculateResult = () => {
     const quantity =
       Math.max(
@@ -52174,14 +52344,16 @@ function openStockAdjustmentModal(
 
     const result =
       isIncome
-        ? item.qty +
+        ? branchQuantity() +
           quantity
         : Math.max(
             0,
-            item.qty -
+            branchQuantity() -
             quantity
           );
 
+    modal.querySelector("[data-adjustment-balance]").textContent =
+      `${getStockInterfaceText("Зараз:")} ${branchQuantity().toLocaleString(getCalendarLocale())} ${localizedUnit}`;
     if (resultElement) {
       resultElement.textContent =
         `${result.toLocaleString(
@@ -52195,6 +52367,9 @@ function openStockAdjustmentModal(
       "input",
       calculateResult
     );
+
+  branchSelect.addEventListener("change", calculateResult);
+  calculateResult();
 
   const submitButton =
     modal.querySelector(
@@ -52228,11 +52403,11 @@ function openStockAdjustmentModal(
 
         if (
           !isIncome &&
-          quantity > item.qty
+          quantity > branchQuantity()
         ) {
           showStockAlert(
             getStockAvailableQuantityMessage(
-              item.qty,
+              branchQuantity(),
               item.unit
             )
           );
@@ -52262,18 +52437,20 @@ function openStockAdjustmentModal(
           );
 
         try {
-          await adjustStockItemApi(
-            item.id,
-            {
-              mode:
-                isIncome
-                  ? "income"
-                  : "writeoff",
-
-              quantity,
-              comment,
-            }
-          );
+          const details = {
+            from_branch: isIncome ? null : branchSelect.value,
+            to_branch: isIncome ? branchSelect.value : null,
+            quantity, comment,
+          };
+          const signature = JSON.stringify(details);
+          if (pendingOperation?.signature !== signature) {
+            pendingOperation = { signature, id: crypto.randomUUID() };
+          }
+          await stockApiRequest(`/api/stock/${encodeURIComponent(item.id)}/branches`, {
+            method: "POST", headers: getOrgHeaders(),
+            body: JSON.stringify({ ...details, operation_id: pendingOperation.id }),
+          });
+          await loadStockApi(true);
 
           closeModal();
           renderStockTab();
@@ -54551,6 +54728,7 @@ async function openHospitalAdmissionModal() {
   let patients = [];
   let owners = [];
   let staff = [];
+  let branches = [];
 
   try {
     const results =
@@ -54558,6 +54736,7 @@ async function openHospitalAdmissionModal() {
         loadPatientsApi(),
         loadOwners(),
         loadStaffApi(),
+        loadCalendarBranches().catch(() => []),
       ]);
 
     patients =
@@ -54574,6 +54753,7 @@ async function openHospitalAdmissionModal() {
           ? state.owners
           : [];
 
+    branches = results[3];
     staff =
       Array.isArray(results[2])
         ? results[2]
@@ -54724,6 +54904,13 @@ async function openHospitalAdmissionModal() {
                 </small>
               </div>
             </div>
+
+            <label class="hospitalAdmissionField">
+              <span>Філія стаціонару</span>
+              <select class="hospitalAdmissionInput" id="hospitalAdmissionBranch" required>
+                ${branches.length ? stockBranchSelectOptions(branches) : '<option value="">Не вдалося завантажити філії</option>'}
+              </select>
+            </label>
 
             <label class="hospitalAdmissionField">
               <span>
@@ -55312,6 +55499,12 @@ async function openHospitalAdmissionModal() {
               ?.value || ""
           ).trim();
 
+        const branchId = loadingModal.querySelector("#hospitalAdmissionBranch").value;
+        if (!branchId) {
+          showHospitalAlert("Не вдалося завантажити філії. Відкрийте форму повторно.");
+          return;
+        }
+
         if (!patientId) {
           showHospitalAlert(
   "Оберіть пацієнта."
@@ -55353,6 +55546,7 @@ async function openHospitalAdmissionModal() {
 
         const payload = {
           patient_id: patientId,
+          branch_id: branchId,
           doctor_id: doctorId,
           room,
           status,
@@ -73234,6 +73428,13 @@ function calendarBranchStorageKey() {
 function selectedCalendarBranch(branches) {
   const id = localStorage.getItem(calendarBranchStorageKey());
   return branches.find(branch => branch.id === id) || branches.find(branch => branch.is_primary) || branches[0];
+}
+
+function stockBranchSelectOptions(branches) {
+  const selected = selectedCalendarBranch(branches);
+  return branches.map(branch =>
+    `<option value="${escapeHtml(branch.id)}" ${branch.id === selected?.id ? "selected" : ""}>${escapeHtml(branch.name)}</option>`
+  ).join("");
 }
 
 function mountCalendarBranchSelect(page, branches, selected) {
@@ -91258,14 +91459,8 @@ if (e.target.closest("#visitStkAdd")) {
       "visitStkSelect"
     )?.value || "";
 
-  const qty = Math.max(
-    1,
-    Number(
-      document.getElementById(
-        "visitStkQty"
-      )?.value || 1
-    )
-  );
+  const qty = Number(document.getElementById("visitStkQty")?.value);
+  if (!Number.isFinite(qty) || qty <= 0) return alert("Перевірте кількість препарату.");
 
   if (!stockId) return;
 
