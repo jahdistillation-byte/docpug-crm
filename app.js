@@ -32203,6 +32203,9 @@ async function loadFinanceOverviewApi(
     currency: selectedCurrency,
   });
 
+  const branch = await state.workspaceBranchReady;
+  if (branch) params.set("branch_id", branch.id);
+
   const response = await fetch(
     `/api/finance/overview?${params.toString()}`,
     {
@@ -32258,6 +32261,9 @@ async function loadFinanceClientBalancesApi(
     currency: selectedCurrency,
   });
 
+  const branch = await state.workspaceBranchReady;
+  if (branch) params.set("branch_id", branch.id);
+
   const response = await fetch(
     `/api/finance/client-balances?${params.toString()}`,
     {
@@ -32292,9 +32298,11 @@ async function loadFinanceClientBalancesApi(
   return result.data;
 }
 async function loadFinanceAccountsApi() {
+  const branch = await state.workspaceBranchReady;
+  const params = new URLSearchParams(branch ? { branch_id: branch.id } : {});
   const response =
     await fetch(
-      "/api/finance/accounts",
+      `/api/finance/accounts?${params}`,
       {
         credentials:
           "include",
@@ -32835,6 +32843,11 @@ Object.assign(
       pl: "Salda rachunków",
     },
 
+    "За проведеними операціями вибраної філії.": {
+      en: "Based on posted transactions for the selected branch.",
+      de: "Basierend auf den gebuchten Vorgängen des ausgewählten Standorts.",
+      pl: "Na podstawie zaksięgowanych operacji wybranej placówki.",
+    },
     "За всіма проведеними фінансовими операціями.": {
       en: "Based on all completed financial transactions.",
       de: "Basierend auf allen gebuchten Finanztransaktionen.",
@@ -36151,6 +36164,9 @@ async function loadFinanceTransactionsApi(
     String(offset)
   );
 
+  const branch = await state.workspaceBranchReady;
+  if (branch) params.set("branch_id", branch.id);
+
   const response =
     await fetch(
       `/api/finance/transactions?${params.toString()}`,
@@ -36208,6 +36224,9 @@ async function loadFinanceExpensesOverviewApi(
     date_to: dateTo,
     currency: selectedCurrency,
   });
+
+  const branch = await state.workspaceBranchReady;
+  if (branch) params.set("branch_id", branch.id);
 
   const response = await fetch(
     `/api/finance/expenses/overview?${params.toString()}`,
@@ -43696,7 +43715,7 @@ page.innerHTML = `
       <p>
         ${escapeHtml(
           getFinanceInterfaceText(
-            "За всіма проведеними фінансовими операціями."
+            "За проведеними операціями вибраної філії."
           )
         )}
       </p>

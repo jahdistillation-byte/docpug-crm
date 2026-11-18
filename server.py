@@ -5423,6 +5423,7 @@ def load_finance_org_rows(
     order_by=None,
     desc=False,
     page_size=1000,
+    branch_id=None,
 ):
     """
     Load a complete organization-scoped register without silently losing rows
@@ -5448,6 +5449,9 @@ def load_finance_org_rows(
                     current_org,
                 )
             )
+
+            if branch_id:
+                query = query.eq("branch_id", branch_id)
 
             if order_by:
                 query = query.order(
@@ -9050,19 +9054,20 @@ def _load_finance_currency_overview(
                 400,
             )
 
-        result = execute_with_retry(
-            lambda: supabase.rpc(
-                rpc_name,
-                {
-                    "p_org_id": current_org,
-                    "p_date_from": date_from.isoformat(),
-                    "p_date_to": date_to.isoformat(),
-                    "p_currency": currency,
-                },
-            ),
-            attempts=4,
-            delay=0.35,
-        )
+        try:
+            branch = workspace_request_branch(current_org, request.args.get("branch_id"))
+        except ValueError as error:
+            return fail(str(error), 400)
+        params = {
+            "p_org_id": current_org,
+            "p_date_from": date_from.isoformat(),
+            "p_date_to": date_to.isoformat(),
+            "p_currency": currency,
+        }
+        if branch:
+            params["p_branch_id"] = branch["id"]
+            rpc_name += "_by_branch"
+        result = execute_with_retry(lambda: supabase.rpc(rpc_name, params), attempts=4, delay=0.35)
 
         overview = result.data
 
@@ -9126,6 +9131,8 @@ def api_finance_client_balances():
         return fail("Unsupported finance currency", 400)
 
     try:
+        branch = workspace_request_branch(current_org, request.args.get("branch_id"))
+        visit_scope = {"branch_id": branch["id"]} if branch else {}
         owners = load_finance_org_rows(
             "owners",
             order_by="name",
@@ -9138,6 +9145,7 @@ def api_finance_client_balances():
                 "visits",
                 order_by="date",
                 desc=True,
+                **visit_scope,
             )
             if str(
                 visit.get("currency") or "UAH"
@@ -9392,6 +9400,8 @@ def api_finance_client_balances():
             "items": clients,
         })
 
+    except ValueError as error:
+        return fail(str(error), 400)
     except Exception as error:
         print(
             "❌ GET finance client balances:",
@@ -9426,20 +9436,13 @@ def api_finance_accounts():
         )
 
     try:
-        result = execute_with_retry(
-            lambda: (
-                supabase
-                .rpc(
-                    "get_financial_account_balances",
-                    {
-                        "p_org_id":
-                            current_org,
-                    },
-                )
-            ),
-            attempts=4,
-            delay=0.35,
-        )
+        branch = workspace_request_branch(current_org, request.args.get("branch_id"))
+        params = {"p_org_id": current_org}
+        rpc_name = "get_financial_account_balances"
+        if branch:
+            params["p_branch_id"] = branch["id"]
+            rpc_name += "_by_branch"
+        result = execute_with_retry(lambda: supabase.rpc(rpc_name, params), attempts=4, delay=0.35)
 
         balances = (
             result.data
@@ -9463,6 +9466,8 @@ def api_finance_accounts():
             balances
         )
 
+    except ValueError as error:
+        return fail(str(error), 400)
     except Exception as error:
         print(
             "❌ GET finance accounts:",
@@ -10304,11 +10309,16 @@ def api_finance_transactions_list():
             )
         ).strip()
 
+        try:
+            branch = workspace_request_branch(current_org, request.args.get("branch_id"))
+        except ValueError as error:
+            return fail(str(error), 400)
+
         def build_transactions_query():
             query = (
                 supabase
                 .table(
-                    "finance_transactions"
+                    "finance_transaction_branch_scope" if branch else "finance_transactions"
                 )
                 .select(
                     "id, org_id, "
@@ -10330,6 +10340,9 @@ def api_finance_transactions_list():
                     current_org,
                 )
             )
+
+            if branch:
+                query = query.eq("effective_branch_id", branch["id"])
 
             if transaction_type:
                 query = query.eq(
@@ -10388,6 +10401,7 @@ def api_finance_transactions_list():
                     "occurred_at",
                     desc=True,
                 )
+                .order("id", desc=True)
                 .range(
                     offset,
                     offset + limit,

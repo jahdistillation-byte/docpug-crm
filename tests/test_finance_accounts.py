@@ -95,14 +95,13 @@ class FinanceAccountsSupabase:
         )
 
     def table(self, table_name):
-        if table_name != "finance_transactions":
+        if table_name not in {"finance_transactions", "finance_transaction_branch_scope"}:
             raise AssertionError(
                 f"Unexpected table: {table_name}"
             )
 
-        return FinanceTransactionsQuery(
-            self
-        )
+        self.transaction_table = table_name
+        return FinanceTransactionsQuery(self)
 
 
 class FinanceAccountsApiTests(unittest.TestCase):
@@ -167,6 +166,36 @@ class FinanceAccountsApiTests(unittest.TestCase):
                     ORG_ID,
             },
         )
+
+    def test_branch_filters_accounts_reports_and_journal(self):
+        branch = {"id": ACCOUNT_ID, "is_primary": False}
+        with patch.object(server, "workspace_request_branch", return_value=branch) as resolve:
+            for path, rpc in (
+                ("accounts", "get_financial_account_balances_by_branch"),
+                ("overview", "get_finance_overview_currency_by_branch"),
+                ("expenses/overview", "get_finance_expenses_overview_currency_by_branch"),
+            ):
+                with self.subTest(path=path):
+                    response = self.client.get(f"/api/finance/{path}?branch_id={ACCOUNT_ID}")
+                    self.assertEqual(response.status_code, 200)
+                    self.assertEqual(self.fake.rpc_name, rpc)
+                    self.assertEqual(self.fake.rpc_arguments["p_org_id"], ORG_ID)
+                    self.assertEqual(self.fake.rpc_arguments["p_branch_id"], ACCOUNT_ID)
+
+            response = self.client.get(f"/api/finance/transactions?branch_id={ACCOUNT_ID}")
+            self.assertEqual(response.status_code, 200)
+            resolve.assert_called_with(ORG_ID, ACCOUNT_ID)
+
+        self.assertEqual(self.fake.transaction_table, "finance_transaction_branch_scope")
+        self.assertIn(("org_id", ORG_ID), self.fake.transaction_filters)
+        self.assertIn(("effective_branch_id", ACCOUNT_ID), self.fake.transaction_filters)
+
+    def test_invalid_branch_does_not_fall_back_to_organization_totals(self):
+        for path in ("accounts", "overview", "expenses/overview", "client-balances", "transactions"):
+            with self.subTest(path=path):
+                response = self.client.get(f"/api/finance/{path}?branch_id=invalid")
+                self.assertEqual(response.status_code, 400)
+        self.assertIsNone(self.fake.rpc_name)
 
     def test_transaction_journal_filters_by_account(self):
         response = self.client.get(
