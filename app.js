@@ -22602,35 +22602,35 @@ const teamManager =
     </div>
   `;
 
-  const staff =
-    await loadStaffApi();
+  let branch = null;
+  if (teamManager) {
+    try {
+      branch = await state.workspaceBranchReady;
+    } catch {
+      page.innerHTML = `<div class="card">
+        <p role="status">${escapeHtml(calendarBranchLabel(1))}</p>
+        <button type="button" class="ghost">${escapeHtml(calendarBranchLabel(2))}</button>
+      </div>`;
+      page.querySelector("button").addEventListener("click", () => location.reload());
+      return;
+    }
+  }
 
-  const specializations =
-    await loadSpecializationsApi();
+  const [staff, specializations, schedule] = await Promise.all([
+    loadStaffApi(),
+    loadSpecializationsApi(),
+    loadStaffScheduleApi(today),
+  ]);
 
-  const schedule =
-    await loadStaffScheduleApi(
-      today
-    );
+  const visibleStaff = teamManager
+    ? staff.filter(employee => employee.branch_ids?.includes(branch?.id))
+    : staff.filter(employee => String(employee.id) === String(currentStaffId));
 
-  const visibleStaff =
-    teamManager
-      ? staff
-      : staff.filter(
-          (employee) =>
-            String(employee.id) ===
-            String(currentStaffId)
-        );
-
-  const scheduleMap =
-    new Map(
-      schedule.map(
-        (item) => [
-          String(item.staff_id),
-          item,
-        ]
-      )
-    );
+  const scheduleMap = new Map(
+    schedule
+      .filter(item => !branch || !item.branch_id || item.branch_id === branch.id)
+      .map(item => [String(item.staff_id), item])
+  );
 
   const getTeamGroupLabel = (name) => {
     const value = String(name || "Напрям");
@@ -122581,7 +122581,10 @@ async function renderStaffBranches(drawer, staffRow = null) {
     }
 
     if (section.branchRequest !== request) return;
-    const selected = new Set(staffRow?.branch_ids || []);
+    const activeBranches = result.data.filter(branch => branch.is_active);
+    const selected = new Set(staffRow
+      ? staffRow.branch_ids || []
+      : [selectedCalendarBranch(activeBranches)?.id].filter(Boolean));
     section.initialBranchIds = selected;
     for (const branch of result.data) {
       if (!branch.is_active && !selected.has(branch.id)) continue;
@@ -122590,7 +122593,7 @@ async function renderStaffBranches(drawer, staffRow = null) {
       const input = document.createElement("input");
       input.type = "checkbox";
       input.value = branch.id;
-      input.checked = staffRow ? selected.has(branch.id) : branch.is_primary;
+      input.checked = selected.has(branch.id);
       label.className = "staffBranchOption";
       const name = document.createElement("span");
       name.textContent = branch.name;
