@@ -27,6 +27,14 @@ class Query:
         self.filters.append((field, value))
         return self
 
+    def in_(self, field, values):
+        self.filters.append((field, set(values)))
+        return self
+
+    def gte(self, field, value):
+        self.filters.append((field, lambda actual: actual is not None and actual >= value))
+        return self
+
     def limit(self, count):
         self.end = count
         return self
@@ -53,7 +61,14 @@ class Query:
 
     def execute(self):
         rows = self.db.rows[self.table]
-        selected = [r for r in rows if all(r.get(k) == v for k, v in self.filters)]
+        def matches(actual, expected):
+            if callable(expected):
+                return expected(actual)
+            if isinstance(expected, set):
+                return actual in expected
+            return actual == expected
+
+        selected = [r for r in rows if all(matches(r.get(k), v) for k, v in self.filters)]
         if self.operation == "insert":
             if self.table == "stock_movements" and self.db.fail_movement:
                 raise RuntimeError("simulated movement failure")
@@ -193,6 +208,30 @@ class StockLaunchTests(unittest.TestCase):
         response = self.client.post("/api/visits/foreign/stock", json={"stock_id": STOCK_ITEM_ID, "quantity": 1})
         self.assertEqual(response.status_code, 404)
         self.assertEqual(self.db.rows["visit_stock"], [])
+
+    def test_selected_branch_scopes_stock_quantity_and_history(self):
+        main, second, foreign = (f"00000000-0000-4000-8000-{n:012}" for n in range(1, 4))
+        self.db.rows["branches"] = [
+            {"id": main, "org_id": "clinic", "is_active": True, "is_primary": True},
+            {"id": second, "org_id": "clinic", "is_active": True, "is_primary": False},
+            {"id": foreign, "org_id": "other", "is_active": True, "is_primary": True},
+        ]
+        self.db.rows["stock_branch_balances"] = [
+            {"org_id": "clinic", "stock_id": STOCK_ITEM_ID, "branch_id": main, "quantity": 10},
+        ]
+        self.db.rows["stock_movements"] = [
+            {"id": branch, "org_id": "clinic", "stock_id": STOCK_ITEM_ID, "branch_id": branch,
+             "movement_type": "writeoff", "quantity": 1, "created_at": "2999-01-01"}
+            for branch in (main, second)
+        ]
+        for branch, expected_qty in ((main, 10), (second, 0)):
+            response = self.client.get(f"/api/stock?branch_id={branch}")
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(response.get_json()["data"][0]["qty"], expected_qty)
+            movements = self.client.get(f"/api/stock/{STOCK_ITEM_ID}/movements?branch_id={branch}")
+            self.assertEqual([row["id"] for row in movements.get_json()["data"]["items"]], [branch])
+        self.assertEqual(self.client.get(f"/api/stock?branch_id={foreign}").status_code, 400)
+        self.assertEqual(self.client.get("/api/stock?branch_id=invalid").status_code, 400)
 
     def test_history_is_scoped_paginated_and_read_only(self):
         for i in range(55):

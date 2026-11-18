@@ -364,15 +364,4 @@ body[data-theme="white"] #visitModal {
   overflow-wrap: anywhere;
 }
 
-.calendarBranchControl {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  min-width: 0;
-  font-weight: 600;
-}
-.calendarBranchControl select {
-  max-width: min(240px, 62vw);
-  min-width: 0;
-}
 #visitBookingBranch[hidden] { display: none !important; }

@@ -9493,7 +9493,10 @@ async function routeFromHash() {
     if (route === "visits") renderVisitsTab();
 if (route === "hospital") renderHospitalTab();
 if (route === "services") renderServicesTab();
-    if (route === "stock") renderStockTab();
+    if (route === "stock") {
+      await loadStockApi();
+      if (state.route === route) renderStockTab();
+    }
     if (
   route === "finance"
 ) {
@@ -36245,6 +36248,9 @@ async function loadFinancePurchasesApi(
   const params =
     new URLSearchParams();
 
+  const branch = await state.workspaceBranchReady;
+  if (branch) params.set("branch_id", branch.id);
+
   const dateFrom =
     options.dateFrom ||
     financeDashboardState.dateFrom;
@@ -36459,6 +36465,8 @@ async function createFinanceSupplierApi(
 async function createFinancePurchaseApi(
   payload
 ) {
+  const branch = await state.workspaceBranchReady;
+  if (branch) payload = { ...payload, branch_id: branch.id };
   const response = await fetch(
     "/api/finance/purchases",
     {
@@ -41758,11 +41766,9 @@ async function openFinancePurchaseReceiveModal(purchase, onSuccess) {
     return;
   }
 
-  let branches;
-  try {
-    branches = await loadCalendarBranches();
-  } catch {
-    openDeleteModal("Не вдалося завантажити філії приймання.", null, "info");
+  const branch = await state.workspaceBranchReady.catch(() => null);
+  if (!branch || (purchase.branch_id && purchase.branch_id !== branch.id)) {
+    openDeleteModal("Відкрийте закупівлю у її філії.", null, "info");
     return;
   }
   document.querySelector(".financePurchaseReceiveOverlay")?.remove();
@@ -41834,9 +41840,6 @@ async function openFinancePurchaseReceiveModal(purchase, onSuccess) {
           `).join("")}
         </div>
 
-        <label class="stockReceiveNote"><span>Філія приймання</span>
-          <select name="receipt_branch" required>${stockBranchSelectOptions(branches)}</select>
-        </label>
         <label class="stockReceiveNote"><span>${escapeHtml(stockWorkspaceText("Примітка"))}</span><textarea name="receipt_note" maxlength="2000" rows="2"></textarea></label>
         <p class="stockReceiveSummary" role="status"></p>
         <div class="financeSupplierCreateError" role="alert" hidden></div>
@@ -41975,7 +41978,7 @@ async function openFinancePurchaseReceiveModal(purchase, onSuccess) {
 
     try {
       const note = form.elements.receipt_note.value.trim();
-      const branchId = form.elements.receipt_branch.value;
+      const branchId = branch.id;
       const signature = JSON.stringify({ items: cleanItems, note, branchId });
       if (pendingReceipt?.signature !== signature) {
         pendingReceipt = {
@@ -49311,8 +49314,11 @@ async function loadStockMovementHistory(button) {
   message.textContent = getStockInterfaceText("Завантаження…");
 
   try {
+    const branch = await state.workspaceBranchReady;
+    const params = new URLSearchParams({ offset: button.dataset.offset || "0" });
+    if (branch) params.set("branch_id", branch.id);
     const data = await stockApiRequest(
-      `/api/stock/${encodeURIComponent(button.dataset.stockHistory)}/movements?offset=${Number(button.dataset.offset || 0)}`,
+      `/api/stock/${encodeURIComponent(button.dataset.stockHistory)}/movements?${params}`,
       { method: "GET" }
     );
     if (!panel.isConnected) return;
@@ -49349,135 +49355,6 @@ async function loadStockMovementHistory(button) {
   } finally {
     button.disabled = false;
   }
-}
-
-function mountStockBranchBalances(page, items) {
-  if (!items.length) return;
-  const panel = document.createElement("details");
-  panel.className = "stockBranchBalances";
-  panel.open = Boolean(state.stockBranchPanelOpen);
-  panel.innerHTML = `
-    <summary>Залишки за філіями</summary>
-    <div class="stockBranchBody">
-      <label>Позиція<select data-branch-stock-item>${items.map(item =>
-        `<option value="${escapeHtml(item.id)}">${escapeHtml(item.name)}</option>`
-      ).join("")}</select></label>
-      <p role="status"></p>
-      <div data-branch-stock-result></div>
-    </div>`;
-  page.querySelector("#stockPremiumGrid").before(panel);
-  const itemSelect = panel.querySelector("[data-branch-stock-item]");
-  const result = panel.querySelector("[data-branch-stock-result]");
-  const status = panel.querySelector("[role=status]");
-  let requestVersion = 0;
-  let saving = false;
-  if (items.some(item => item.id === state.stockBranchItem)) itemSelect.value = state.stockBranchItem;
-
-  async function load() {
-    const itemId = itemSelect.value;
-    state.stockBranchItem = itemId;
-    const version = ++requestVersion;
-    result.replaceChildren();
-    status.textContent = "Завантаження залишків…";
-    try {
-      const data = await stockApiRequest(`/api/stock/${encodeURIComponent(itemId)}/branches`, { headers: getOrgHeaders() });
-      if (!panel.isConnected || version !== requestVersion) return;
-      const item = items.find(entry => entry.id === itemId);
-      const branches = data.branches;
-      const active = branches.filter(branch => branch.is_active);
-      const quantity = value => `${Number(value).toLocaleString(getCalendarLocale(), { maximumFractionDigits: 6 })} ${item.unit}`;
-      const names = Object.fromEntries(branches.map(branch => [branch.id, branch.name]));
-      const branchOptions = '<option value="">Оберіть філію</option>' + active.map(branch =>
-        `<option value="${escapeHtml(branch.id)}">${escapeHtml(branch.name)}</option>`
-      ).join("");
-      status.textContent = `Усі філії · ${quantity(branches.reduce((sum, branch) => sum + Number(branch.quantity), 0))}`;
-      result.innerHTML = `
-        <ul class="stockBranchQuantities">${branches.map(branch =>
-          `<li><span>${escapeHtml(branch.name)}${branch.is_active ? "" : " · неактивна"}</span><strong>${escapeHtml(quantity(branch.quantity))}</strong></li>`
-        ).join("")}</ul>
-        ${isOwnerOrAdmin() && active.length ? `
-          <form class="stockBranchOperation">
-            <label>Операція<select name="mode">
-              <option value="income">Надходження</option>
-              <option value="writeoff">Списання</option>
-              ${active.length > 1 ? '<option value="transfer">Переміщення</option>' : ""}
-            </select></label>
-            <label hidden>Звідки<select name="from">${branchOptions}</select></label>
-            <label>Куди<select name="to" required>${branchOptions}</select></label>
-            <label>Кількість<input name="quantity" required inputmode="decimal" pattern="[0-9]+([.,][0-9]+)?" maxlength="18"></label>
-            <button type="submit" class="primary">Зберегти рух</button>
-            <p role="alert" hidden></p>
-          </form>` : ""}
-        ${data.operations.length ? `<details><summary>Історія рухів філій</summary>
-          <ul class="stockBranchQuantities">${data.operations.map(operation => {
-            const from = names[operation.from_branch_id];
-            const to = names[operation.to_branch_id];
-            const label = from && to ? `${from} → ${to}` : to ? `Надходження · ${to}` : `Списання · ${from}`;
-            return `<li><span>${escapeHtml(formatStockDate(operation.created_at))} · ${escapeHtml(label)}${operation.comment ? ` · ${escapeHtml(operation.comment)}` : ""}</span>
-              <strong>${escapeHtml(quantity(operation.quantity))}</strong></li>`;
-          }).join("")}</ul></details>` : ""}`;
-      const form = result.querySelector("form");
-      if (!form) return;
-      const fields = form.elements;
-      const alert = form.querySelector("[role=alert]");
-      const submit = form.querySelector("button");
-      let pending;
-      function updateMode() {
-        fields.from.required = fields.mode.value !== "income";
-        fields.to.required = fields.mode.value !== "writeoff";
-        fields.from.closest("label").hidden = !fields.from.required;
-        fields.to.closest("label").hidden = !fields.to.required;
-      }
-      fields.mode.addEventListener("change", updateMode);
-      form.addEventListener("submit", async event => {
-        event.preventDefault();
-        if (saving) return;
-        const details = {
-          from_branch: fields.from.required ? fields.from.value : null,
-          to_branch: fields.to.required ? fields.to.value : null,
-          quantity: Number(fields.quantity.value.replace(",", ".")),
-        };
-        const signature = JSON.stringify(details);
-        if (pending?.signature !== signature) pending = { signature, id: crypto.randomUUID() };
-        saving = true;
-        alert.hidden = true;
-        itemSelect.disabled = true;
-        submit.disabled = true;
-        try {
-          await stockApiRequest(`/api/stock/${encodeURIComponent(itemId)}/branches`, {
-            method: "POST", headers: getOrgHeaders(),
-            body: JSON.stringify({ ...details, operation_id: pending.id }),
-          });
-          if (panel.isConnected) {
-            await loadStockApi(true);
-            if (panel.isConnected) renderStockTab();
-          }
-        } catch (error) {
-          alert.textContent = error.message;
-          alert.hidden = false;
-        } finally {
-          saving = false;
-          itemSelect.disabled = false;
-          submit.disabled = false;
-        }
-      });
-    } catch (error) {
-      if (!panel.isConnected || version !== requestVersion) return;
-      status.textContent = error.message;
-      const retry = document.createElement("button");
-      retry.type = "button";
-      retry.className = "ghost";
-      retry.textContent = "Повторити";
-      retry.addEventListener("click", load);
-      result.append(retry);
-    }
-  }
-  panel.addEventListener("toggle", () => {
-    state.stockBranchPanelOpen = panel.open;
-    if (panel.open && !requestVersion) load();
-  });
-  itemSelect.addEventListener("change", load);
-  if (panel.open) load();
 }
 
 function renderStockTab() {
@@ -49946,7 +49823,6 @@ const currentSpecies =
   `;
 
     mountStockNavigation(page);
-    mountStockBranchBalances(page, items);
     page
     ._stockLocalizationObserver
     ?.disconnect();
@@ -51316,34 +51192,10 @@ const categories =
         </div>
 
         <div class="stockEditorRow">
-          <label class="stockEditorField">
-            <span>
-              ${
-                isEdit
-                  ? "Поточний залишок · лише перегляд"
-                  : "Початковий залишок"
-              }
-            </span>
-
-            <input
-              id="stockEditorQuantity"
-              type="number"
-              min="0"
-              step="0.01"
-              value="${
-                isEdit
-                  ? escapeHtml(
-                      String(item.qty)
-                    )
-                  : "0"
-              }"
-              ${
-                isEdit
-                  ? "readonly aria-readonly=\"true\""
-                  : ""
-              }
-            >
-          </label>
+          ${isEdit ? `<label class="stockEditorField">
+            <span>Поточний залишок · лише перегляд</span>
+            <input id="stockEditorQuantity" type="number" value="${escapeHtml(String(item.qty))}" readonly>
+          </label>` : ""}
 
           <label class="stockEditorField">
             <span>
@@ -51579,9 +51431,6 @@ const categories =
       "#stockEditorQuantity"
     );
   if (options.forPurchase && !isEdit) {
-    quantityInput.value = "0";
-    quantityInput.disabled = true;
-    quantityInput.closest("label").insertAdjacentHTML("beforeend", `<small>${escapeHtml(stockWorkspaceText("Залишок буде додано під час приймання закупівлі."))}</small>`);
     const activeInput = modal.querySelector("#stockEditorActive");
     activeInput.checked = true;
     activeInput.disabled = true;
@@ -52073,17 +51922,14 @@ async function openStockAdjustmentModal(
       stockItem
     );
 
-  let stockBranches;
+  let branch;
   try {
-    const data = await stockApiRequest(`/api/stock/${encodeURIComponent(item.id)}/branches`, {
-      headers: getOrgHeaders(), cache: "no-store",
-    });
-    stockBranches = data.branches.filter(branch => branch.is_active);
+    branch = await state.workspaceBranchReady;
   } catch (error) {
     showStockAlert(error.message);
     return;
   }
-  if (!stockBranches.length) {
+  if (!branch) {
     showStockAlert("Немає активних філій.");
     return;
   }
@@ -52192,11 +52038,6 @@ async function openStockAdjustmentModal(
           </small>
         </div>
       </div>
-
-      <label class="stockAdjustmentField">
-        <span>Філія</span>
-        <select id="stockAdjustmentBranch">${stockBranchSelectOptions(stockBranches)}</select>
-      </label>
 
       <label class="stockAdjustmentField">
         <span>
@@ -52328,8 +52169,7 @@ async function openStockAdjustmentModal(
     }
   );
 
-  const branchSelect = modal.querySelector("#stockAdjustmentBranch");
-  const branchQuantity = () => Number(stockBranches.find(branch => branch.id === branchSelect.value)?.quantity || 0);
+  const branchQuantity = () => Number(item.qty || 0);
   let pendingOperation;
 
   const calculateResult = () => {
@@ -52368,7 +52208,6 @@ async function openStockAdjustmentModal(
       calculateResult
     );
 
-  branchSelect.addEventListener("change", calculateResult);
   calculateResult();
 
   const submitButton =
@@ -52438,8 +52277,8 @@ async function openStockAdjustmentModal(
 
         try {
           const details = {
-            from_branch: isIncome ? null : branchSelect.value,
-            to_branch: isIncome ? branchSelect.value : null,
+            from_branch: isIncome ? null : branch.id,
+            to_branch: isIncome ? branch.id : null,
             quantity, comment,
           };
           const signature = JSON.stringify(details);
@@ -73437,23 +73276,32 @@ function stockBranchSelectOptions(branches) {
   ).join("");
 }
 
-function mountCalendarBranchSelect(page, branches, selected) {
-  const toolbar = page.querySelector(".pcToolbar") || page.querySelector(".calendarHeader");
-  if (!toolbar) return;
-  const label = document.createElement("label");
-  label.className = "calendarBranchControl";
-  label.textContent = calendarBranchLabel(0);
-  const select = document.createElement("select");
-  select.id = "calendarBranchSelect";
-  select.className = "premium-select";
-  for (const branch of branches) select.add(new Option(branch.name, branch.id));
-  select.value = selected.id;
-  select.addEventListener("change", () => {
+function mountWorkspaceBranchSelect(branches) {
+  const select = document.getElementById("workspaceBranchSelect");
+  const control = document.getElementById("workspaceBranchControl");
+  control.hidden = !branches.length;
+  select.setAttribute("aria-label", calendarBranchLabel(0));
+  select.replaceChildren(...branches.map(branch => new Option(branch.name, branch.id)));
+  select.value = selectedCalendarBranch(branches)?.id || "";
+  select.onchange = () => {
     localStorage.setItem(calendarBranchStorageKey(), select.value);
-    renderCalendarTab().then(() => document.getElementById("calendarBranchSelect")?.focus());
-  });
-  label.append(select);
-  toolbar.prepend(label);
+    location.reload();
+  };
+}
+
+async function initializeWorkspaceBranch() {
+  try {
+    const branches = await loadCalendarBranches();
+    mountWorkspaceBranchSelect(branches);
+    return selectedCalendarBranch(branches);
+  } catch {
+    const control = document.getElementById("workspaceBranchControl");
+    control.hidden = false;
+    const select = document.getElementById("workspaceBranchSelect");
+    select.replaceChildren(new Option(calendarBranchLabel(1), ""));
+    select.disabled = true;
+    throw new Error(calendarBranchLabel(1));
+  }
 }
 
 async function renderCalendarTab(options = {}) {
@@ -73491,7 +73339,7 @@ async function renderCalendarTab(options = {}) {
     loadStaffScheduleApi(
       today
     ),
-    calendarMode === "month" ? null : loadCalendarBranches().catch(() => []),
+    loadCalendarBranches().catch(() => []),
   ]);
 
   if(renderRevision!==window.__pugCalendarRenderRevision) return;
@@ -73739,7 +73587,6 @@ events.forEach(
     `;
 
     window.mountPugCalendarWorkspace?.(page, {mode: "week", date: today, staff, events});
-    mountCalendarBranchSelect(page, branches, branch);
 
     $("[data-cal-mode='day']")?.addEventListener("click", async () => {
       calendarMode = "day";
@@ -77875,7 +77722,6 @@ page.innerHTML = `
 
 mountMobileCalendarDay(page);
 window.mountPugCalendarWorkspace?.(page, {mode: "day", date: today, staff, events});
-mountCalendarBranchSelect(page, branches, branch);
 initCalendarTopScroll();
   $$("[data-calendar-timeline]")
   .forEach(
@@ -110775,9 +110621,10 @@ async function loadStockApi(
   }
 
   try {
+    const branch = await state.workspaceBranchReady;
     const data =
       await stockApiRequest(
-        "/api/stock",
+        branch ? `/api/stock?branch_id=${encodeURIComponent(branch.id)}` : "/api/stock",
         {
           method: "GET",
         }
@@ -121698,7 +121545,9 @@ async function init() {
     console.warn("Clinic subscription status unavailable:", error);
   });
 
+state.workspaceBranchReady = initializeWorkspaceBranch();
 const startupRequests = [
+  state.workspaceBranchReady,
   loadClinicProfileApi(),
 ];
 

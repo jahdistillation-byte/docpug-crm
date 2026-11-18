@@ -3839,6 +3839,20 @@ def serialize_stock_item(row):
     }
 
 
+def workspace_request_branch(org_id, raw):
+    if raw is None:
+        return None
+    try:
+        branch_id = str(uuid.UUID(raw))
+    except (ValueError, TypeError, AttributeError):
+        raise ValueError("Філія недоступна.") from None
+    query = (supabase.table("branches").select("id,is_primary").eq("org_id", org_id)
+             .eq("id", branch_id).eq("is_active", True).limit(1).execute())
+    if not query.data:
+        raise ValueError("Філія недоступна.")
+    return query.data[0]
+
+
 @app.get("/api/stock")
 def api_get_stock():
     user, auth_error = auth_required()
@@ -3871,33 +3885,30 @@ def api_get_stock():
             result.data or []
         )
 
+        branch = workspace_request_branch(current_org, request.args.get("branch_id"))
+        branch_id = branch["id"] if branch else None
+        if branch_id:
+            balances = {}
+            for offset in range(0, len(rows), 100):
+                item_ids = [str(row["id"]) for row in rows[offset:offset + 100]]
+                result = (supabase.table("stock_branch_balances").select("stock_id,quantity")
+                          .eq("org_id", current_org).eq("branch_id", branch_id)
+                          .in_("stock_id", item_ids).execute())
+                balances.update({str(row["stock_id"]): row["quantity"] for row in result.data or []})
+            rows = [{**row, "qty": balances.get(str(row["id"]), 0)} for row in rows]
+
+        cutoff = (datetime.now(timezone.utc) - timedelta(days=30)).isoformat()
+        usage_query = (supabase.table("stock_movements").select("stock_id, quantity")
+                       .eq("org_id", current_org).eq("movement_type", "writeoff")
+                       .gte("created_at", cutoff))
+        if branch_id:
+            usage_query = usage_query.eq("branch_id", branch_id)
+
         usage_by_stock = {}
 
         try:
             usage_result = execute_with_retry(
-                lambda: (
-                    supabase
-                    .table("stock_movements")
-                    .select(
-                        "stock_id, quantity"
-                    )
-                    .eq(
-                        "org_id",
-                        current_org,
-                    )
-                    .eq(
-                        "movement_type",
-                        "writeoff",
-                    )
-                    .gte(
-                        "created_at",
-                        (
-                            datetime
-                            .now(timezone.utc)
-                            - timedelta(days=30)
-                        ).isoformat(),
-                    )
-                ),
+                lambda: usage_query,
                 attempts=4,
                 delay=0.3,
             )
@@ -3976,6 +3987,8 @@ def api_get_stock():
 
         return ok(items)
 
+    except ValueError as error:
+        return fail(str(error), 400)
     except Exception as error:
         print(
             "❌ GET /api/stock:",
@@ -4102,11 +4115,14 @@ def api_get_stock_movements(stock_id):
         if not stock.data:
             return fail("Позицію не знайдено.", 404)
 
-        result = (supabase.table("stock_movements")
-                  .select("id,created_at,movement_type,quantity,quantity_before,quantity_after,comment,visit_id")
-                  .eq("org_id", current_org).eq("stock_id", stock_id)
-                  .order("created_at", desc=True).order("id", desc=True)
-                  .range(offset, offset + 50).execute())
+        branch = workspace_request_branch(current_org, request.args.get("branch_id"))
+        branch_id = branch["id"] if branch else None
+        query = (supabase.table("stock_movements")
+                 .select("id,created_at,movement_type,quantity,quantity_before,quantity_after,comment,visit_id")
+                 .eq("org_id", current_org).eq("stock_id", stock_id))
+        if branch_id:
+            query = query.eq("branch_id", branch_id)
+        result = query.order("created_at", desc=True).order("id", desc=True).range(offset, offset + 50).execute()
         rows = list(result.data or [])
         return ok({
             "items": rows[:50],
@@ -4114,6 +4130,8 @@ def api_get_stock_movements(stock_id):
             "next_offset": offset + min(len(rows), 50),
             "unit": stock.data[0].get("unit") or "шт",
         })
+    except ValueError as error:
+        return fail(str(error), 400)
     except Exception as error:
         print("Stock movement history failed:", repr(error), flush=True)
         return fail("Не вдалося завантажити історію руху.", 500)
@@ -12027,7 +12045,7 @@ def api_finance_purchase_detail(purchase_id):
         return fail("Organization not selected", 400)
     try:
         result = (supabase.table("stock_purchases")
-                  .select("id,supplier_id,purchase_number,invoice_number,status,payment_status,order_date,expected_date,received_at,subtotal,discount_amount,total_amount,paid_amount,currency,document_url,note,created_at,updated_at")
+                  .select("id,branch_id,supplier_id,purchase_number,invoice_number,status,payment_status,order_date,expected_date,received_at,subtotal,discount_amount,total_amount,paid_amount,currency,document_url,note,created_at,updated_at")
                   .eq("org_id", current_org).eq("id", purchase_id).limit(1).execute())
         if not result.data:
             return fail("Закупівлю не знайдено.", 404)
@@ -12228,13 +12246,14 @@ def api_finance_purchases_list():
     )
 
     try:
+        branch = workspace_request_branch(current_org, request.args.get("branch_id"))
         query = (
             supabase
             .table(
                 "stock_purchases"
             )
             .select(
-                "id, org_id, supplier_id, "
+                "id, org_id, supplier_id, branch_id, "
                 "purchase_number, invoice_number, "
                 "status, payment_status, "
                 "order_date, expected_date, "
@@ -12250,6 +12269,12 @@ def api_finance_purchases_list():
                 current_org,
             )
         )
+
+        if branch:
+            if branch["is_primary"]:
+                query = query.or_(f'branch_id.eq.{branch["id"]},branch_id.is.null')
+            else:
+                query = query.eq("branch_id", branch["id"])
 
         if status:
             query = query.eq(
@@ -12566,6 +12591,8 @@ def api_finance_purchases_list():
             },
         })
 
+    except ValueError as error:
+        return fail(str(error), 400)
     except Exception as error:
         print(
             "❌ GET finance purchases:",
@@ -12950,11 +12977,16 @@ def api_finance_purchase_create():
         })
 
     try:
+        try:
+            branch = workspace_request_branch(current_org, payload.get("branch_id"))
+        except ValueError as error:
+            return fail(str(error), 400)
         result = (
             supabase
             .rpc(
-                "create_stock_purchase",
+                "create_stock_purchase_at_branch" if branch else "create_stock_purchase",
                 {
+                    **({"p_branch_id": branch["id"]} if branch else {}),
                     "p_org_id":
                         current_org,
 
@@ -13222,6 +13254,14 @@ def api_receive_stock_purchase(
         return fail("Оберіть філію приймання.", 400)
 
     try:
+        purchase_branch = (supabase.table("stock_purchases").select("branch_id")
+                           .eq("org_id", current_org).eq("id", clean_purchase_id)
+                           .limit(1).execute())
+        if purchase_branch.data and purchase_branch.data[0].get("branch_id"):
+            assigned_id = str(purchase_branch.data[0]["branch_id"])
+            if branch_id and branch_id != assigned_id:
+                return fail("Прийміть закупівлю у її філії.", 409)
+            branch_id = assigned_id
         rpc_result = (
             supabase
             .rpc(
