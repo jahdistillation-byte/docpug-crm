@@ -9101,6 +9101,144 @@ def _load_finance_currency_overview(
         return fail(error_message, 500)
 
 
+def payroll_money(value):
+    return Decimal(str(value or 0)).quantize(Decimal("0.01"))
+
+
+def calculate_payroll_draft(staff, shifts, visits, transactions, services, materials, branch_id, date_from, date_to):
+    employees = {str(person["id"]): person for person in staff}
+    included_ids = {str(person["id"]) for person in staff if branch_id in (person.get("branch_ids") or [])}
+    visit_by_id = {str(visit["id"]): visit for visit in visits if str(visit.get("branch_id")) == branch_id}
+    schedules = {}
+    for shift in shifts:
+        if (str(shift.get("branch_id")) == branch_id and shift.get("is_active") is not False
+                and date_from <= str(shift.get("work_date") or "") <= date_to):
+            staff_id = str(shift.get("staff_id"))
+            included_ids.add(staff_id)
+            schedules.setdefault(staff_id, set()).add(str(shift["work_date"]))
+
+    lines_by_visit = {}
+    for name, lines in (("services", services), ("materials", materials)):
+        for line in lines:
+            totals = lines_by_visit.setdefault(str(line.get("visit_id")), {"services": Decimal(0), "materials": Decimal(0)})
+            totals[name] += Decimal(str(line.get("qty") or 0)) * Decimal(str(line.get("price_snap") or 0))
+
+    payments = {}
+    for entry in transactions:
+        visit_id = str(entry.get("visit_id"))
+        visit = visit_by_id.get(visit_id)
+        if not visit or entry.get("status") != "completed" or entry.get("currency") != "UAH":
+            continue
+        kind = entry.get("transaction_type")
+        if kind not in {"payment", "refund"}:
+            continue
+        item = payments.setdefault(visit_id, {"before": Decimal(0), "period": Decimal(0)})
+        day = datetime.fromisoformat(str(entry["occurred_at"]).replace("Z", "+00:00")).astimezone(REPORT_TIMEZONE).date().isoformat()
+        amount = Decimal(str(entry.get("amount") or 0)) * (-1 if kind == "refund" else 1)
+        if day < date_from:
+            item["before"] += amount
+        elif day <= date_to:
+            item["period"] += amount
+
+    bases = {}
+    details = {}
+    excluded_currency_visits = 0
+    for visit_id, entry in payments.items():
+        visit = visit_by_id[visit_id]
+        if visit.get("currency", "UAH") != "UAH":
+            excluded_currency_visits += 1
+            continue
+        staff_id = str(visit.get("staff_id") or "")
+        if staff_id not in employees:
+            continue
+        included_ids.add(staff_id)
+        totals = lines_by_visit.get(visit_id, {"services": Decimal(0), "materials": Decimal(0)})
+        subtotal = totals["services"] + totals["materials"]
+        billed = max(Decimal(0), subtotal - Decimal(str(visit.get("discount_amount") or 0)))
+        if billed <= 0 or subtotal <= 0:
+            continue
+        before = min(billed, max(Decimal(0), entry["before"]))
+        after = min(billed, max(Decimal(0), entry["before"] + entry["period"]))
+        base = (after - before) * totals["services"] / subtotal
+        bases[staff_id] = bases.get(staff_id, Decimal(0)) + base
+        details.setdefault(staff_id, []).append({
+            "visit_id": visit_id, "date": visit.get("date"),
+            "paid_services": str(payroll_money(base)),
+        })
+
+    items = []
+    for staff_id in sorted(included_ids):
+        person = employees.get(staff_id)
+        if not person:
+            continue
+        shift_rate = payroll_money(person.get("shift_rate"))
+        percent = payroll_money(person.get("percent_rate"))
+        shift_dates = sorted(schedules.get(staff_id, set()))
+        shift_amount = shift_rate * len(shift_dates)
+        commission_base = payroll_money(bases.get(staff_id))
+        commission = payroll_money(commission_base * percent / 100)
+        items.append({
+            "staff_id": staff_id, "name": person.get("name") or "Працівник",
+            "shift_dates": shift_dates, "shift_count": len(shift_dates),
+            "shift_rate": str(shift_rate), "shift_amount": str(shift_amount),
+            "percent_rate": str(percent), "commission_base": str(commission_base),
+            "commission": str(commission), "total": str(payroll_money(shift_amount + commission)),
+            "visits": details.get(staff_id, []),
+        })
+    items.sort(key=lambda item: item["name"].casefold())
+    return {"items": items, "total": str(sum((Decimal(item["total"]) for item in items), Decimal(0))),
+            "excluded_currency_visits": excluded_currency_visits}
+
+
+@app.get("/api/finance/payroll")
+def api_finance_payroll():
+    _, auth_error = owner_required()
+    if auth_error:
+        return auth_error
+    org_id = get_current_org_id()
+    if not org_id:
+        return fail("Organization not selected", 400)
+    try:
+        branch = workspace_request_branch(org_id, request.args.get("branch_id"))
+        if not branch:
+            return fail("Оберіть філію у шапці.", 400)
+        today = datetime.now(REPORT_TIMEZONE).date()
+        date_from = datetime.strptime(request.args.get("date_from") or today.replace(day=1).isoformat(), "%Y-%m-%d").date()
+        date_to = datetime.strptime(request.args.get("date_to") or today.isoformat(), "%Y-%m-%d").date()
+        if date_to > today or date_from > date_to or (date_to - date_from).days > 93:
+            return fail("Оберіть минулий або поточний період до 94 днів.", 400)
+        staff = load_finance_org_rows("staff", order_by="id")
+        shifts = load_finance_org_rows("staff_schedule", order_by="id")
+        visits = load_finance_org_rows("visits", order_by="id", branch_id=branch["id"])
+        transactions = load_finance_org_rows("finance_transactions", order_by="id")
+        services, materials = [], []
+        ids = [row["id"] for row in visits]
+        for offset in range(0, len(ids), 100):
+            chunk = ids[offset:offset + 100]
+            for table, target in (("visit_services", services), ("visit_stock", materials)):
+                page_offset = 0
+                while True:
+                    rows = report_rows(lambda: supabase.table(table).select("visit_id,qty,price_snap")
+                                       .in_("visit_id", chunk).order("id").range(page_offset, page_offset + 499))
+                    target.extend(rows)
+                    if len(rows) < 500:
+                        break
+                    page_offset += 500
+        draft = calculate_payroll_draft(staff, shifts, visits, transactions, services, materials,
+                                        branch["id"], date_from.isoformat(), date_to.isoformat())
+        unassigned_shifts = sum(
+            1 for shift in shifts if not shift.get("branch_id") and shift.get("is_active") is not False
+            and date_from.isoformat() <= str(shift.get("work_date") or "") <= date_to.isoformat()
+        )
+        return ok({**draft, "unassigned_shifts": unassigned_shifts, "branch_name": branch["name"], "currency": "UAH",
+                   "date_from": date_from.isoformat(), "date_to": date_to.isoformat()})
+    except ValueError as error:
+        return fail(str(error), 400)
+    except Exception:
+        app.logger.exception("Could not calculate payroll draft")
+        return fail("Не вдалося розрахувати зарплати.", 500)
+
+
 @app.get("/api/finance/overview")
 def api_finance_overview():
     return _load_finance_currency_overview(

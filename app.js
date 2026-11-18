@@ -35909,6 +35909,7 @@ function buildFinanceSectionNavigation() {
       icon: "⌘",
       label: "Платіжні інтеграції",
     },
+    ...(isOwner() ? [{ key: "payroll", icon: "₴", label: "Зарплати" }] : []),
     ...(isOwner()
       ? [{
           key: "report",
@@ -46836,6 +46837,69 @@ async function renderFinanceIntegrationsTab(page) {
   }
 }
 
+async function renderFinancePayrollTab(page) {
+  page.innerHTML = `<div class="card" role="status">Розраховуємо зарплати…</div>`;
+  try {
+    const branch = await state.workspaceBranchReady;
+    const today = financeDateToIso(new Date());
+    const params = new URLSearchParams({
+      branch_id: branch.id,
+      date_from: financeDashboardState.dateFrom,
+      date_to: financeDashboardState.dateTo > today ? today : financeDashboardState.dateTo,
+    });
+    const response = await fetch(`/api/finance/payroll?${params}`, { credentials: "include", cache: "no-store" });
+    const result = await response.json();
+    if (!response.ok || !result.ok) throw new Error(result.error || "Не вдалося розрахувати зарплати.");
+    const data = result.data;
+    const money = amount => escapeHtml(formatClinicMoney(amount, "UAH"));
+    page.innerHTML = `<div class="financeDashboard">
+      ${buildFinanceSectionNavigation()}
+      <header class="financeHero">
+        <div><span class="financeEyebrow">ПОПЕРЕДНІЙ РОЗРАХУНОК</span>
+          <h1>Зарплати</h1><p>${escapeHtml(data.branch_name)}</p>
+          <p>Зміни за графіком до сьогодні. Відсоток від оплачених послуг з урахуванням знижок і повернень.</p>
+          <p>Ставки взято з поточних карток співробітників. Підтвердження відпрацьованих змін, бонуси, утримання та виплати потребують узгодження.</p>
+        </div>
+      </header>
+      <form id="payrollPeriod" class="card">
+        <label>Від <input type="date" name="from" value="${escapeHtml(data.date_from)}" required max="${today}"></label>
+        <label>До <input type="date" name="to" value="${escapeHtml(data.date_to)}" required max="${today}"></label>
+        <button type="submit" class="primary">Розрахувати</button>
+      </form>
+      <section class="card"><h2>Разом за період · ${money(data.total)}</h2>
+        <p>Валюта розрахунку — UAH.</p>
+        ${data.unassigned_shifts ? `<p role="status">Змін без прив’язки до філії · ${data.unassigned_shifts}. Оплату цих змін потрібно уточнити.</p>` : ""}
+        ${data.excluded_currency_visits ? '<p role="status">Є оплати візитів в інших валютах. Вони потребують окремого розрахунку.</p>' : ""}
+        ${data.items.map(item => `<details class="card">
+          <summary><strong>${escapeHtml(item.name)}</strong> · ${money(item.total)}</summary>
+          <p>Зміни за графіком · ${item.shift_count} × ${money(item.shift_rate)} = ${money(item.shift_amount)}</p>
+          <p>Відсоток · ${money(item.commission_base)} × ${escapeHtml(item.percent_rate)}% = ${money(item.commission)}</p>
+          <p>Дати змін · ${escapeHtml(item.shift_dates.join(", ") || "—")}</p>
+          ${item.visits.length ? `<h3>Оплачені послуги</h3><ul>${item.visits.map(visit => `<li>
+            <a href="#visit:${encodeURIComponent(visit.visit_id)}">${escapeHtml(visit.date || "Візит")}</a>
+            · база для відсотка ${money(visit.paid_services)}
+          </li>`).join("")}</ul>` : ""}
+        </details>`).join("") || "<p>Співробітників і нарахувань за цей період немає.</p>"}
+      </section>
+    </div>`;
+    bindFinanceSectionNavigation(page);
+    page.querySelector("#payrollPeriod").addEventListener("submit", event => {
+      event.preventDefault();
+      const form = event.currentTarget;
+      financeDashboardState.dateFrom = form.elements.from.value;
+      financeDashboardState.dateTo = form.elements.to.value;
+      void renderFinancePayrollTab(page);
+    });
+  } catch (error) {
+    page.innerHTML = `<div class="financeDashboard">${buildFinanceSectionNavigation()}
+      <section class="card"><p role="alert">${escapeHtml(error.message)}</p>
+        <button type="button" id="payrollRetry" class="ghost">Повторити</button>
+      </section></div>`;
+    bindFinanceSectionNavigation(page);
+    page.querySelector("#payrollRetry").addEventListener("click", () => renderFinancePayrollTab(page));
+  }
+}
+
 async function renderFinanceTab(
   options = {}
 ) {
@@ -46889,6 +46953,15 @@ async function renderFinanceTab(
   if (options.dateTo) {
     financeDashboardState.dateTo =
       options.dateTo;
+  }
+
+  if (financeDashboardState.section === "payroll") {
+    if (!isOwner()) {
+      financeDashboardState.section = "today";
+    } else {
+      await renderFinancePayrollTab(page);
+      return;
+    }
   }
 
   if (
