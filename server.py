@@ -3846,7 +3846,7 @@ def workspace_request_branch(org_id, raw):
         branch_id = str(uuid.UUID(raw))
     except (ValueError, TypeError, AttributeError):
         raise ValueError("Філія недоступна.") from None
-    query = (supabase.table("branches").select("id,is_primary").eq("org_id", org_id)
+    query = (supabase.table("branches").select("id,is_primary,name").eq("org_id", org_id)
              .eq("id", branch_id).eq("is_active", True).limit(1).execute())
     if not query.data:
         raise ValueError("Філія недоступна.")
@@ -7628,7 +7628,18 @@ def report_status_count(rows, *statuses):
     )
 
 
-def build_owner_daily_report(org_id, day):
+def branch_report_finance(org_id, branch_id, start, end, currency):
+    result = execute_with_retry(lambda: supabase.rpc("get_branch_daily_report_finance", {
+        "p_org_id": org_id, "p_branch_id": branch_id, "p_start": start,
+        "p_end": end, "p_currency": currency,
+    }))
+    if not isinstance(result.data, dict):
+        raise RuntimeError("Unexpected branch finance report response")
+    return {"summary": result.data, "stock_cost_available": currency == "UAH"}
+
+
+def build_owner_daily_report(org_id, day, branch=None):
+    branch_id = branch["id"] if branch else None
     day_iso = day.isoformat()
     previous_day = day - timedelta(days=1)
     previous_iso = previous_day.isoformat()
@@ -7655,50 +7666,54 @@ def build_owner_daily_report(org_id, day):
     if currency not in {"UAH", "EUR", "USD", "GBP", "PLN", "CHF"}:
         raise ValueError("Invalid report currency")
 
-    def rows(table, columns, configure):
-        return report_rows(
-            lambda: configure(
-                supabase.table(table)
-                .select(columns)
-                .eq("org_id", org_id)
-            )
-        )
+    def rows(table, columns, configure, branch_scoped=False):
+        def query():
+            selected = supabase.table(table).select(columns).eq("org_id", org_id)
+            if branch_id and branch_scoped:
+                selected = selected.eq("branch_id", branch_id)
+            return configure(selected)
+        return report_rows(query)
 
     visits = rows(
         "visits", "id,status,currency",
-        lambda query: query.eq("date", day_iso)
+        lambda query: query.eq("date", day_iso), branch_scoped=True
     )
     previous_visits = rows(
         "visits", "id,status",
-        lambda query: query.eq("date", previous_iso)
+        lambda query: query.eq("date", previous_iso), branch_scoped=True
     )
     events = rows(
         "calendar_events", "id,status,visit_id",
-        lambda query: query.eq("event_date", day_iso)
+        lambda query: query.eq("event_date", day_iso), branch_scoped=True
     )
     previous_events = rows(
         "calendar_events", "id,status",
-        lambda query: query.eq("event_date", previous_iso)
+        lambda query: query.eq("event_date", previous_iso), branch_scoped=True
     )
-    new_owners = rows(
-        "owners", "id",
-        lambda query: query.gte("created_at", start_utc).lt("created_at", end_utc)
-    )
-    previous_owners = rows(
-        "owners", "id",
-        lambda query: query.gte("created_at", previous_start_utc).lt("created_at", previous_end_utc)
-    )
-    new_patients = rows(
-        "patients", "id",
-        lambda query: query.gte("created_at", start_utc).lt("created_at", end_utc)
-    )
-    previous_patients = rows(
-        "patients", "id",
-        lambda query: query.gte("created_at", previous_start_utc).lt("created_at", previous_end_utc)
-    )
+    if branch_id:
+        new_owners = previous_owners = new_patients = previous_patients = []
+        finance = branch_report_finance(org_id, branch_id, start_utc, end_utc, currency)
+        previous_finance = branch_report_finance(org_id, branch_id, previous_start_utc, previous_end_utc, currency)
+    else:
+        new_owners = rows(
+            "owners", "id",
+            lambda query: query.gte("created_at", start_utc).lt("created_at", end_utc)
+        )
+        previous_owners = rows(
+            "owners", "id",
+            lambda query: query.gte("created_at", previous_start_utc).lt("created_at", previous_end_utc)
+        )
+        new_patients = rows(
+            "patients", "id",
+            lambda query: query.gte("created_at", start_utc).lt("created_at", end_utc)
+        )
+        previous_patients = rows(
+            "patients", "id",
+            lambda query: query.gte("created_at", previous_start_utc).lt("created_at", previous_end_utc)
+        )
 
-    finance = report_finance_overview(org_id, day, currency)
-    previous_finance = report_finance_overview(org_id, previous_day, currency)
+        finance = report_finance_overview(org_id, day, currency)
+        previous_finance = report_finance_overview(org_id, previous_day, currency)
     finance_summary = finance.get("summary") or {}
     previous_finance_summary = previous_finance.get("summary") or {}
 
@@ -7745,6 +7760,19 @@ def build_owner_daily_report(org_id, day):
         "stock", "id,name,unit,qty,minimum_qty,active",
         lambda query: query.eq("active", True)
     )
+    if branch_id:
+        balances = {}
+        for offset in range(0, len(stock_rows), 100):
+            item_ids = [row["id"] for row in stock_rows[offset:offset + 100]]
+            balances.update({
+                row["stock_id"]: row["quantity"] for row in rows(
+                    "stock_branch_balances", "stock_id,quantity",
+                    lambda query: query.in_("stock_id", item_ids), branch_scoped=True,
+                )
+            })
+        stock_rows = [{**item, "qty": balances[item["id"]]}
+                      for item in stock_rows if item["id"] in balances]
+
     low_stock = []
 
     for item in stock_rows:
@@ -7764,7 +7792,7 @@ def build_owner_daily_report(org_id, day):
     stock_movements = rows(
         "stock_movements", "movement_type,quantity,unit_cost,name_snap",
         lambda query: query.eq("movement_type", "writeoff")
-        .gte("created_at", start_utc).lt("created_at", end_utc)
+        .gte("created_at", start_utc).lt("created_at", end_utc), branch_scoped=True
     )
     writeoff_quantity = sum(
         abs(report_number(row.get("quantity"))) for row in stock_movements
@@ -7783,12 +7811,21 @@ def build_owner_daily_report(org_id, day):
 
     hospitalizations = rows(
         "hospitalizations", "id,status",
-        lambda query: query.eq("is_active", True)
+        lambda query: query.eq("is_active", True), branch_scoped=True
     )
-    open_tasks = rows(
-        "hospital_tasks", "id,status,scheduled_at",
-        lambda query: query.neq("status", "completed")
-    )
+    if branch_id:
+        open_tasks = []
+        for offset in range(0, len(hospitalizations), 100):
+            stay_ids = [row["id"] for row in hospitalizations[offset:offset + 100]]
+            open_tasks.extend(rows(
+                "hospital_tasks", "id,status,scheduled_at",
+                lambda query: query.in_("hospitalization_id", stay_ids).neq("status", "completed"),
+            ))
+    else:
+        open_tasks = rows(
+            "hospital_tasks", "id,status,scheduled_at",
+            lambda query: query.neq("status", "completed")
+        )
     now_utc = datetime.now(timezone.utc)
     overdue_tasks = 0
 
@@ -7814,7 +7851,9 @@ def build_owner_daily_report(org_id, day):
     expenses = report_number(finance_summary.get("expenses"))
     net_revenue = report_number(finance_summary.get("net_revenue"), payments - refunds)
     profit_value = finance_summary.get("estimated_profit")
-    result_amount = report_number(profit_value) if profit_value is not None else None
+    result_amount = net_revenue - expenses if branch_id else (
+        report_number(profit_value) if profit_value is not None else None
+    )
     previous_revenue = report_number(
         previous_finance_summary.get("net_revenue"),
         report_number(previous_finance_summary.get("payments"))
@@ -7836,6 +7875,7 @@ def build_owner_daily_report(org_id, day):
     report = {
         "date": day_iso,
         "clinic_name": clinic_name,
+        "branch_name": branch["name"] if branch else None,
         "currency": currency,
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "visits": {
@@ -7847,8 +7887,8 @@ def build_owner_daily_report(org_id, day):
             if scheduled_count else 0
         },
         "clients": {
-            "new_owners": len(new_owners),
-            "new_patients": len(new_patients)
+            "new_owners": None if branch_id else len(new_owners),
+            "new_patients": None if branch_id else len(new_patients)
         },
         "finance": {
             "currency": currency,
@@ -7858,14 +7898,14 @@ def build_owner_daily_report(org_id, day):
             "revenue": round(net_revenue, 2),
             "result": round(result_amount, 2) if result_amount is not None else None,
             "average_check": round(report_number(finance_summary.get("average_check")), 2),
-            "outstanding": round(debt, 2)
+            "outstanding": None if branch_id else round(debt, 2)
         },
         "comparison": {
             "currency": currency,
             "scheduled_delta": scheduled_count - len(previous_events),
             "completed_delta": completed_count - previous_completed,
-            "new_owners_delta": len(new_owners) - len(previous_owners),
-            "new_patients_delta": len(new_patients) - len(previous_patients),
+            "new_owners_delta": None if branch_id else len(new_owners) - len(previous_owners),
+            "new_patients_delta": None if branch_id else len(new_patients) - len(previous_patients),
             "revenue_delta": round(net_revenue - previous_revenue, 2)
         },
         "services": {"currency": currency, "top": top_services},
@@ -7918,6 +7958,12 @@ def build_owner_report_telegram_message(report):
 
     safe_clinic = html.escape(str(report.get("clinic_name") or "Клініка"))
     safe_date = html.escape(str(report.get("date") or ""))
+    if report.get("branch_name"):
+        safe_clinic += " · " + html.escape(report["branch_name"])
+    clients_text = "—" if report.get("branch_name") else (
+        f"Власники: <b>{report_int(clients.get('new_owners'))}</b> · "
+        f"пацієнти: <b>{report_int(clients.get('new_patients'))}</b>"
+    )
 
     lines = [
         f"<b>🐾 {safe_clinic} · підсумок дня</b>",
@@ -7937,8 +7983,7 @@ def build_owner_report_telegram_message(report):
         f"Середній чек: {money(finance.get('average_check'))}",
         "",
         "<b>👥 Нові клієнти</b>",
-        f"Власники: <b>{report_int(clients.get('new_owners'))}</b> · "
-        f"пацієнти: <b>{report_int(clients.get('new_patients'))}</b>",
+        clients_text,
     ]
 
     top_services = services.get("top") or []
@@ -7975,14 +8020,16 @@ def build_owner_report_telegram_message(report):
 
 
 
-def get_report_settings(org_id):
+def report_scope(query, org_id, branch_id):
+    query = query.eq("org_id", org_id)
+    return query.eq("branch_id", branch_id) if branch_id else query.is_("branch_id", "null")
+
+
+def get_report_settings(org_id, branch_id=None):
     rows = report_rows(
-        lambda: supabase.table("clinic_report_settings")
-        .select(
-            "org_id,telegram_chat_id,daily_enabled,daily_time,timezone,updated_at"
-        )
-        .eq("org_id", org_id)
-        .limit(1)
+        lambda: report_scope(supabase.table("clinic_report_settings")
+                             .select("org_id,telegram_chat_id,daily_enabled,daily_time,timezone,updated_at"),
+                             org_id, branch_id).limit(1)
     )
 
     row = rows[0] if rows else {}
@@ -8196,8 +8243,9 @@ def api_owner_daily_report():
 
     try:
         day = report_date(request.args.get("date"))
-        report = build_owner_daily_report(current_org, day)
-        settings = get_report_settings(current_org)
+        branch = workspace_request_branch(current_org, request.args.get("branch_id"))
+        report = build_owner_daily_report(current_org, day, branch)
+        settings = get_report_settings(current_org, branch["id"] if branch else None)
         report["telegram"] = {
             "configured": settings["telegram_configured"],
             "daily_enabled": settings["daily_enabled"],
@@ -8222,7 +8270,9 @@ def api_owner_report_settings():
         return auth_error
 
     try:
-        settings = get_report_settings(get_current_org_id())
+        org_id = get_current_org_id()
+        branch = workspace_request_branch(org_id, request.args.get("branch_id"))
+        settings = get_report_settings(org_id, branch["id"] if branch else None)
         settings["telegram_chat_id"] = (
             settings["telegram_chat_id"]
             if settings["telegram_configured"]
@@ -8230,6 +8280,8 @@ def api_owner_report_settings():
         )
         settings["bot_configured"] = bool(TELEGRAM_BOT_TOKEN)
         return ok(settings)
+    except ValueError as error:
+        return fail(str(error), 400)
     except Exception as error:
         print("❌ GET report settings:", repr(error), flush=True)
         return fail("Не вдалося завантажити налаштування звіту.", 500)
@@ -8264,9 +8316,11 @@ def api_owner_report_settings_update():
     }
 
     try:
+        branch = workspace_request_branch(current_org, data.get("branch_id"))
+        payload["branch_id"] = branch["id"] if branch else None
         result = execute_with_retry(
             lambda: supabase.table("clinic_report_settings")
-            .upsert(payload, on_conflict="org_id"),
+            .upsert(payload, on_conflict="org_id,branch_id"),
             attempts=4,
             delay=0.3,
         )
@@ -8281,6 +8335,8 @@ def api_owner_report_settings_update():
             "daily_time": str(row.get("daily_time") or "21:00")[:5],
             "timezone": str(row.get("timezone") or "Europe/Kyiv"),
         })
+    except ValueError as error:
+        return fail(str(error), 400)
     except Exception as error:
         print("❌ PUT report settings:", repr(error), flush=True)
         return fail("Не вдалося зберегти Telegram-налаштування.", 500)
@@ -8296,11 +8352,7 @@ def api_owner_report_telegram_setup():
     current_org = get_current_org_id()
 
     try:
-        settings = get_report_settings(current_org)
-        configured = configure_owner_report_bot(
-            public_app_base_url(),
-            settings.get("telegram_chat_id"),
-        )
+        configured = configure_owner_report_bot(public_app_base_url())
 
         return ok(configured)
 
@@ -8437,7 +8489,7 @@ def backfill_report_delivery_from_audit(org_id, day_iso, audit_row):
             rows = report_rows(
                 lambda: supabase.table("clinic_report_deliveries")
                 .select("id,status,telegram_message_id")
-                .eq("org_id", org_id)
+                .eq("org_id", org_id).is_("branch_id", "null")
                 .eq("report_date", day_iso)
                 .eq("channel", "telegram")
                 .limit(1)
@@ -8465,25 +8517,25 @@ def api_owner_daily_report_send():
     try:
         day = report_date(data.get("date"))
         day_iso = day.isoformat()
-        settings = get_report_settings(current_org)
+        branch = workspace_request_branch(current_org, data.get("branch_id"))
+        branch_id = branch["id"] if branch else None
+        settings = get_report_settings(current_org, branch_id)
         chat_id = settings.get("telegram_chat_id")
 
         if not chat_id:
             return fail("Спочатку вкажіть Telegram chat ID власника.", 409)
 
         delivery_rows = report_rows(
-            lambda: supabase.table("clinic_report_deliveries")
-            .select(
-                "id,status,attempt_count,telegram_message_id,updated_at"
-            )
-            .eq("org_id", current_org)
+            lambda: report_scope(supabase.table("clinic_report_deliveries")
+                                 .select("id,status,attempt_count,telegram_message_id,updated_at"),
+                                 current_org, branch_id)
             .eq("report_date", day_iso)
             .eq("channel", "telegram")
             .limit(1)
         )
         delivery = delivery_rows[0] if delivery_rows else None
 
-        if not delivery:
+        if not delivery and not branch_id:
             previous_audit = find_report_sent_audit(
                 current_org,
                 day_iso,
@@ -8545,18 +8597,21 @@ def api_owner_daily_report_send():
                 3,
             )
 
-            supabase.table("clinic_report_deliveries").update({
+            claim = supabase.table("clinic_report_deliveries").update({
                 "status": "processing",
                 "attempt_count": next_attempt,
                 "error_message": None,
                 "updated_at": now_iso,
-            }).eq("id", delivery_id).execute()
+            }).eq("id", delivery_id).eq("updated_at", delivery["updated_at"]).execute()
+            if not claim.data:
+                return fail("Звіт уже відправляється. Зачекайте кілька секунд.", 409)
         else:
             try:
                 delivery_result = supabase.table(
                     "clinic_report_deliveries"
                 ).insert({
                     "org_id": current_org,
+                    "branch_id": branch_id,
                     "report_date": day_iso,
                     "channel": "telegram",
                     "status": "processing",
@@ -8570,9 +8625,8 @@ def api_owner_daily_report_send():
                 )
             except Exception:
                 raced_rows = report_rows(
-                    lambda: supabase.table("clinic_report_deliveries")
-                    .select("id,status,telegram_message_id")
-                    .eq("org_id", current_org)
+                    lambda: report_scope(supabase.table("clinic_report_deliveries")
+                                         .select("id,status,telegram_message_id"), current_org, branch_id)
                     .eq("report_date", day_iso)
                     .eq("channel", "telegram")
                     .limit(1)
@@ -8598,7 +8652,7 @@ def api_owner_daily_report_send():
             return fail("Не вдалося підготувати відправлення звіту.", 500)
 
         try:
-            report = build_owner_daily_report(current_org, day)
+            report = build_owner_daily_report(current_org, day, branch)
             telegram_result = send_telegram_report(
                 chat_id,
                 report["telegram_message"],
@@ -8626,13 +8680,14 @@ def api_owner_daily_report_send():
         }).eq("id", delivery_id).execute()
 
         write_audit_event(
-            action="report.telegram_sent",
+            action="report.branch_telegram_sent" if branch_id else "report.telegram_sent",
             entity_type="daily_report",
             entity_id=day_iso,
             entity_label=f"Звіт за {day_iso}",
             summary="Щоденний звіт відправлено власнику в Telegram",
             metadata={
                 "report_date": day_iso,
+                "branch_id": branch_id,
                 "telegram_message_id": message_id,
             },
         )
@@ -8699,13 +8754,13 @@ def report_dispatch_authorized():
     )
 
 
-def write_automatic_report_audit(org_id, day, message_id):
+def write_automatic_report_audit(org_id, day, message_id, branch_id=None):
     try:
         supabase.table("audit_events").insert({
             "org_id": org_id,
             "actor_name": "Автоматичний звіт",
             "actor_role": "system",
-            "action": "report.telegram_auto_sent",
+            "action": "report.branch_telegram_auto_sent" if branch_id else "report.telegram_auto_sent",
             "entity_type": "daily_report",
             "entity_id": day.isoformat(),
             "entity_label": f"Звіт за {day.isoformat()}",
@@ -8714,6 +8769,7 @@ def write_automatic_report_audit(org_id, day, message_id):
                 "report_date": day.isoformat(),
                 "telegram_message_id": message_id,
                 "schedule": "21:00 Europe/Kyiv",
+                "branch_id": branch_id,
             },
         }).execute()
     except Exception as error:
@@ -8744,7 +8800,7 @@ def api_internal_daily_report_dispatch():
         settings_rows = report_rows(
             lambda: supabase.table("clinic_report_settings")
             .select(
-                "org_id,telegram_chat_id,daily_enabled,daily_time,timezone"
+                "org_id,branch_id,telegram_chat_id,daily_enabled,daily_time,timezone"
             )
             .eq("daily_enabled", True)
         )
@@ -8757,19 +8813,22 @@ def api_internal_daily_report_dispatch():
                 skipped_count += 1
                 continue
 
+            branch_id = settings.get("branch_id")
+            try:
+                branch = workspace_request_branch(org_id, branch_id)
+            except ValueError:
+                skipped_count += 1
+                continue
             existing_rows = report_rows(
-                lambda org_id=org_id: supabase.table(
-                    "clinic_report_deliveries"
-                )
-                .select("id,status,attempt_count,updated_at")
-                .eq("org_id", org_id)
+                lambda: report_scope(supabase.table("clinic_report_deliveries")
+                                     .select("id,status,attempt_count,updated_at"), org_id, branch_id)
                 .eq("report_date", report_day.isoformat())
                 .eq("channel", "telegram")
                 .limit(1)
             )
             existing = existing_rows[0] if existing_rows else None
 
-            if not existing:
+            if not existing and not branch_id:
                 previous_audit = find_report_sent_audit(
                     org_id,
                     report_day.isoformat(),
@@ -8821,23 +8880,33 @@ def api_internal_daily_report_dispatch():
             if existing:
                 delivery_id = str(existing.get("id"))
                 attempts += 1
-                supabase.table("clinic_report_deliveries").update({
+                claim = supabase.table("clinic_report_deliveries").update({
                     "status": "processing",
                     "attempt_count": attempts,
                     "error_message": None,
                     "updated_at": now_iso,
-                }).eq("id", delivery_id).execute()
+                }).eq("id", delivery_id).eq("updated_at", existing["updated_at"]).execute()
+                if not claim.data:
+                    skipped_count += 1
+                    continue
             else:
-                delivery_result = supabase.table(
-                    "clinic_report_deliveries"
-                ).insert({
-                    "org_id": org_id,
-                    "report_date": report_day.isoformat(),
-                    "channel": "telegram",
-                    "status": "processing",
-                    "attempt_count": 1,
-                    "updated_at": now_iso,
-                }).execute()
+                try:
+                    delivery_result = supabase.table(
+                        "clinic_report_deliveries"
+                    ).insert({
+                        "org_id": org_id,
+                        "branch_id": branch_id,
+                        "report_date": report_day.isoformat(),
+                        "channel": "telegram",
+                        "status": "processing",
+                        "attempt_count": 1,
+                        "updated_at": now_iso,
+                    }).execute()
+                except Exception as error:
+                    if str(getattr(error, "code", "")) == "23505":
+                        skipped_count += 1
+                        continue
+                    raise
                 delivery_id = str(
                     delivery_result.data[0].get("id")
                     if delivery_result.data
@@ -8853,6 +8922,7 @@ def api_internal_daily_report_dispatch():
                 report = build_owner_daily_report(
                     org_id,
                     report_day,
+                    branch,
                 )
                 telegram_result = send_telegram_report(
                     chat_id,
@@ -8872,11 +8942,7 @@ def api_internal_daily_report_dispatch():
                     "updated_at": datetime.now(timezone.utc).isoformat(),
                 }).eq("id", delivery_id).execute()
 
-                write_automatic_report_audit(
-                    org_id,
-                    report_day,
-                    message_id,
-                )
+                write_automatic_report_audit(org_id, report_day, message_id, branch_id)
                 sent_count += 1
 
             except Exception as delivery_error:
@@ -9806,6 +9872,13 @@ def api_finance_transaction_create():
                 "created_via": "finance_dashboard",
             },
         }
+
+        try:
+            branch = workspace_request_branch(current_org, data.get("branch_id"))
+        except ValueError as error:
+            return fail(str(error), 400)
+        if branch:
+            payload["branch_id"] = branch["id"]
 
         if financial_account_id:
             payload["financial_account_id"] = financial_account_id

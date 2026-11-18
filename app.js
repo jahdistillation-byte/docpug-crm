@@ -37262,6 +37262,8 @@ function getFinanceTransactionMeta(
 async function createFinanceTransactionApi(
   payload
 ) {
+  const branch = await state.workspaceBranchReady;
+  if (branch) payload = { ...payload, branch_id: branch.id };
   const response =
     await fetch(
       "/api/finance/transactions",
@@ -45205,6 +45207,8 @@ async function loadOwnerDailyReportApi(
       date: reportDate,
     });
 
+  const branch = await state.workspaceBranchReady;
+  if (branch) params.set("branch_id", branch.id);
   const response = await fetch(
     `/api/reports/daily?${params.toString()}`,
     {
@@ -45231,8 +45235,10 @@ async function loadOwnerDailyReportApi(
 
 
 async function loadOwnerReportSettingsApi() {
+  const branch = await state.workspaceBranchReady;
+  const params = new URLSearchParams(branch ? { branch_id: branch.id } : {});
   const response = await fetch(
-    "/api/reports/settings",
+    `/api/reports/settings?${params}`,
     {
       credentials: "include",
       headers: {
@@ -45260,6 +45266,7 @@ async function saveOwnerReportSettingsApi(
   telegramChatId,
   dailyEnabled = false
 ) {
+  const branch = await state.workspaceBranchReady;
   const response = await fetch(
     "/api/reports/settings",
     {
@@ -45271,6 +45278,7 @@ async function saveOwnerReportSettingsApi(
         ...getOrgHeaders(),
       },
       body: JSON.stringify({
+        branch_id: branch?.id,
         telegram_chat_id:
           String(telegramChatId || "").trim(),
         daily_enabled:
@@ -45323,6 +45331,7 @@ async function setupOwnerReportTelegramBotApi() {
 async function sendOwnerDailyReportApi(
   reportDate
 ) {
+  const branch = await state.workspaceBranchReady;
   const response = await fetch(
     "/api/reports/daily/send",
     {
@@ -45334,6 +45343,7 @@ async function sendOwnerDailyReportApi(
         ...getOrgHeaders(),
       },
       body: JSON.stringify({
+        branch_id: branch?.id,
         date: reportDate,
       }),
     }
@@ -46127,6 +46137,7 @@ async function renderFinanceOwnerReportTab(
           <div>
             <span class="financeEyebrow">ЩОДЕННИЙ КОНТРОЛЬ</span>
             <h1>Звіт власника</h1>
+            ${report.branch_name ? `<p><b>${escapeHtml(report.branch_name)}</b></p>` : ""}
             <p>${escapeHtml(getFinanceInterfaceText("Валюта"))}: <b>${escapeHtml(currency)}</b></p>
             <p>
               Головні цифри клініки, ризики та точки уваги
@@ -46198,8 +46209,8 @@ async function renderFinanceOwnerReportTab(
               <p><span>Завершено</span><b>${Number(visits.completed || 0)}</b></p>
               <p><span>Зараз у роботі</span><b>${Number(visits.in_progress || 0)}</b></p>
               <p><span>Скасовано</span><b>${Number(visits.cancelled || 0)}</b></p>
-              <p><span>Нових власників</span><b>${Number(clients.new_owners || 0)}</b></p>
-              <p><span>Нових пацієнтів</span><b>${Number(clients.new_patients || 0)}</b></p>
+              <p><span>Нових власників</span><b>${clients.new_owners == null ? "—" : Number(clients.new_owners)}</b></p>
+              <p><span>Нових пацієнтів</span><b>${clients.new_patients == null ? "—" : Number(clients.new_patients)}</b></p>
             </div>
           </article>
 
@@ -46349,15 +46360,18 @@ async function renderFinanceOwnerReportTab(
             <span>TELEGRAM ВЛАСНИКА</span>
             <h2>Відправити готовий підсумок</h2>
             <p>
-              У боті залишиться одна кнопка «Отримати ID».
-              Після підключення можна ввімкнути автоматичний
-              звіт щодня о 21:00 за Києвом.
+              Відкрийте бота, натисніть «Отримати ID» та збережіть
+              Telegram ID отримувача для вибраної філії.
             </p>
+            <a href="https://t.me/pugcrm_bot" target="_blank" rel="noopener noreferrer">
+              Відкрити @pugcrm_bot
+            </a>
           </div>
           <div class="ownerReportTelegramControls">
             <input
               type="text"
               id="ownerReportTelegramChatId"
+              aria-label="Telegram ID отримувача"
               inputmode="numeric"
               placeholder="Наприклад, 123456789"
               value="${escapeHtml(settings.telegram_chat_id || "")}"

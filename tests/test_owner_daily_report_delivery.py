@@ -220,6 +220,35 @@ class OwnerDailyReportDeliveryTests(unittest.TestCase):
             "42",
         )
 
+    def test_branch_delivery_uses_only_its_settings_and_report(self):
+        fake_supabase = DeliverySupabase()
+        branch = {"id": "branch-2", "name": "Лівий берег"}
+        with (
+            patch.object(server, "owner_required", return_value=({"role": "owner"}, None)),
+            patch.object(server, "get_current_user", return_value={
+                "id": "user-1", "org_id": "org-1", "role": "owner", "is_active": True,
+            }),
+            patch.object(server, "get_current_org_id", return_value="org-1"),
+            patch.object(server, "workspace_request_branch", return_value=branch) as resolve,
+            patch.object(server, "get_report_settings", return_value={"telegram_chat_id": "123456790"}) as settings,
+            patch.object(server, "report_rows", side_effect=lambda query: query().execute().data),
+            patch.object(server, "find_report_sent_audit") as legacy,
+            patch.object(server, "build_owner_daily_report", return_value={"telegram_message": "branch report"}) as report,
+            patch.object(server, "send_telegram_report", return_value={"message_id": 42}) as send,
+            patch.object(server, "write_audit_event"),
+            patch.object(server, "supabase", fake_supabase),
+        ):
+            response = self.client.post("/api/reports/daily/send", json={"branch_id": "branch-2"})
+
+        self.assertEqual(response.status_code, 200)
+        resolve.assert_called_once_with("org-1", "branch-2")
+        settings.assert_called_once_with("org-1", "branch-2")
+        legacy.assert_not_called()
+        self.assertEqual(report.call_args.args[2], branch)
+        send.assert_called_once_with("123456790", "branch report")
+        self.assertIn(("branch_id", "branch-2"), fake_supabase.operations[0]["filters"])
+        self.assertEqual(fake_supabase.operations[1]["payload"]["branch_id"], "branch-2")
+
 
 if __name__ == "__main__":
     unittest.main()
