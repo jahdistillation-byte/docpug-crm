@@ -2048,6 +2048,7 @@ PUBLIC_ASSET_FILES = {
     "ach.js",
     "style.css",
     "stock-catalog.css",
+    "payroll.css",
     "stock-workspace.js",
     "stock-payments.js",
     "hospital-ward.css",
