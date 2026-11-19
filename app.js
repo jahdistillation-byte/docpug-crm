@@ -46852,37 +46852,76 @@ async function renderFinancePayrollTab(page) {
     if (!response.ok || !result.ok) throw new Error(result.error || "Не вдалося розрахувати зарплати.");
     const data = result.data;
     const money = amount => escapeHtml(formatClinicMoney(amount, "UAH"));
-    page.innerHTML = `<div class="financeDashboard">
+    const shiftTotal = data.items.reduce((sum, item) => sum + Number(item.shift_amount), 0);
+    const commissionTotal = data.items.reduce((sum, item) => sum + Number(item.commission), 0);
+    page.innerHTML = `<div class="financeDashboard payrollWorkspace">
       ${buildFinanceSectionNavigation()}
-      <header class="financeHero">
-        <div><span class="financeEyebrow">ПОПЕРЕДНІЙ РОЗРАХУНОК</span>
-          <h1>Зарплати</h1><p>${escapeHtml(data.branch_name)}</p>
-          <p>Зміни за графіком до сьогодні. Відсоток від оплачених послуг з урахуванням знижок і повернень.</p>
-          <p>Ставки взято з поточних карток співробітників. Підтвердження відпрацьованих змін, бонуси, утримання та виплати потребують узгодження.</p>
+      <header class="payrollHeader">
+        <div>
+          <h1>Зарплати</h1>
+          <p>${escapeHtml(data.branch_name)} · Попередній розрахунок</p>
         </div>
+        <form id="payrollPeriod" class="payrollPeriod">
+          <label>Від<input type="date" name="from" value="${escapeHtml(data.date_from)}" required max="${today}"></label>
+          <span class="payrollDateSeparator" aria-hidden="true">—</span>
+          <label>До<input type="date" name="to" value="${escapeHtml(data.date_to)}" required max="${today}"></label>
+          <button type="submit" class="primary">Розрахувати</button>
+        </form>
       </header>
-      <form id="payrollPeriod" class="card">
-        <label>Від <input type="date" name="from" value="${escapeHtml(data.date_from)}" required max="${today}"></label>
-        <label>До <input type="date" name="to" value="${escapeHtml(data.date_to)}" required max="${today}"></label>
-        <button type="submit" class="primary">Розрахувати</button>
-      </form>
-      <section class="card"><h2>Разом за період · ${money(data.total)}</h2>
-        <p>Валюта розрахунку — UAH.</p>
-        ${data.unassigned_shifts ? `<p role="status">Змін без прив’язки до філії · ${data.unassigned_shifts}. Оплату цих змін потрібно уточнити.</p>` : ""}
-        ${data.excluded_currency_visits ? '<p role="status">Є оплати візитів в інших валютах. Вони потребують окремого розрахунку.</p>' : ""}
-        ${data.items.map(item => `<details class="card">
-          <summary><strong>${escapeHtml(item.name)}</strong> · ${money(item.total)}</summary>
-          <p>Зміни за графіком · ${item.shift_count} × ${money(item.shift_rate)} = ${money(item.shift_amount)}</p>
-          <p>Відсоток · ${money(item.commission_base)} × ${escapeHtml(item.percent_rate)}% = ${money(item.commission)}</p>
-          <p>Дати змін · ${escapeHtml(item.shift_dates.join(", ") || "—")}</p>
-          ${item.visits.length ? `<h3>Оплачені послуги</h3><ul>${item.visits.map(visit => `<li>
-            <a href="#visit:${encodeURIComponent(visit.visit_id)}">${escapeHtml(visit.date || "Візит")}</a>
-            · база для відсотка ${money(visit.paid_services)}
-          </li>`).join("")}</ul>` : ""}
-        </details>`).join("") || "<p>Співробітників і нарахувань за цей період немає.</p>"}
+
+      <section class="payrollTotals" aria-label="Підсумок розрахунку">
+        <article class="payrollTotal payrollTotalPrimary"><span>Разом за період</span><strong>${money(data.total)}</strong><small>${data.items.length} співробітників · UAH</small></article>
+        <article class="payrollTotal"><span>За зміни</span><strong>${money(shiftTotal)}</strong><small>${data.items.reduce((sum, item) => sum + item.shift_count, 0)} змін за графіком</small></article>
+        <article class="payrollTotal"><span>Відсоток за послуги</span><strong>${money(commissionTotal)}</strong><small>З урахуванням оплат і повернень</small></article>
       </section>
+
+      ${data.unassigned_shifts ? `<aside class="payrollNotice" role="status">
+        <span class="payrollNoticeIcon" aria-hidden="true">!</span>
+        <div><strong>Потрібно уточнити філію для ${data.unassigned_shifts} змін</strong>
+        <p>Після прив’язки до філії ці зміни увійдуть у розрахунок.</p></div>
+      </aside>` : ""}
+      ${data.excluded_currency_visits ? '<p class="payrollNotice" role="status">Оплати візитів в інших валютах потребують окремого розрахунку.</p>' : ""}
+
+      <section class="payrollRegister">
+        <div class="payrollRegisterHeading">
+          <h2>Співробітники</h2>
+          <label class="payrollSearch"><span aria-hidden="true">⌕</span><input type="search" id="payrollSearch" placeholder="Знайти співробітника" aria-label="Знайти співробітника"></label>
+        </div>
+        <div class="payrollColumns" aria-hidden="true"><span>Співробітник</span><span>За зміни</span><span>Відсоток</span><span>Разом</span><span></span></div>
+        ${data.items.map(item => `<details class="payrollEmployee" data-payroll-name="${escapeHtml(item.name.toLocaleLowerCase())}">
+          <summary>
+            <span class="payrollEmployeeIdentity"><span class="payrollAvatar" aria-hidden="true">${escapeHtml(item.name.trim().charAt(0).toLocaleUpperCase())}</span><strong>${escapeHtml(item.name)}</strong></span>
+            <span class="payrollEmployeeAmount"><small>За зміни</small>${money(item.shift_amount)}</span>
+            <span class="payrollEmployeeAmount"><small>Відсоток</small>${money(item.commission)}</span>
+            <strong class="payrollEmployeeTotal"><small>Разом</small>${money(item.total)}</strong>
+            <span class="payrollChevron" aria-hidden="true">⌄</span>
+          </summary>
+          <div class="payrollEmployeeDetails">
+            <div class="payrollCalculation">
+              <div><span>Зміни за графіком</span><strong>${item.shift_count} × ${money(item.shift_rate)}</strong><small>${escapeHtml(item.shift_dates.join(" · ") || "Змін у цьому періоді немає")}</small></div>
+              <div><span>Розрахунок відсотка</span><strong>${money(item.commission_base)} × ${escapeHtml(item.percent_rate)}%</strong><small>Оплачені послуги після знижок і повернень</small></div>
+            </div>
+            ${item.visits.length ? `<div class="payrollVisits"><h3>База для відсотка за візитами</h3>
+              ${item.visits.map(visit => `<a href="#visit:${encodeURIComponent(visit.visit_id)}"><span>${escapeHtml(formatStockDate(visit.date) || "Візит")} <span aria-hidden="true">↗</span></span><strong>${money(visit.paid_services)}</strong></a>`).join("")}
+            </div>` : ""}
+          </div>
+        </details>`).join("")}
+        <p id="payrollEmpty" class="payrollEmpty" ${data.items.length ? "hidden" : ""}>Співробітників не знайдено.</p>
+      </section>
+
+      <details class="payrollRules">
+        <summary>Як розраховано зарплату <span aria-hidden="true">⌄</span></summary>
+        <p>Ставки взято з поточних карток співробітників. Зміни за графіком враховано до сьогодні. Відсоток нараховано на оплачену частину послуг з урахуванням знижок і повернень.</p>
+        <p>Розрахунок попередній. Підтвердження відпрацьованих змін, бонуси, утримання та виплати потребують узгодження.</p>
+      </details>
     </div>`;
     bindFinanceSectionNavigation(page);
+    page.querySelector("#payrollSearch").addEventListener("input", event => {
+      const query = event.target.value.trim().toLocaleLowerCase();
+      const employees = [...page.querySelectorAll("[data-payroll-name]")];
+      employees.forEach(employee => { employee.hidden = !employee.dataset.payrollName.includes(query); });
+      page.querySelector("#payrollEmpty").hidden = employees.some(employee => !employee.hidden);
+    });
     page.querySelector("#payrollPeriod").addEventListener("submit", event => {
       event.preventDefault();
       const form = event.currentTarget;
