@@ -41468,6 +41468,11 @@ body[data-theme="white"] .teamPageCard .premiumDeleteBtn {
     grid-column: 3;
   }
 
+  .page[data-page="finance"] .financeSectionNavigation:has([data-finance-section="payroll"])
+  .financeSectionButton[data-finance-section="report"] {
+    grid-column: 4;
+  }
+
   .page[data-page="finance"] .financeSectionButton[data-finance-section="integrations"]:last-child {
     grid-column: 2 / span 2;
     justify-self: center;
