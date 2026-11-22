@@ -56030,7 +56030,11 @@ if (!owner) {
   state.selectedOwnerId = String(ownerId);
 
   // Гарантируем наличие данных
-  const patients = Array.isArray(state.patients) && state.patients.length ? state.patients : await loadPatientsApi();
+  // An empty loaded cache is valid; loader render callbacks must not load again.
+  const hasPatientCache = Array.isArray(state.patients) && (
+    state.patients.length > 0 || patientsApiLoaded || patientsApiLoading
+  );
+  const patients = hasPatientCache ? state.patients : await loadPatientsApi();
   const pets = (patients || []).filter((p) => String(p.owner_id) === String(ownerId));
 
     // Гарантируем, что визиты загружены
